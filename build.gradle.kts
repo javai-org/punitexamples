@@ -208,7 +208,7 @@ tasks.register("release") {
         logger.lifecycle("Creating tag $tag...")
         runCommand("git", "tag", "-a", tag, "-m", "Release $ver")
 
-        // 5. Publish to Maven Central (delete local tag if this fails)
+        // 5. Publish to Maven Central (colon prefix scopes to root project only)
         logger.lifecycle("Publishing $ver to Maven Central...")
         try {
             runCommand("./gradlew", ":publishAndReleaseToMavenCentral")
