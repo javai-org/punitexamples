@@ -1,0 +1,284 @@
+# Empirical Baseline for ShoppingBasketUseCase/model-claude-sonnet-4-5-20250929
+# Generated automatically by punit experiment runner
+# DO NOT EDIT - create a specification based on this baseline instead
+
+schemaVersion: punit-spec-1
+useCaseId: ShoppingBasketUseCase/model-claude-sonnet-4-5-20250929
+generatedAt: 2026-02-13T04:54:04.296701Z
+experimentClass: org.javai.punit.examples.experiments.ShoppingBasketExplore
+experimentMethod: compareModels
+execution:
+  samplesPlanned: 20
+  samplesExecuted: 20
+  terminationReason: COMPLETED
+statistics:
+  observed: 0.6000
+  successes: 12
+  failures: 8
+cost:
+  totalTimeMs: 332
+  avgTimePerSampleMs: 16
+  totalTokens: 3852
+  avgTokensPerSample: 192
+resultProjection:
+  sample[0]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 30"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"action…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[1]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[2]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[3]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[4]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[5]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[6]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 30"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"action…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[7]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[8]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 21"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"operat…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[9]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[10]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 30"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"action…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[11]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[12]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 30"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"action…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[13]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[14]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[15]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[16]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: passed
+      Response has content: passed
+      Contains valid actions: passed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 20"
+      - "content: {\"actions\": [{\"context\": \"SHOP\", \"name\": \"add\", \"p…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[17]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 30"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"action…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[18]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 11"
+      - "content: {\"operations\": [{\"action\": \"add\", \"item\": \"some ap…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+  sample[19]:
+    input: Add some apples
+    postconditions:
+      Valid shopping action: failed
+      Response has content: passed
+      Contains valid actions: failed
+    executionTimeMs: 0
+    diffableContent:
+      - "completionTokens: 30"
+      - "content: I'd be happy to help! Here's the JSON:\\n\\n{\"action…"
+      - "promptTokens: 170"
+      - <absent>
+      - <absent>
+contentFingerprint: a0434291aef9e74fd139a9a4505e4c79b80fbde8b4c0579db925b05239016d82

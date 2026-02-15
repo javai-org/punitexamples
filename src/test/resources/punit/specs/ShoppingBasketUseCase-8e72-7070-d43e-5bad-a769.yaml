@@ -1,0 +1,36 @@
+# Empirical Baseline for ShoppingBasketUseCase
+# Generated automatically by punit experiment runner
+# DO NOT EDIT - create a specification based on this baseline instead
+
+schemaVersion: punit-spec-1
+useCaseId: ShoppingBasketUseCase
+generatedAt: 2026-02-13T06:24:01.988391Z
+experimentClass: org.javai.punit.examples.experiments.ShoppingBasketMeasure
+experimentMethod: measureBaseline
+footprint: 8e7245de
+covariates:
+  day_of_week: WEEKDAY
+  time_of_day: "00:00/8h, 12:00/4h, 20:00/4h"
+  llm_model: gpt-4o-mini
+  temperature: 0.3
+execution:
+  samplesPlanned: 1000
+  samplesExecuted: 1000
+  terminationReason: COMPLETED
+requirements:
+  minPassRate: 0.4053
+statistics:
+  successRate:
+    observed: 0.4360
+    standardError: 0.0157
+    confidenceInterval95: [0.4053, 0.4667]
+  successes: 436
+  failures: 564
+  failureDistribution:
+    Valid shopping action: 564
+cost:
+  totalTimeMs: 626
+  avgTimePerSampleMs: 0
+  totalTokens: 194871
+  avgTokensPerSample: 194
+contentFingerprint: 6c158c20096c7c28edbba174dcd6f8691f90818e592d44e20dd52cc01a752256
