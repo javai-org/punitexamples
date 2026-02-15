@@ -3,7 +3,17 @@
     "allow": [
       "Bash(./gradlew generateVerdictCatalog:*)",
       "WebFetch(domain:)",
-      "Bash(./gradlew tasks:*)"
+      "Bash(./gradlew tasks:*)",
+      "Bash(git -C /Users/mikemannion/workspace/punitexamples reset:*)",
+      "Bash(git -C /Users/mikemannion/workspace/punitexamples status .idea/git_toolbox_prj.xml)",
+      "Bash(./gradlew test:*)",
+      "Bash(python3:*)",
+      "Bash(./gradlew exp:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(gh release create:*)",
+      "Bash(./gradlew:*)"
     ]
   }
 }
