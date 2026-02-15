@@ -36,8 +36,6 @@
  * </ul>
  *
  * <h2>Running the Examples</h2>
- * <p>All examples are {@code @Disabled} by default to prevent accidental execution
- * in CI.
  *
  * <h3>Running Experiments</h3>
  * <p>Use the dedicated {@code exp} task for experiments:

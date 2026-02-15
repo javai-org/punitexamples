@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(./gradlew generateVerdictCatalog:*)",
-      "WebFetch(domain:)"
+      "WebFetch(domain:)",
+      "Bash(./gradlew tasks:*)"
     ]
   }
 }

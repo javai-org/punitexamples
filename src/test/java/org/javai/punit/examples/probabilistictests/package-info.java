@@ -37,9 +37,10 @@
  * you can specify the threshold directly rather than deriving it from experiments.
  *
  * <h2>Running Tests</h2>
- * <p>Tests are {@code @Disabled} by default. Run individually after setting up baselines:
+ * <p>Shopping basket tests require a baseline. Run the corresponding MEASURE
+ * experiment first, then run the test:
  * <pre>{@code
- * # First, run the corresponding MEASURE experiment to establish a baseline
+ * # Establish a baseline
  * ./gradlew exp -Prun=ShoppingBasketMeasure
  *
  * # Then run the test

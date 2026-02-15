@@ -8,3 +8,5 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+# Plugin-specific configuration
+/git_toolbox_prj.xml
