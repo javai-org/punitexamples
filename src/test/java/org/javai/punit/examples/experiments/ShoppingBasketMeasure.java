@@ -124,7 +124,7 @@ public class ShoppingBasketMeasure {
             useCase = ShoppingBasketUseCase.class,
             experimentId = "baseline-with-golden-v1"
     )
-    @InputSource(file = "golden/shopping-instructions.json")
+    @InputSource(file = "fixtures/shopping-instructions.json")
     void measureBaselineWithGolden(
             ShoppingBasketUseCase useCase,
             TranslationInput input,

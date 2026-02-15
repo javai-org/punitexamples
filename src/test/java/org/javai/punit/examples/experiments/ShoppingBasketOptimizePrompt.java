@@ -135,7 +135,7 @@ public class ShoppingBasketOptimizePrompt {
             noImprovementWindow = 3,
             experimentId = "prompt-optimization-v1"
     )
-    @InputSource(file = "golden/shopping-instructions.json")
+    @InputSource(file = "fixtures/shopping-instructions.json")
     @Pacing(maxRequestsPerSecond = 5)
     void optimizeSystemPrompt(
             ShoppingBasketUseCase useCase,
