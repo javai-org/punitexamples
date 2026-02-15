@@ -211,7 +211,7 @@ tasks.register("release") {
         // 5. Publish to Maven Central (delete local tag if this fails)
         logger.lifecycle("Publishing $ver to Maven Central...")
         try {
-            runCommand("./gradlew", "publishAndReleaseToMavenCentral")
+            runCommand("./gradlew", ":publishAndReleaseToMavenCentral")
         } catch (e: Exception) {
             logger.lifecycle("Publishing failed — removing local tag $tag")
             runCommand("git", "tag", "-d", tag)
