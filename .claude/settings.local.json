@@ -13,7 +13,10 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(gh release create:*)",
-      "Bash(./gradlew:*)"
+      "Bash(./gradlew:*)",
+      "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(head:*)"
     ]
   }
 }
