@@ -83,18 +83,18 @@ public class ShoppingBasketUseCase {
      */
     private static final ServiceContract<ServiceInput, ChatResponse> CONTRACT =
             ServiceContract.<ServiceInput, ChatResponse>define()
-                    .ensure("Response has content", ShoppingBasketUseCase::getResponseHasContentOutcome)
+                    .ensure("Response has content", ShoppingBasketUseCase::hasContent)
                     .derive("Valid shopping action", ShoppingActionValidator::validate)
-                    .ensure("Contains valid actions", ShoppingBasketUseCase::getValidActionOutcome)
+                    .ensure("Contains valid actions", ShoppingBasketUseCase::hasValidAction)
                     .build();
 
-    private static @NonNull Outcome<Void> getResponseHasContentOutcome(ChatResponse response) {
+    private static @NonNull Outcome<Void> hasContent(ChatResponse response) {
         return response.content() != null && !response.content().isBlank()
                 ? Outcome.ok()
                 : Outcome.fail("check", "content was null or blank");
     }
 
-    private static @NonNull Outcome<Void> getValidActionOutcome(ShoppingActionValidator.ValidationResult result) {
+    private static @NonNull Outcome<Void> hasValidAction(ShoppingActionValidator.ValidationResult result) {
         if (result.actions().isEmpty()) {
             return Outcome.fail("check", "No actions in result");
         }

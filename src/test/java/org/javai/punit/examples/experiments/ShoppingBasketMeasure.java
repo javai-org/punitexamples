@@ -94,7 +94,8 @@ public class ShoppingBasketMeasure {
      */
     @MeasureExperiment(
             useCase = ShoppingBasketUseCase.class,
-            experimentId = "baseline-v1"
+            experimentId = "baseline-v1",
+            samples = 1000
     )
     @InputSource("basketInstructions")
     void measureBaseline(

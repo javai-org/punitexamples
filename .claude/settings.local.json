@@ -16,7 +16,10 @@
       "Bash(./gradlew:*)",
       "Bash(grep:*)",
       "Bash(xargs:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "WebSearch",
+      "WebFetch(domain:search.maven.org)",
+      "WebFetch(domain:central.sonatype.com)"
     ]
   }
 }
