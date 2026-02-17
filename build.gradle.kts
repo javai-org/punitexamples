@@ -51,7 +51,7 @@ dependencies {
     runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.3")
 
     // PUnit framework
-    testImplementation("org.javai:punit:0.2.0-SNAPSHOT")
+    testImplementation("org.javai:punit:0.2.0")
 
     // JUnit 5
     testImplementation(platform("org.junit:junit-bom:5.14.2"))
