@@ -67,8 +67,8 @@ import org.jspecify.annotations.NonNull;
         covariateDayOfWeek = {@DayGroup({SATURDAY, SUNDAY})},
         covariateTimeOfDay = {"08:00/4h", "16:00/4h"},
         covariates = {
-                @Covariate(key = "llm_model", category = CovariateCategory.CONFIGURATION),
-                @Covariate(key = "temperature", category = CovariateCategory.CONFIGURATION)
+                @Covariate(key = "llm_model", category = CovariateCategory.EXTERNAL_DEPENDENCY),
+                @Covariate(key = "temperature", category = CovariateCategory.EXTERNAL_DEPENDENCY)
         }
 )
 public class ShoppingBasketUseCase {
