@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-02
+
+### Changed
+- Upgraded PUnit dependency from 0.2.0 to 0.3.0, picking up enhanced verdict text (particularly latency reporting)
+- Regenerated verdict catalog (`docs/VERDICT-CATALOG.md`) against PUnit 0.3.0
+
+### Added
+- Operational flow verification test (`OperationalFlowVerificationTest`) validating the full punit lifecycle: explore → optimize → measure → verify → test
+- Gradle tasks for running the operational flow end-to-end (`operationalFlowTest` and individual stage tasks)
+
+### Fixed
+- Use `assumeTrue` for missing directories in verification test to skip gracefully rather than fail
+
 ## [0.1.1] - 2026-02-15
 
 ### Added
@@ -28,6 +41,7 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/javai-org/punitexamples/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/javai-org/punitexamples/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/javai-org/punitexamples/releases/tag/v0.1.0
