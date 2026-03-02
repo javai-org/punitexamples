@@ -45,3 +45,6 @@ bin/
 /src/test/resources/punit/explorations/ShoppingBasketUseCase/
 /src/test/resources/punit/optimizations/ShoppingBasketUseCase/
 /src/test/resources/punit/specs/
+
+### Demo scripts ###
+ex-*.sh

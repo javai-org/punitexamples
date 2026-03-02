@@ -23,8 +23,9 @@ group = "org.javai"
 version = property("punitExamplesVersion") as String
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
 
 // Compile with -parameters flag to preserve method parameter names at runtime
@@ -51,7 +52,7 @@ dependencies {
     runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.3")
 
     // PUnit framework
-    testImplementation("org.javai:punit:0.2.0")
+    testImplementation("org.javai:punit:0.3.0")
 
     // JUnit 5
     testImplementation(platform("org.junit:junit-bom:5.14.2"))

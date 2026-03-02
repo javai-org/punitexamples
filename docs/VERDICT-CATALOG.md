@@ -35,10 +35,10 @@ The simplest passing verdict. PUnit detects that the required number of successe
 
   servicePassesComfortably(ShoppingBasketUseCase, String)
   
-  Observed pass rate:  0.7576 (25/33) >= required: 0.5000
+  Observed pass rate:  0.5682 (25/44) >= required: 0.5000
   Termination:         Required pass rate already achieved
-  Details:             After 33 samples with 25 successes (0.7576), required min pass rate (25 successes) already met. Skipping 17 remaining samples.
-  Elapsed:             10ms
+  Details:             After 44 samples with 25 successes (0.5682), required min pass rate (25 successes) already met. Skipping 6 remaining samples.
+  Elapsed:             2322ms
 
 ```
 
@@ -53,30 +53,30 @@ The simplest passing verdict. PUnit detects that the required number of successe
     Test type:             One-sided binomial proportion test
   
   OBSERVED DATA
-    Sample size (n):       35
+    Sample size (n):       32
     Successes (k):         25
-    Observed rate (p̂):    0.7143
+    Observed rate (p̂):    0.7813
   
   BASELINE REFERENCE
     Source:                (inline threshold)
     Threshold:             0.5000 (Threshold specified directly in @ProbabilisticTest annotation)
   
   STATISTICAL INFERENCE
-    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.71 × 0.29 / 35) = 0.0764
-    Confidence interval:   95% [0.549, 0.837]
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.78 × 0.22 / 32) = 0.0731
+    Confidence interval:   95% [0.612, 0.890]
   
     Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                           z = (0.71 - 0.50) / √(0.50 × 0.50 / 35)
-                           z = 2.54
+                           z = (0.78 - 0.50) / √(0.50 × 0.50 / 32)
+                           z = 3.18
   
-    p-value:               P(Z > 2.54) = 0.006
+    p-value:               P(Z > 3.18) = 0.001
   
   VERDICT
     Result:                PASS
-    Interpretation:        The observed success rate of 0.7143 meets the
+    Interpretation:        The observed success rate of 0.7813 meets the
                            required threshold of 0.5000. The test passes.
   
-    Caveat:                With n=35 samples, subtle performance changes may
+    Caveat:                With n=32 samples, subtle performance changes may
                            not be detectable. For higher sensitivity, consider
                            increasing sample size.
     Caveat:                Using inline threshold (no baseline spec). For
@@ -115,7 +115,7 @@ When PUnit determines that the threshold can no longer be reached — even if ev
   Termination:         Cannot reach required pass rate
   Details:             After 2 samples with 0 successes, maximum possible successes (0 + 28 = 28) is less than required (29)
   Analysis:            Needed 29 successes, maximum possible is 28
-  Elapsed:             1ms
+  Elapsed:             164ms
 
 ```
 
@@ -191,9 +191,9 @@ A failing verdict. The verbose variant adds the HYPOTHESIS TEST and STATISTICAL 
 ═ STATISTICAL ANALYSIS FOR: serviceFailsNarrowlyTransparent(ShoppingBaske... ═
 
   OBSERVED DATA
-    Sample size (n):       4
-    Successes (k):         1
-    Observed rate (p̂):    0.2500
+    Sample size (n):       6
+    Successes (k):         3
+    Observed rate (p̂):    0.5000
   
   BASELINE REFERENCE
     Source:                (inline threshold)
@@ -201,11 +201,11 @@ A failing verdict. The verbose variant adds the HYPOTHESIS TEST and STATISTICAL 
   
   VERDICT
     Result:                FAIL
-    Interpretation:        The observed success rate of 0.2500 falls below the
+    Interpretation:        The observed success rate of 0.5000 falls below the
                            required threshold of 0.9500. The observed rate does
                            not meet the threshold.
   
-    Caveat:                Small sample size (n=4). Statistical conclusions
+    Caveat:                Small sample size (n=6). Statistical conclusions
                            should be interpreted with caution. Consider
                            increasing sample size for more reliable results.
     Caveat:                Using inline threshold (no baseline spec). For
@@ -285,10 +285,10 @@ When a cost budget (time or tokens) runs out before all samples complete, PUnit 
   failsWhenBudgetRunsOut(ShoppingBasketUseCase, String)
   
   Samples executed:    5 of 50 (budget exhausted)
-  Pass rate:           0.6000 (3/5), required: 0.5000
+  Pass rate:           0.8000 (4/5), required: 0.5000
   Termination:         Method token budget exhausted
   Details:             Method token budget exhausted: 1000 tokens >= 1000 budget
-  Elapsed:             4ms
+  Elapsed:             328ms
 
 ```
 
@@ -299,10 +299,10 @@ An alternative budget behaviour, `EVALUATE_PARTIAL`, evaluates the partial resul
 
   evaluatesPartialResultsOnBudgetPass(ShoppingBasketUseCase, String)
   
-  Observed pass rate:  0.8000 (4/5) >= required: 0.5000
+  Observed pass rate:  1.0000 (5/5) >= required: 0.5000
   Termination:         Method token budget exhausted
   Details:             Method token budget exhausted: 1000 tokens >= 1000 budget
-  Elapsed:             4ms
+  Elapsed:             352ms
 
 ```
 
@@ -318,26 +318,26 @@ An alternative budget behaviour, `EVALUATE_PARTIAL`, evaluates the partial resul
   
   OBSERVED DATA
     Sample size (n):       5
-    Successes (k):         4
-    Observed rate (p̂):    0.8000
+    Successes (k):         3
+    Observed rate (p̂):    0.6000
   
   BASELINE REFERENCE
     Source:                (inline threshold)
     Threshold:             0.5000 (Threshold specified directly in @ProbabilisticTest annotation)
   
   STATISTICAL INFERENCE
-    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.80 × 0.20 / 5) = 0.1789
-    Confidence interval:   95% [0.376, 0.964]
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.60 × 0.40 / 5) = 0.2191
+    Confidence interval:   95% [0.231, 0.882]
   
     Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                           z = (0.80 - 0.50) / √(0.50 × 0.50 / 5)
-                           z = 1.34
+                           z = (0.60 - 0.50) / √(0.50 × 0.50 / 5)
+                           z = 0.45
   
-    p-value:               P(Z > 1.34) = 0.090
+    p-value:               P(Z > 0.45) = 0.327
   
   VERDICT
     Result:                FAIL
-    Interpretation:        The observed success rate of 0.8000 falls below the
+    Interpretation:        The observed success rate of 0.6000 falls below the
                            required threshold of 0.5000. This suggests the
                            system is not meeting its expected performance
                            level.
@@ -377,9 +377,9 @@ When a threshold originates from an SLA, SLO, or policy, PUnit frames the hypoth
 ═ STATISTICAL ANALYSIS FOR: slaPassShowsComplianceHypothesis(ShoppingBask... ═
 
   OBSERVED DATA
-    Sample size (n):       32
+    Sample size (n):       42
     Successes (k):         25
-    Observed rate (p̂):    0.7813
+    Observed rate (p̂):    0.5952
   
   BASELINE REFERENCE
     Source:                (inline threshold)
@@ -387,11 +387,11 @@ When a threshold originates from an SLA, SLO, or policy, PUnit frames the hypoth
   
   VERDICT
     Result:                PASS
-    Interpretation:        The observed success rate of 0.7813 meets the
+    Interpretation:        The observed success rate of 0.5952 meets the
                            required threshold of 0.5000. The system meets its
                            SLA requirement.
   
-    Caveat:                With n=32 samples, subtle performance changes may
+    Caveat:                With n=42 samples, subtle performance changes may
                            not be detectable. For higher sensitivity, consider
                            increasing sample size.
   
@@ -412,31 +412,31 @@ When a threshold originates from an SLA, SLO, or policy, PUnit frames the hypoth
     Test type:             One-sided binomial proportion test
   
   OBSERVED DATA
-    Sample size (n):       49
+    Sample size (n):       31
     Successes (k):         25
-    Observed rate (p̂):    0.5102
+    Observed rate (p̂):    0.8065
   
   BASELINE REFERENCE
     Source:                (inline threshold)
     Threshold:             0.5000 (Threshold specified directly in @ProbabilisticTest annotation)
   
   STATISTICAL INFERENCE
-    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.51 × 0.49 / 49) = 0.0714
-    Confidence interval:   95% [0.375, 0.644]
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.81 × 0.19 / 31) = 0.0710
+    Confidence interval:   95% [0.637, 0.908]
   
     Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                           z = (0.51 - 0.50) / √(0.50 × 0.50 / 49)
-                           z = 0.14
+                           z = (0.81 - 0.50) / √(0.50 × 0.50 / 31)
+                           z = 3.41
   
-    p-value:               P(Z > 0.14) = 0.443
+    p-value:               P(Z > 3.41) = 0.000
   
   VERDICT
     Result:                PASS
-    Interpretation:        The observed success rate of 0.5102 meets the
+    Interpretation:        The observed success rate of 0.8065 meets the
                            required threshold of 0.5000. The system meets its
                            SLA requirement.
   
-    Caveat:                With n=49 samples, subtle performance changes may
+    Caveat:                With n=31 samples, subtle performance changes may
                            not be detectable. For higher sensitivity, consider
                            increasing sample size.
   
@@ -472,9 +472,9 @@ When the sample size is too small to provide meaningful statistical evidence of 
 ═ STATISTICAL ANALYSIS FOR: complianceUndersizedSmokeTestOnly(ShoppingBas... ═
 
   OBSERVED DATA
-    Sample size (n):       1
-    Successes (k):         0
-    Observed rate (p̂):    0.0000
+    Sample size (n):       2
+    Successes (k):         1
+    Observed rate (p̂):    0.5000
   
   BASELINE REFERENCE
     Source:                (inline threshold)
@@ -482,25 +482,22 @@ When the sample size is too small to provide meaningful statistical evidence of 
   
   VERDICT
     Result:                FAIL
-    Interpretation:        The observed success rate of 0.0000 falls below the
+    Interpretation:        The observed success rate of 0.5000 falls below the
                            required threshold of 0.9999. The observed rate is
                            inconsistent with the target.
   
-    Caveat:                Small sample size (n=1). Statistical conclusions
+    Caveat:                Small sample size (n=2). Statistical conclusions
                            should be interpreted with caution. Consider
                            increasing sample size for more reliable results.
-    Caveat:                Zero success rate observed. This indicates a
-                           fundamental failure that may warrant investigation
-                           before further testing.
     Caveat:                Warning: sample not sized for compliance
-                           verification. With n=1 and target of 0.9999, even
+                           verification. With n=2 and target of 0.9999, even
                            zero failures would not provide sufficient
                            statistical evidence of compliance (α=0.050). A PASS
                            at this sample size is a smoke-test-level
                            observation, not a compliance determination. Note: a
                            FAIL verdict remains a reliable indication of
                            non-conformance.
-    Caveat:                Sample not sized for verification (N=1, need 27053).
+    Caveat:                Sample not sized for verification (N=2, need 27053).
                            This is a smoke-test-level observation, not a
                            compliance determination.
   
@@ -521,45 +518,42 @@ When the sample size is too small to provide meaningful statistical evidence of 
     Test type:             One-sided binomial proportion test
   
   OBSERVED DATA
-    Sample size (n):       1
-    Successes (k):         0
-    Observed rate (p̂):    0.0000
+    Sample size (n):       6
+    Successes (k):         5
+    Observed rate (p̂):    0.8333
   
   BASELINE REFERENCE
     Source:                (inline threshold)
     Threshold:             0.9999 (Threshold specified directly in @ProbabilisticTest annotation)
   
   STATISTICAL INFERENCE
-    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.00 × 1.00 / 1) = 0.0000
-    Confidence interval:   95% [0.000, 0.793]
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.83 × 0.17 / 6) = 0.1521
+    Confidence interval:   95% [0.436, 0.970]
   
     Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                           z = (0.00 - 1.00) / √(1.00 × 0.00 / 1)
-                           z = -99.99
+                           z = (0.83 - 1.00) / √(1.00 × 0.00 / 6)
+                           z = -40.80
   
-    p-value:               P(Z > -99.99) = 1.000
+    p-value:               P(Z > -40.80) = 1.000
   
   VERDICT
     Result:                FAIL
-    Interpretation:        The observed success rate of 0.0000 falls below the
+    Interpretation:        The observed success rate of 0.8333 falls below the
                            required threshold of 0.9999. The observed rate is
                            inconsistent with the target.
   
-    Caveat:                Small sample size (n=1). Statistical conclusions
+    Caveat:                Small sample size (n=6). Statistical conclusions
                            should be interpreted with caution. Consider
                            increasing sample size for more reliable results.
-    Caveat:                Zero success rate observed. This indicates a
-                           fundamental failure that may warrant investigation
-                           before further testing.
     Caveat:                Warning: sample not sized for compliance
-                           verification. With n=1 and target of 0.9999, even
+                           verification. With n=6 and target of 0.9999, even
                            zero failures would not provide sufficient
                            statistical evidence of compliance (α=0.050). A PASS
                            at this sample size is a smoke-test-level
                            observation, not a compliance determination. Note: a
                            FAIL verdict remains a reliable indication of
                            non-conformance.
-    Caveat:                Sample not sized for verification (N=1, need 27053).
+    Caveat:                Sample not sized for verification (N=6, need 27053).
                            This is a smoke-test-level observation, not a
                            compliance determination.
   
@@ -575,15 +569,159 @@ When the sample size is too small to provide meaningful statistical evidence of 
 
 When the test runs under conditions that differ from the baseline (e.g. different time of day, weekday vs weekend), PUnit emits a BASELINE FOUND banner listing the misaligned covariates before the test runs. This also appears as a caveat in the verdict.
 
-> **Not yet available.** This section requires blocks that were not produced by the current test run. Missing: temporalMismatchShowsCaveatTransparent (BASELINE_FOUND, SUMMARY), temporalMismatchShowsCaveatTransparent (TEST_CONFIGURATION, SUMMARY), temporalMismatchShowsCaveatTransparent (STATISTICAL_ANALYSIS, SUMMARY), temporalMismatchShowsCaveatTransparent (STATISTICAL_ANALYSIS, VERBOSE)
+### Summary
+
+```
+═ BASELINE FOUND FOR USE CASE: ShoppingBasketUseCase ═════════════════ PUnit ═
+
+  Baseline file:       ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml
+  
+  Please note, the following covariates do not match the baseline:
+    - day_of_week: baseline=WEEKEND, test=WEEKDAY
+    - llm_model: baseline=gpt-4o-mini, test=mock-llm
+  
+  Statistical comparison may be less reliable.
+  Consider running a new MEASURE experiment under current conditions.
+
+```
+
+```
+═ TEST CONFIGURATION ═════════════════════════════════════════════════ PUnit ═
+
+  temporalMismatchShowsCaveatTransparent
+  
+  Mode:                SPEC-DRIVEN
+  Intent:              VERIFICATION
+  Spec:                ShoppingBasketUseCase
+  Threshold:           0.4063 (derived from baseline)
+  Samples:             50
+
+```
+
+```
+═ STATISTICAL ANALYSIS FOR: temporalMismatchShowsCaveatTransparent(Shoppi... ═
+
+  OBSERVED DATA
+    Sample size (n):       46
+    Successes (k):         16
+    Observed rate (p̂):    0.3478
+  
+  BASELINE REFERENCE
+    Source:                ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml (generated 2026-03-01)
+    Empirical basis:       1000 samples, 437 successes (0.4370)
+    Threshold derivation:  Lower bound of 95% CI = 0.4114, min pass rate = 0.4063
+  
+  LATENCY ANALYSIS
+    Population:            Successful samples only (n=16 of 46)
+    Observed distribution:
+    p50:                   53ms
+    p90:                   96ms
+    p95:                   98ms
+    p99:                   98ms
+    max:                   98ms
+  
+    Percentile thresholds (from baseline):
+    p50:                   53ms <= 55ms                                     PASS
+    p90:                   96ms > 95ms                                      FAIL
+    p95:                   98ms <= 99ms                        PASS (indicative)
+    p99:                   98ms <= 104ms                       PASS (indicative)
+  
+    Caveat:                Sample size is small for some percentiles — results
+                           are indicative, not evidential.
+  
+    Baseline reference:    ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml
+  
+  VERDICT
+    Result:                FAIL
+    Interpretation:        The observed success rate of 0.3478 falls below the
+                           required threshold of 0.4063. This suggests the
+                           system is not meeting its expected performance
+                           level.
+  
+    Caveat:                Covariate misalignment detected: the test conditions
+                           differ from the baseline. Misaligned covariates:
+                           day_of_week (baseline=WEEKEND, test=WEEKDAY),
+                           llm_model (baseline=gpt-4o-mini, test=mock-llm).
+                           Statistical comparison may be less reliable.
+    Caveat:                With n=46 samples, subtle performance changes may
+                           not be detectable. For higher sensitivity, consider
+                           increasing sample size.
+
+```
+
+### Verbose
+
+```
+═ STATISTICAL ANALYSIS FOR: temporalMismatchShowsCaveatTransparent(Shoppi... ═
+
+  HYPOTHESIS TEST
+    H₀ (null):             True success rate π ≥ 0.4063 (success rate meets threshold)
+    H₁ (alternative):      True success rate π < 0.4063 (success rate below threshold)
+    Test type:             One-sided binomial proportion test
+  
+  OBSERVED DATA
+    Sample size (n):       49
+    Successes (k):         19
+    Observed rate (p̂):    0.3878
+  
+  BASELINE REFERENCE
+    Source:                ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml (generated 2026-03-01)
+    Empirical basis:       1000 samples, 437 successes (0.4370)
+    Threshold derivation:  Lower bound of 95% CI = 0.4114, min pass rate = 0.4063
+  
+  STATISTICAL INFERENCE
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.39 × 0.61 / 49) = 0.0696
+    Confidence interval:   95% [0.264, 0.528]
+  
+    Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
+                           z = (0.39 - 0.41) / √(0.41 × 0.59 / 49)
+                           z = -0.26
+  
+    p-value:               P(Z > -0.26) = 0.604
+  
+  LATENCY ANALYSIS
+    Population:            Successful samples only (n=19 of 49)
+    Observed distribution:
+    p50:                   66ms
+    p90:                   101ms
+    p95:                   102ms
+    p99:                   102ms
+    max:                   102ms
+  
+    Percentile thresholds (from baseline):
+    p50:                   66ms > 55ms                                      FAIL
+    p90:                   101ms > 95ms                                     FAIL
+    p95:                   102ms > 99ms                                     FAIL
+    p99:                   102ms <= 104ms                      PASS (indicative)
+  
+    Caveat:                Sample size is small for some percentiles — results
+                           are indicative, not evidential.
+  
+    Baseline reference:    ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml
+  
+  VERDICT
+    Result:                FAIL
+    Interpretation:        The observed success rate of 0.3878 falls below the
+                           required threshold of 0.4063. This suggests the
+                           system is not meeting its expected performance
+                           level.
+  
+    Caveat:                Covariate misalignment detected: the test conditions
+                           differ from the baseline. Misaligned covariates:
+                           day_of_week (baseline=WEEKEND, test=WEEKDAY),
+                           llm_model (baseline=gpt-4o-mini, test=mock-llm).
+                           Statistical comparison may be less reliable.
+    Caveat:                With n=49 samples, subtle performance changes may
+                           not be detectable. For higher sensitivity, consider
+                           increasing sample size.
+
+```
 
 ---
 
 ## 8. Intent-governed verdicts (VERIFICATION vs SMOKE)
 
 PUnit supports two test intents: **VERIFICATION** (evidential — enforces a statistical feasibility gate before any samples execute) and **SMOKE** (sentinel — permits undersized configurations and uses softened language). The intent appears in the verdict banner and influences hypothesis framing and caveats.
-
-VERIFICATION is the default intent.
 
 A VERIFICATION test with insufficient samples will fail at configuration time (not shown here — see the user guide for the infeasibility message). The examples below show how intent affects the verdict for tests that *do* execute.
 
@@ -609,9 +747,9 @@ A VERIFICATION test with insufficient samples will fail at configuration time (n
 ═ STATISTICAL ANALYSIS FOR: verificationPassSized(ShoppingBasketUseCase, ... ═
 
   OBSERVED DATA
-    Sample size (n):       34
+    Sample size (n):       36
     Successes (k):         25
-    Observed rate (p̂):    0.7353
+    Observed rate (p̂):    0.6944
   
   BASELINE REFERENCE
     Source:                (inline threshold)
@@ -619,11 +757,11 @@ A VERIFICATION test with insufficient samples will fail at configuration time (n
   
   VERDICT
     Result:                PASS
-    Interpretation:        The observed success rate of 0.7353 meets the
+    Interpretation:        The observed success rate of 0.6944 meets the
                            required threshold of 0.5000. The system meets its
                            SLA requirement.
   
-    Caveat:                With n=34 samples, subtle performance changes may
+    Caveat:                With n=36 samples, subtle performance changes may
                            not be detectable. For higher sensitivity, consider
                            increasing sample size.
   
@@ -696,9 +834,9 @@ If the SMOKE sample is already large enough for verification, PUnit suggests upg
 ═ STATISTICAL ANALYSIS FOR: smokeSizedNormativeHint(ShoppingBasketUseCase... ═
 
   OBSERVED DATA
-    Sample size (n):       36
+    Sample size (n):       35
     Successes (k):         25
-    Observed rate (p̂):    0.6944
+    Observed rate (p̂):    0.7143
   
   BASELINE REFERENCE
     Source:                (inline threshold)
@@ -706,11 +844,11 @@ If the SMOKE sample is already large enough for verification, PUnit suggests upg
   
   VERDICT
     Result:                PASS
-    Interpretation:        The observed success rate of 0.6944 meets the
+    Interpretation:        The observed success rate of 0.7143 meets the
                            required threshold of 0.5000. The observed rate is
                            consistent with the target.
   
-    Caveat:                With n=36 samples, subtle performance changes may
+    Caveat:                With n=35 samples, subtle performance changes may
                            not be detectable. For higher sensitivity, consider
                            increasing sample size.
     Caveat:                Sample is sized for verification. Consider setting
@@ -733,31 +871,31 @@ If the SMOKE sample is already large enough for verification, PUnit suggests upg
     Test type:             One-sided binomial proportion test
   
   OBSERVED DATA
-    Sample size (n):       33
+    Sample size (n):       36
     Successes (k):         25
-    Observed rate (p̂):    0.7576
+    Observed rate (p̂):    0.6944
   
   BASELINE REFERENCE
     Source:                (inline threshold)
     Threshold:             0.5000 (Threshold specified directly in @ProbabilisticTest annotation)
   
   STATISTICAL INFERENCE
-    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.76 × 0.24 / 33) = 0.0746
-    Confidence interval:   95% [0.590, 0.872]
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.69 × 0.31 / 36) = 0.0768
+    Confidence interval:   95% [0.531, 0.820]
   
     Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                           z = (0.76 - 0.50) / √(0.50 × 0.50 / 33)
-                           z = 2.96
+                           z = (0.69 - 0.50) / √(0.50 × 0.50 / 36)
+                           z = 2.33
   
-    p-value:               P(Z > 2.96) = 0.002
+    p-value:               P(Z > 2.33) = 0.010
   
   VERDICT
     Result:                PASS
-    Interpretation:        The observed success rate of 0.7576 meets the
+    Interpretation:        The observed success rate of 0.6944 meets the
                            required threshold of 0.5000. The system meets its
                            SLA requirement.
   
-    Caveat:                With n=33 samples, subtle performance changes may
+    Caveat:                With n=36 samples, subtle performance changes may
                            not be detectable. For higher sensitivity, consider
                            increasing sample size.
   
@@ -776,42 +914,42 @@ If the SMOKE sample is already large enough for verification, PUnit suggests upg
     Test type:             One-sided binomial proportion test
   
   OBSERVED DATA
-    Sample size (n):       6
-    Successes (k):         4
-    Observed rate (p̂):    0.6667
+    Sample size (n):       3
+    Successes (k):         1
+    Observed rate (p̂):    0.3333
   
   BASELINE REFERENCE
     Source:                (inline threshold)
     Threshold:             0.9500 (Threshold specified directly in @ProbabilisticTest annotation)
   
   STATISTICAL INFERENCE
-    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.67 × 0.33 / 6) = 0.1925
-    Confidence interval:   95% [0.300, 0.903]
+    Standard error:        SE = √(p̂(1-p̂)/n) = √(0.33 × 0.67 / 3) = 0.2722
+    Confidence interval:   95% [0.061, 0.792]
   
     Test statistic:        z = (p̂ - π₀) / √(π₀(1-π₀)/n)
-                           z = (0.67 - 0.95) / √(0.95 × 0.05 / 6)
-                           z = -3.18
+                           z = (0.33 - 0.95) / √(0.95 × 0.05 / 3)
+                           z = -4.90
   
-    p-value:               P(Z > -3.18) = 0.999
+    p-value:               P(Z > -4.90) = 1.000
   
   VERDICT
     Result:                FAIL
-    Interpretation:        The observed success rate of 0.6667 falls below the
+    Interpretation:        The observed success rate of 0.3333 falls below the
                            required threshold of 0.9500. The observed rate is
                            inconsistent with the target.
   
-    Caveat:                Small sample size (n=6). Statistical conclusions
+    Caveat:                Small sample size (n=3). Statistical conclusions
                            should be interpreted with caution. Consider
                            increasing sample size for more reliable results.
     Caveat:                Warning: sample not sized for compliance
-                           verification. With n=6 and target of 0.9500, even
+                           verification. With n=3 and target of 0.9500, even
                            zero failures would not provide sufficient
                            statistical evidence of compliance (α=0.050). A PASS
                            at this sample size is a smoke-test-level
                            observation, not a compliance determination. Note: a
                            FAIL verdict remains a reliable indication of
                            non-conformance.
-    Caveat:                Sample not sized for verification (N=6, need 52).
+    Caveat:                Sample not sized for verification (N=3, need 52).
                            This is a smoke-test-level observation, not a
                            compliance determination.
   

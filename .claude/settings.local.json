@@ -19,7 +19,10 @@
       "Bash(head:*)",
       "WebSearch",
       "WebFetch(domain:search.maven.org)",
-      "WebFetch(domain:central.sonatype.com)"
+      "WebFetch(domain:central.sonatype.com)",
+      "Bash(java:*)",
+      "Bash(./ex-1.sh:*)",
+      "Bash(javap:*)"
     ]
   }
 }
