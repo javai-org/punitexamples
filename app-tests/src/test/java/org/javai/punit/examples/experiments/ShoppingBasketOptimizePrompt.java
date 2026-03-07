@@ -111,13 +111,11 @@ public class ShoppingBasketOptimizePrompt {
      * </ul>
      *
      * <h3>Input Source and Iteration Behavior</h3>
-     * <p>Each optimization iteration tests the current system prompt against ALL inputs
-     * from the golden dataset exactly once. With 8 inputs in the dataset, each iteration
-     * runs 8 samples (one per input), then scores the aggregate performance.
-     *
-     * <p><b>Note:</b> When using {@code @InputSource}, do not specify {@code samplesPerIteration}
-     * as they are mutually exclusive. The effective samples per iteration is automatically
-     * set to the number of inputs.
+     * <p>Each optimization iteration tests the current system prompt against inputs
+     * from the golden dataset via round-robin cycling. When {@code samplesPerIteration}
+     * is not specified (as here), it defaults to the number of inputs — so each input
+     * is tested exactly once per iteration. If {@code samplesPerIteration} is explicitly
+     * set, inputs cycle via round-robin to fill the specified count.
      *
      * @param useCase the use case instance
      * @param systemPrompt the current system prompt (updated each iteration)

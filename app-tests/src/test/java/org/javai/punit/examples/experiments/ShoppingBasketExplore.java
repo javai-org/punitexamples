@@ -80,8 +80,8 @@ public class ShoppingBasketExplore {
      * Explores performance across varied inputs.
      *
      * <p>This experiment uses a curated set of instructions to understand how the
-     * LLM performs across different instruction types. Each input becomes a separate
-     * configuration, generating separate spec files for comparison.
+     * LLM performs across different instruction types. Inputs are cycled via round-robin
+     * across all samples, producing a single aggregated exploration spec.
      *
      * <p>The {@code @Input} annotation explicitly marks which parameter receives
      * the input value, distinguishing it from the use case parameter.

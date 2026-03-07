@@ -75,7 +75,7 @@ public class ShoppingBasketBudgetTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -100,7 +100,7 @@ public class ShoppingBasketBudgetTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -125,7 +125,7 @@ public class ShoppingBasketBudgetTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -160,7 +160,7 @@ public class ShoppingBasketBudgetTest {
         // Record actual tokens from the outcome metadata (extracted from response via withResult)
         outcome.getMetadataLong("tokensUsed").ifPresent(tokenRecorder::recordTokens);
 
-        outcome.assertAll();
+        outcome.assertContract();
     }
 
     /**
@@ -182,7 +182,7 @@ public class ShoppingBasketBudgetTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     static Stream<String> standardInstructions() {

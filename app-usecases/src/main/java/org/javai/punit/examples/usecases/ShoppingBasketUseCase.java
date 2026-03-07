@@ -114,7 +114,7 @@ public class ShoppingBasketUseCase {
     private String systemPrompt = """
             You are a shopping assistant that converts natural language instructions into JSON actions.
 
-            ALWAYS respond with a JSON object containing an "actions" array, even for single operations.
+            Respond with JSON only — no explanation or commentary. The JSON must contain an "actions" array, even for single operations.
 
             Format:
             {

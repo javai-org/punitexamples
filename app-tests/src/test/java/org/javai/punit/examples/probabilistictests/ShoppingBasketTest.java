@@ -77,7 +77,7 @@ public class ShoppingBasketTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -99,7 +99,7 @@ public class ShoppingBasketTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

@@ -1,28 +1,25 @@
-package org.javai.punit.examples.probabilistictests;
+package org.javai.punit.examples.sentinals;
 
 import java.util.stream.Stream;
 import org.javai.punit.api.InputSource;
 import org.javai.punit.api.MeasureExperiment;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
+import org.javai.punit.api.Sentinel;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.javai.punit.usecase.UseCaseFactory;
 
 /**
- * Unified reliability test for ShoppingBasketUseCase — both baseline measurement
+ * Reliability specification for ShoppingBasketUseCase — both baseline measurement
  * and probabilistic verification live in a single class.
  *
- * <p>This class demonstrates the <b>unified test pattern</b>, where {@code @MeasureExperiment}
- * and {@code @ProbabilisticTest} methods coexist with shared setup and input sources.
- * Tag-based filtering ensures the correct methods run for each Gradle task:
- * <ul>
- *   <li>{@code ./gradlew exp} — runs only {@code @MeasureExperiment} methods
- *       (tagged {@code punit-experiment})</li>
- *   <li>{@code ./gradlew test} — runs only {@code @ProbabilisticTest} methods
- *       (experiment tag excluded)</li>
- * </ul>
+ * <p>This class demonstrates the <b>Sentinel authoring model</b>: a pure-Java reliability
+ * specification with no JUnit dependencies. It uses {@link UseCaseFactory} directly and
+ * contains {@code @MeasureExperiment} and {@code @ProbabilisticTest} methods with shared
+ * input sources.
+ *
+ * <p>JUnit test classes derive from this class via inheritance (one-line adapter),
+ * while the Sentinel engine can consume it directly for automated monitoring.
  *
  * <h2>Workflow</h2>
  * <pre>{@code
@@ -33,25 +30,13 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * ./gradlew test --tests "ShoppingBasketReliabilityTest.testInstructionTranslation"
  * }</pre>
  *
- * <h2>Benefits over separate classes</h2>
- * <ul>
- *   <li>Single {@code @BeforeEach} — shared setup, no duplication</li>
- *   <li>Shared input source — {@link #instructions()} used by both measure and test</li>
- *   <li>Co-located documentation — the relationship between measure and test is explicit</li>
- * </ul>
- *
  * @see ShoppingBasketUseCase
  */
-// Run with ./gradlew exp or ./gradlew test (see class Javadoc)
-public class ShoppingBasketReliabilityTest {
+@Sentinel
+public class ShoppingBasketReliability {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
-
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
-    }
+    UseCaseFactory factory = new UseCaseFactory();
+    { factory.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new); }
 
     // ═══════════════════════════════════════════════════════════════════════════
     // MEASURE — establish baseline (run once / periodically)
@@ -91,7 +76,7 @@ public class ShoppingBasketReliabilityTest {
     @ProbabilisticTest(useCase = ShoppingBasketUseCase.class, samples = 100)
     @InputSource("instructions")
     void testInstructionTranslation(ShoppingBasketUseCase useCase, String instruction) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     // ═══════════════════════════════════════════════════════════════════════════

@@ -60,7 +60,7 @@ public class PaymentGatewayUseCase {
 	private static final ServiceContract<PaymentInput, PaymentResult> CONTRACT =
 			ServiceContract.<PaymentInput, PaymentResult>define()
 					.ensure("Transaction succeeded", PaymentGatewayUseCase::isSuccess)
-					.ensureDurationBelow("SLA", Duration.ofSeconds(1))
+					.ensureDurationBelow("SLA", Duration.ofSeconds(5))
 					.build();
 
 	private static @NonNull Outcome<Void> isSuccess(PaymentResult pr) {

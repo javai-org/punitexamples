@@ -88,7 +88,7 @@ public class ShoppingBasketExceptionTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -115,7 +115,7 @@ public class ShoppingBasketExceptionTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -147,7 +147,7 @@ public class ShoppingBasketExceptionTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -175,7 +175,7 @@ public class ShoppingBasketExceptionTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     static Stream<String> standardInstructions() {

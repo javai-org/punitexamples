@@ -99,7 +99,7 @@ public class ShoppingBasketCovariateTest {
             ShoppingBasketUseCase useCase,
             String instruction
     ) {
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -125,7 +125,7 @@ public class ShoppingBasketCovariateTest {
         // This affects the "llm_model" covariate via @CovariateSource
         useCase.setModel("gpt-4-turbo");
 
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -150,7 +150,7 @@ public class ShoppingBasketCovariateTest {
         // Low temperature for high reliability
         useCase.setTemperature(0.1);
 
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     /**
@@ -176,7 +176,7 @@ public class ShoppingBasketCovariateTest {
         // Higher temperature - may have different reliability characteristics
         useCase.setTemperature(0.7);
 
-        useCase.translateInstruction(instruction).assertAll();
+        useCase.translateInstruction(instruction).assertContract();
     }
 
     static Stream<String> standardInstructions() {

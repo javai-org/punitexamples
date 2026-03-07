@@ -15,6 +15,9 @@
               <build path="$PROJECT_DIR$/../punit" name="punit">
                 <projects>
                   <project path="$PROJECT_DIR$/../punit" />
+                  <project path="$PROJECT_DIR$/../punit/punit-core" />
+                  <project path="$PROJECT_DIR$/../punit/punit-junit5" />
+                  <project path="$PROJECT_DIR$/../punit/punit-sentinel" />
                 </projects>
               </build>
               <build path="$PROJECT_DIR$/../punit/punit-gradle-plugin" name="punit-gradle-plugin">
@@ -31,8 +34,14 @@
           <set>
             <option value="$PROJECT_DIR$/../outcome" />
             <option value="$PROJECT_DIR$/../punit" />
+            <option value="$PROJECT_DIR$/../punit/punit-core" />
             <option value="$PROJECT_DIR$/../punit/punit-gradle-plugin" />
+            <option value="$PROJECT_DIR$/../punit/punit-junit5" />
+            <option value="$PROJECT_DIR$/../punit/punit-sentinel" />
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/app-tests" />
+            <option value="$PROJECT_DIR$/app-usecases" />
           </set>
         </option>
       </GradleProjectSettings>
