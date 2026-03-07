@@ -1,5 +1,6 @@
 package org.javai.punit.examples.sentinals;
 
+import org.javai.punit.api.Latency;
 import org.javai.punit.api.MeasureExperiment;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.ProbabilisticTest;
@@ -113,6 +114,34 @@ public class PaymentGatewayReliability {
     )
     void testLatency(PaymentGatewayUseCase useCase) {
         useCase.chargeCard("tok_visa_4242", 1999L).assertLatency();
+    }
+
+    /**
+     * Tests functional correctness with explicit latency thresholds from the SLA.
+     *
+     * <p>This test demonstrates the {@code latency} attribute of
+     * {@code @ProbabilisticTest}, which declares contractual percentile
+     * thresholds directly on the annotation. The SLA requires that 95% of
+     * transactions complete within 500ms and 99% within 1000ms.
+     *
+     * <p>PUnit measures the wall-clock time of each successful sample, computes
+     * the observed percentile distribution, and compares it against the declared
+     * thresholds. Both the pass-rate and latency dimensions must pass for the
+     * test to pass.
+     *
+     * @param useCase the use case instance (injected by PUnit)
+     */
+    @ProbabilisticTest(
+            useCase = PaymentGatewayUseCase.class,
+            samples = 200,
+            minPassRate = 0.99,
+            intent = TestIntent.SMOKE,
+            thresholdOrigin = ThresholdOrigin.SLA,
+            contractRef = "Payment Provider SLA v2.3, Sections 4.1 & 4.2",
+            latency = @Latency(p95Ms = 500, p99Ms = 1000)
+    )
+    void testReliabilityWithLatencySla(PaymentGatewayUseCase useCase) {
+        useCase.chargeCard("tok_visa_4242", 1999L).assertAll();
     }
 
     /**
