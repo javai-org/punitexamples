@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-10
+
+### Changed
+- Upgraded PUnit dependency from 0.3.0 to 0.4.0
+- Restructured into three modules: `app` (domain classes), `app-usecases` (use case definitions and `@Sentinel` reliability specs), and `app-tests` (probabilistic tests and experiments)
+
+### Added
+- Sentinel reliability specs: `PaymentGatewayReliability` and `ShoppingBasketReliability` in `app-usecases`
+- `PaymentGatewayReliabilityTest` and `PaymentGatewayReliabilityExtendedTest` for sentinel-based testing
+- `ShoppingBasketReliabilityTest` for sentinel-based shopping basket testing
+- Latency example in `PaymentGatewayReliability`
+- PUnit Gradle plugin (`org.javai.punit`) applied to `app-tests`
+
 ## [0.2.0] - 2026-03-02
 
 ### Changed
@@ -41,7 +54,8 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/javai-org/punitexamples/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/javai-org/punitexamples/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/javai-org/punitexamples/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/javai-org/punitexamples/releases/tag/v0.1.0
