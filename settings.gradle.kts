@@ -18,6 +18,7 @@ if (punitDir.isDirectory) {
             substitute(module("org.javai:punit")).using(project(":"))
             substitute(module("org.javai:punit-core")).using(project(":punit-core"))
             substitute(module("org.javai:punit-junit5")).using(project(":punit-junit5"))
+            substitute(module("org.javai:punit-sentinel")).using(project(":punit-sentinel"))
         }
     }
 }
