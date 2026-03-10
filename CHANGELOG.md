@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-03-10
+
+### Changed
+- Upgraded Outcome dependency from 0.1.0 to 0.2.0
+- Adapted `AnthropicChatLlm` and `OpenAiChatLlm` to Outcome 0.2.0 API (`Failure.exception()` now returns `Optional<Throwable>`)
+
+### Added
+- GitHub Actions CI workflow, Claude Code workflows, and Dependabot configuration
+- PUnit Gradle plugin resolution from Maven Central for CI (composite build still takes priority locally)
+
 ## [0.3.0] - 2026-03-10
 
 ### Changed
@@ -54,7 +64,8 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/javai-org/punitexamples/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/javai-org/punitexamples/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/javai-org/punitexamples/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/javai-org/punitexamples/compare/v0.1.0...v0.1.1
