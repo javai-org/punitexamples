@@ -4,7 +4,7 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.1")
 
     // Outcome - result types used by domain classes
-    implementation("org.javai:outcome:0.1.0")
+    implementation("org.javai:outcome:0.2.0")
 
     // Log4j2 - logging
     implementation("org.apache.logging.log4j:log4j-api:2.25.3")

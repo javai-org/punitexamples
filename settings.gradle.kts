@@ -4,6 +4,15 @@ pluginManagement {
     if (punitPluginDir.isDirectory) {
         includeBuild(punitPluginDir)
     }
+
+    // Allow resolving the PUnit plugin from Maven Central (used when local build is absent)
+    plugins {
+        id("org.javai.punit") version "0.4.0"
+    }
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
 }
 
 rootProject.name = "punitexamples"

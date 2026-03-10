@@ -117,7 +117,7 @@ public final class OpenAiChatLlm implements ChatLlm {
             case Outcome.Ok<ChatResponse> ok -> ok.value();
             case Outcome.Fail<ChatResponse> fail -> throw new LlmApiException(
                     "OpenAI API call failed: " + fail.failure().message(),
-                    fail.failure().exception()
+                    fail.failure().exception().orElse(null)
             );
         };
     }

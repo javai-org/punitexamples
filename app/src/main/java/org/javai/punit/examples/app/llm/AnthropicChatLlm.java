@@ -125,7 +125,7 @@ public final class AnthropicChatLlm implements ChatLlm {
             case Outcome.Ok<ChatResponse> ok -> ok.value();
             case Outcome.Fail<ChatResponse> fail -> throw new LlmApiException(
                     "Anthropic API call failed: " + fail.failure().message(),
-                    fail.failure().exception()
+                    fail.failure().exception().orElse(null)
             );
         };
     }
