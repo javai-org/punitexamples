@@ -1,0 +1,34 @@
+version: 2
+updates:
+  # Maintain dependencies for Gradle
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    ignore:
+      # Stay on JUnit 5 until ecosystem adoption of JUnit 6 matures
+      - dependency-name: "org.junit*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # Group JUnit updates together
+      junit:
+        patterns:
+          - "org.junit*"
+      # Group all other minor/patch updates
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "org.junit*"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+
