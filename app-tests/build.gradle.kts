@@ -10,7 +10,7 @@ dependencies {
     testImplementation("org.javai:punit-junit5:0.4.0")
 
     // JUnit 5
-    testImplementation(platform("org.junit:junit-bom:5.14.2"))
+    testImplementation(platform("org.junit:junit-bom:5.14.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
