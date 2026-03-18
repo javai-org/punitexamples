@@ -35,7 +35,8 @@ import org.jspecify.annotations.NonNull;
  * @see org.javai.punit.examples.probabilistictests.PaymentGatewaySlaTest
  */
 @UseCase(description = "Process payment transactions through a payment gateway",
-		covariateRegion = @RegionGroup("us-east-1"))
+		covariateRegion = @RegionGroup("US"),
+		warmup = 3)
 public class PaymentGatewayUseCase {
 
     /**
@@ -68,7 +69,7 @@ public class PaymentGatewayUseCase {
 	}
 
 	private final PaymentGateway gateway;
-	private String region = "us-east-1";
+	private String region = "US";
 	/**
 	 * Creates a use case with the default mock gateway.
 	 */
