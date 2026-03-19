@@ -131,7 +131,8 @@ public class ShoppingBasketOptimizePrompt {
             objective = OptimizationObjective.MAXIMIZE,
             maxIterations = 10,
             noImprovementWindow = 3,
-            experimentId = "prompt-optimization-v1"
+            experimentId = "prompt-optimization-v1",
+            skipWarmup = true
     )
     @InputSource(file = "fixtures/shopping-instructions.json")
     @Pacing(maxRequestsPerSecond = 5)

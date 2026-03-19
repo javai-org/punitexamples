@@ -103,7 +103,8 @@ public class ShoppingBasketOptimizeTemperature {
             samplesPerIteration = 20,
             maxIterations = 11,  // Covers 1.0, 0.9, 0.8, ... 0.0
             noImprovementWindow = 20,  // Disable early termination - run all iterations
-            experimentId = "temperature-optimization-v1"
+            experimentId = "temperature-optimization-v1",
+            skipWarmup = true
     )
     void optimizeTemperature(
             ShoppingBasketUseCase useCase,

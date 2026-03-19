@@ -63,7 +63,8 @@ public class ShoppingBasketExplore {
     @ExploreExperiment(
             useCase = ShoppingBasketUseCase.class,
             samplesPerConfig = 20,
-            experimentId = "model-comparison-v1"
+            experimentId = "model-comparison-v1",
+            skipWarmup = true
     )
     @FactorSource(value = "modelConfigurations", factors = {"model"})
     void compareModels(
@@ -93,7 +94,8 @@ public class ShoppingBasketExplore {
     @ExploreExperiment(
             useCase = ShoppingBasketUseCase.class,
             samplesPerConfig = 10,
-            experimentId = "input-exploration-v1"
+            experimentId = "input-exploration-v1",
+            skipWarmup = false
     )
     @InputSource(file = "fixtures/shopping-instructions.json")
     void exploreInputVariations(
