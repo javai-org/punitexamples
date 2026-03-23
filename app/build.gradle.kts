@@ -1,7 +1,7 @@
 dependencies {
     // Jackson - for JSON parsing in domain classes
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.1")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.2")
 
     // Outcome - result types used by domain classes
     implementation("org.javai:outcome:0.2.0")
