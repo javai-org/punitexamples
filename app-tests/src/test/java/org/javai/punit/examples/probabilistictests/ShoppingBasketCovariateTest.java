@@ -4,8 +4,10 @@ import java.util.stream.Stream;
 import org.javai.punit.api.InputSource;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.UseCaseProvider;
+import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
@@ -70,115 +72,6 @@ public class ShoppingBasketCovariateTest {
     @RegisterExtension
     UseCaseProvider provider = new UseCaseProvider();
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
-    }
-
-    /**
-     * Test that demonstrates automatic covariate recording.
-     *
-     * <p>When this test runs:
-     * <ul>
-     *   <li>PUnit captures current temporal covariates (day of week, time of day)</li>
-     *   <li>Retrieves configuration covariates from use case methods</li>
-     *   <li>Records all covariates in the test results</li>
-     *   <li>Uses covariates to find matching baseline</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @InputSource("standardInstructions")
-    void testWithAutomaticCovariates(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with explicitly configured model covariate.
-     *
-     * <p>By setting the model explicitly, this test will match baselines
-     * that were recorded with the same model setting.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @InputSource("standardInstructions")
-    void testWithExplicitModelCovariate(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        // Set model to a specific value
-        // This affects the "llm_model" covariate via @CovariateSource
-        useCase.setModel("gpt-4-turbo");
-
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with different temperature settings.
-     *
-     * <p>Temperature affects the "temperature" configuration covariate.
-     * Different temperatures will match different baselines (if available).
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @InputSource("standardInstructions")
-    void testWithLowTemperature(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        // Low temperature for high reliability
-        useCase.setTemperature(0.1);
-
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test demonstrating covariate impact on baseline selection.
-     *
-     * <p>When baselines exist for multiple covariate combinations, PUnit
-     * selects the most appropriate baseline based on current covariate values.
-     * If no exact match exists, it may use a default or report the mismatch.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @InputSource("standardInstructions")
-    void testWithHighTemperature(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        // Higher temperature - may have different reliability characteristics
-        useCase.setTemperature(0.7);
-
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
     static Stream<String> standardInstructions() {
         return Stream.of(
                 "Add 2 apples",
@@ -187,5 +80,165 @@ public class ShoppingBasketCovariateTest {
                 "Add 3 oranges and 2 bananas",
                 "Clear the basket"
         );
+    }
+
+    /**
+     * Tests with default configuration — automatic covariate recording.
+     */
+    @Nested
+    class DefaultConfiguration {
+
+        static Stream<String> standardInstructions() {
+            return ShoppingBasketCovariateTest.standardInstructions();
+        }
+
+        @BeforeEach
+        void setUp() {
+            provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+        }
+
+        /**
+         * Test that demonstrates automatic covariate recording.
+         *
+         * <p>When this test runs:
+         * <ul>
+         *   <li>PUnit captures current temporal covariates (day of week, time of day)</li>
+         *   <li>Retrieves configuration covariates from use case methods</li>
+         *   <li>Records all covariates in the test results</li>
+         *   <li>Uses covariates to find matching baseline</li>
+         * </ul>
+         *
+         * @param useCase the use case instance
+         * @param instruction the instruction to process
+         */
+        @ProbabilisticTest(
+                useCase = ShoppingBasketUseCase.class,
+                samples = 50
+        )
+        @InputSource("standardInstructions")
+        void testWithAutomaticCovariates(
+                ShoppingBasketUseCase useCase,
+                String instruction
+        ) {
+            useCase.translateInstruction(instruction).assertContract();
+        }
+    }
+
+    /**
+     * Tests with an explicitly configured model covariate.
+     */
+    @Nested
+    class ExplicitModelConfiguration {
+
+        static Stream<String> standardInstructions() {
+            return ShoppingBasketCovariateTest.standardInstructions();
+        }
+
+        @BeforeEach
+        void setUp() {
+            provider.register(ShoppingBasketUseCase.class, () ->
+                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4-turbo", 0.3,
+                            ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+        }
+
+        /**
+         * Test with explicitly configured model covariate.
+         *
+         * <p>By setting the model explicitly, this test will match baselines
+         * that were recorded with the same model setting.
+         *
+         * @param useCase the use case instance
+         * @param instruction the instruction to process
+         */
+        @ProbabilisticTest(
+                useCase = ShoppingBasketUseCase.class,
+                samples = 50
+        )
+        @InputSource("standardInstructions")
+        void testWithExplicitModelCovariate(
+                ShoppingBasketUseCase useCase,
+                String instruction
+        ) {
+            useCase.translateInstruction(instruction).assertContract();
+        }
+    }
+
+    /**
+     * Tests with low temperature for high reliability.
+     */
+    @Nested
+    class LowTemperatureConfiguration {
+
+        static Stream<String> standardInstructions() {
+            return ShoppingBasketCovariateTest.standardInstructions();
+        }
+
+        @BeforeEach
+        void setUp() {
+            provider.register(ShoppingBasketUseCase.class, () ->
+                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.1,
+                            ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+        }
+
+        /**
+         * Test with low temperature setting.
+         *
+         * <p>Temperature affects the "temperature" configuration covariate.
+         * Different temperatures will match different baselines (if available).
+         *
+         * @param useCase the use case instance
+         * @param instruction the instruction to process
+         */
+        @ProbabilisticTest(
+                useCase = ShoppingBasketUseCase.class,
+                samples = 50
+        )
+        @InputSource("standardInstructions")
+        void testWithLowTemperature(
+                ShoppingBasketUseCase useCase,
+                String instruction
+        ) {
+            useCase.translateInstruction(instruction).assertContract();
+        }
+    }
+
+    /**
+     * Tests with high temperature demonstrating covariate impact on baseline selection.
+     */
+    @Nested
+    class HighTemperatureConfiguration {
+
+        static Stream<String> standardInstructions() {
+            return ShoppingBasketCovariateTest.standardInstructions();
+        }
+
+        @BeforeEach
+        void setUp() {
+            provider.register(ShoppingBasketUseCase.class, () ->
+                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.7,
+                            ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+        }
+
+        /**
+         * Test demonstrating covariate impact on baseline selection.
+         *
+         * <p>When baselines exist for multiple covariate combinations, PUnit
+         * selects the most appropriate baseline based on current covariate values.
+         * If no exact match exists, it may use a default or report the mismatch.
+         *
+         * @param useCase the use case instance
+         * @param instruction the instruction to process
+         */
+        @ProbabilisticTest(
+                useCase = ShoppingBasketUseCase.class,
+                samples = 50
+        )
+        @InputSource("standardInstructions")
+        void testWithHighTemperature(
+                ShoppingBasketUseCase useCase,
+                String instruction
+        ) {
+            useCase.translateInstruction(instruction).assertContract();
+        }
     }
 }

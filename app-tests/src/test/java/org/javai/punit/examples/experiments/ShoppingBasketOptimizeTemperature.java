@@ -4,6 +4,7 @@ import org.javai.punit.api.ControlFactor;
 import org.javai.punit.api.OptimizeExperiment;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.UseCaseProvider;
+import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.experiments.optimize.ShoppingBasketSuccessRateScorer;
 import org.javai.punit.examples.experiments.optimize.TemperatureMutator;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
@@ -66,7 +67,12 @@ public class ShoppingBasketOptimizeTemperature {
 
     @BeforeEach
     void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+        provider.registerWithFactors(ShoppingBasketUseCase.class, factors ->
+                new ShoppingBasketUseCase(
+                        ChatLlmProvider.resolve(),
+                        "gpt-4o-mini",
+                        factors.getDouble("temperature"),
+                        ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
     }
 
     /**
@@ -111,9 +117,7 @@ public class ShoppingBasketOptimizeTemperature {
             @ControlFactor("temperature") Double temperature,
             OutcomeCaptor captor
     ) {
-        // Temperature is automatically set via @FactorSetter on the use case
-        assert useCase.getTemperature() == temperature;
-        // Run with a fixed instruction
+        // useCase already configured with current temperature via registerWithFactors
         captor.record(useCase.translateInstruction("Add 2 apples and remove the bread"));
     }
 }

@@ -9,6 +9,7 @@ import org.javai.punit.api.Input;
 import org.javai.punit.api.InputSource;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.UseCaseProvider;
+import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -44,7 +45,13 @@ public class ShoppingBasketExplore {
 
     @BeforeEach
     void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+        provider.registerWithFactors(ShoppingBasketUseCase.class, factors -> {
+            String model = factors.has("model") ? factors.getString("model") : "gpt-4o-mini";
+            double temp = factors.has("temperature") ? factors.getDouble("temperature") : 0.1;
+            String prompt = factors.has("systemPrompt") ? factors.getString("systemPrompt")
+                    : ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT;
+            return new ShoppingBasketUseCase(ChatLlmProvider.resolve(), model, temp, prompt);
+        });
     }
 
     // Representative instruction for configuration comparison
@@ -72,8 +79,7 @@ public class ShoppingBasketExplore {
             @Factor("model") String model,
             OutcomeCaptor captor
     ) {
-        useCase.setModel(model);
-        useCase.setTemperature(0.1);  // Fixed temperature for fair comparison
+        // useCase already configured via registerWithFactors — no mutation
         captor.record(useCase.translateInstruction(TEST_INSTRUCTION));
     }
 
@@ -103,8 +109,7 @@ public class ShoppingBasketExplore {
             @Input ShoppingInstructionInput inputData,
             OutcomeCaptor captor
     ) {
-        useCase.setModel("gpt-4o-mini");
-        useCase.setTemperature(0.1);
+        // useCase already configured with defaults via registerWithFactors
         captor.record(useCase.translateInstruction(inputData.instruction()));
     }
 

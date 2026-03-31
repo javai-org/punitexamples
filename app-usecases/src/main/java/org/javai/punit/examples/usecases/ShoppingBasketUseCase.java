@@ -7,8 +7,6 @@ import org.javai.punit.api.Covariate;
 import org.javai.punit.api.CovariateCategory;
 import org.javai.punit.api.CovariateSource;
 import org.javai.punit.api.DayGroup;
-import org.javai.punit.api.FactorGetter;
-import org.javai.punit.api.FactorSetter;
 import org.javai.punit.api.UseCase;
 import org.javai.punit.contract.ServiceContract;
 import org.javai.punit.contract.UseCaseOutcome;
@@ -108,10 +106,10 @@ public class ShoppingBasketUseCase {
         return Outcome.ok();
     }
 
-    private final ChatLlm llm;
-    private String model = "gpt-4o-mini";
-    private double temperature = 0.3;
-    private String systemPrompt = """
+    /**
+     * Default system prompt for shopping basket instruction translation.
+     */
+    public static final String DEFAULT_SYSTEM_PROMPT = """
             You are a shopping assistant that converts natural language instructions into JSON actions.
 
             Respond with JSON only — no explanation or commentary. The JSON must contain an "actions" array, even for single operations.
@@ -139,8 +137,16 @@ public class ShoppingBasketUseCase {
             - "Clear the basket" -> {"actions": [{"context": "SHOP", "name": "clear", "parameters": []}]}
             """;
 
+    private static final String DEFAULT_MODEL = "gpt-4o-mini";
+    private static final double DEFAULT_TEMPERATURE = 0.3;
+
+    private final ChatLlm llm;
+    private final String model;
+    private final double temperature;
+    private final String systemPrompt;
+
     /**
-     * Creates a use case with the LLM resolved from configuration.
+     * Creates a use case with the LLM resolved from configuration and default settings.
      *
      * @see ChatLlmProvider#resolve()
      */
@@ -149,52 +155,45 @@ public class ShoppingBasketUseCase {
     }
 
     /**
-     * Creates a use case with a specific LLM implementation.
+     * Creates a use case with a specific LLM implementation and default settings.
      *
      * @param llm the chat LLM to use
      */
     public ShoppingBasketUseCase(ChatLlm llm) {
+        this(llm, DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_SYSTEM_PROMPT);
+    }
+
+    /**
+     * Creates a fully configured use case.
+     *
+     * @param llm the chat LLM to use
+     * @param model the LLM model identifier
+     * @param temperature the sampling temperature
+     * @param systemPrompt the system prompt for the LLM
+     */
+    public ShoppingBasketUseCase(ChatLlm llm, String model, double temperature, String systemPrompt) {
         this.llm = llm;
+        this.model = model;
+        this.temperature = temperature;
+        this.systemPrompt = systemPrompt;
     }
 
     // ===============================================================================
-    // FACTOR GETTERS AND COVARIATE SOURCES
+    // ACCESSORS AND COVARIATE SOURCES
     // ===============================================================================
 
-    @FactorGetter
     @CovariateSource("llm_model")
     public String getModel() {
         return model;
     }
 
-    @FactorGetter
     @CovariateSource
     public double getTemperature() {
         return temperature;
     }
 
-    @FactorGetter
     public String getSystemPrompt() {
         return systemPrompt;
-    }
-
-    // ===============================================================================
-    // FACTOR SETTERS
-    // ===============================================================================
-
-    @FactorSetter("llm_model")
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    @FactorSetter
-    public void setTemperature(double temperature) {
-        this.temperature = temperature;
-    }
-
-    @FactorSetter
-    public void setSystemPrompt(String systemPrompt) {
-        this.systemPrompt = systemPrompt;
     }
 
     /**

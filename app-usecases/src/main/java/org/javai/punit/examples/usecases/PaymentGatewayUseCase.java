@@ -2,8 +2,6 @@ package org.javai.punit.examples.usecases;
 
 import java.time.Duration;
 import org.javai.outcome.Outcome;
-import org.javai.punit.api.FactorGetter;
-import org.javai.punit.api.FactorSetter;
 import org.javai.punit.api.RegionGroup;
 import org.javai.punit.api.UseCase;
 import org.javai.punit.contract.ServiceContract;
@@ -69,31 +67,37 @@ public class PaymentGatewayUseCase {
 	}
 
 	private final PaymentGateway gateway;
-	private String region = "US";
+	private final String region;
+
 	/**
-	 * Creates a use case with the default mock gateway.
+	 * Creates a use case with the default mock gateway and US region.
 	 */
 	public PaymentGatewayUseCase() {
 		this(MockPaymentGateway.instance());
 	}
 
 	/**
-	 * Creates a use case with a specific gateway implementation.
+	 * Creates a use case with a specific gateway implementation and US region.
 	 *
 	 * @param gateway the payment gateway to use
 	 */
 	public PaymentGatewayUseCase(PaymentGateway gateway) {
-		this.gateway = gateway;
+		this(gateway, "US");
 	}
 
-	@FactorGetter
+	/**
+	 * Creates a fully configured use case.
+	 *
+	 * @param gateway the payment gateway to use
+	 * @param region the region for payment processing
+	 */
+	public PaymentGatewayUseCase(PaymentGateway gateway, String region) {
+		this.gateway = gateway;
+		this.region = region;
+	}
+
 	public String getRegion() {
 		return region;
-	}
-
-	@FactorSetter("region")
-	public void setRegion(String region) {
-		this.region = region;
 	}
 
     // ═══════════════════════════════════════════════════════════════════════════

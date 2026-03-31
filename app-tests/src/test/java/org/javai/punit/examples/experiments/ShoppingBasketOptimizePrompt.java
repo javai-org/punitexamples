@@ -6,6 +6,7 @@ import org.javai.punit.api.OptimizeExperiment;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.Pacing;
 import org.javai.punit.api.UseCaseProvider;
+import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.experiments.optimize.ShoppingBasketPromptMutator;
 import org.javai.punit.examples.experiments.optimize.ShoppingBasketSuccessRateScorer;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
@@ -71,7 +72,12 @@ public class ShoppingBasketOptimizePrompt {
 
     @BeforeEach
     void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+        provider.registerWithFactors(ShoppingBasketUseCase.class, factors ->
+                new ShoppingBasketUseCase(
+                        ChatLlmProvider.resolve(),
+                        "gpt-4o-mini",
+                        0.3,
+                        factors.getString("systemPrompt")));
     }
 
     /**
@@ -142,9 +148,7 @@ public class ShoppingBasketOptimizePrompt {
             TranslationInput input,
             OutcomeCaptor captor
     ) {
-        // The systemPrompt is automatically injected and set via @FactorSetter
-        assert systemPrompt.equals(useCase.getSystemPrompt()) : "System prompt automatically set by PUnit";
-        // Execute with both instruction and expected value for instance conformance checking
+        // useCase already configured with current systemPrompt via registerWithFactors
         captor.record(useCase.translateInstruction(input.instruction(), input.expected()));
     }
 

@@ -7,6 +7,7 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.UseCaseProvider;
+import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -67,11 +68,6 @@ public class VerdictCatalogueTest {
         }
     }
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
-    }
-
     // ═══════════════════════════════════════════════════════════════════════════
     // INPUT SOURCES
     // ═══════════════════════════════════════════════════════════════════════════
@@ -94,56 +90,78 @@ public class VerdictCatalogueTest {
     @DisplayName("Normal Completion")
     class NormalCompletion {
 
-        static Stream<String> standardInstructions() {
-            return VerdictCatalogueTest.standardInstructions();
+        @Nested
+        @DisplayName("Low Temperature")
+        class LowTemp {
+
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
+
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.50
+            )
+            @InputSource("standardInstructions")
+            void servicePassesComfortably(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.50,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void servicePassesComfortablyTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.50
-        )
-        @InputSource("standardInstructions")
-        void servicePassesComfortably(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+        @Nested
+        @DisplayName("High Temperature")
+        class HighTemp {
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.95,
-                intent = TestIntent.SMOKE
-        )
-        @InputSource("standardInstructions")
-        void serviceFailsNarrowly(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.5);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.50,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void servicePassesComfortablyTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.5, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.95,
-                transparentStats = true,
-                intent = TestIntent.SMOKE
-        )
-        @InputSource("standardInstructions")
-        void serviceFailsNarrowlyTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.5);
-            useCase.translateInstruction(instruction).assertAll();
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.95,
+                    intent = TestIntent.SMOKE
+            )
+            @InputSource("standardInstructions")
+            void serviceFailsNarrowly(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.95,
+                    transparentStats = true,
+                    intent = TestIntent.SMOKE
+            )
+            @InputSource("standardInstructions")
+            void serviceFailsNarrowlyTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
     }
 
@@ -155,56 +173,78 @@ public class VerdictCatalogueTest {
     @DisplayName("Early Termination")
     class EarlyTermination {
 
-        static Stream<String> standardInstructions() {
-            return VerdictCatalogueTest.standardInstructions();
+        @Nested
+        @DisplayName("High Temperature")
+        class HighTemp {
+
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
+
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 1.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 30,
+                    minPassRate = 0.95,
+                    intent = TestIntent.SMOKE
+            )
+            @InputSource("standardInstructions")
+            void failsEarlyWhenThresholdUnreachable(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 30,
+                    minPassRate = 0.95,
+                    transparentStats = true,
+                    intent = TestIntent.SMOKE
+            )
+            @InputSource("standardInstructions")
+            void failsEarlyWhenThresholdUnreachableTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 30,
-                minPassRate = 0.95,
-                intent = TestIntent.SMOKE
-        )
-        @InputSource("standardInstructions")
-        void failsEarlyWhenThresholdUnreachable(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(1.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+        @Nested
+        @DisplayName("Low Temperature")
+        class LowTemp {
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 100,
-                minPassRate = 0.50
-        )
-        @InputSource("standardInstructions")
-        void passesEarlyWhenThresholdAlreadyMet(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 30,
-                minPassRate = 0.95,
-                transparentStats = true,
-                intent = TestIntent.SMOKE
-        )
-        @InputSource("standardInstructions")
-        void failsEarlyWhenThresholdUnreachableTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(1.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 100,
-                minPassRate = 0.50,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void passesEarlyWhenThresholdAlreadyMetTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 100,
+                    minPassRate = 0.50
+            )
+            @InputSource("standardInstructions")
+            void passesEarlyWhenThresholdAlreadyMet(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 100,
+                    minPassRate = 0.50,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void passesEarlyWhenThresholdAlreadyMetTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
     }
 
@@ -216,95 +256,115 @@ public class VerdictCatalogueTest {
     @DisplayName("Budget Exhaustion")
     class BudgetExhaustion {
 
-        static Stream<String> standardInstructions() {
-            return VerdictCatalogueTest.standardInstructions();
+        @Nested
+        @DisplayName("Low Temperature")
+        class LowTemp {
+
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
+
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.50,
+                    tokenCharge = 200,
+                    tokenBudget = 1000,
+                    onBudgetExhausted = BudgetExhaustedBehavior.FAIL
+            )
+            @InputSource("standardInstructions")
+            void failsWhenBudgetRunsOut(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.50,
+                    tokenCharge = 200,
+                    tokenBudget = 1000,
+                    onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
+            )
+            @InputSource("standardInstructions")
+            void evaluatesPartialResultsOnBudgetPass(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.50,
+                    tokenCharge = 200,
+                    tokenBudget = 1000,
+                    onBudgetExhausted = BudgetExhaustedBehavior.FAIL,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void failsWhenBudgetRunsOutTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.50,
+                    tokenCharge = 200,
+                    tokenBudget = 1000,
+                    onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void evaluatesPartialResultsOnBudgetPassTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.50,
-                tokenCharge = 200,
-                tokenBudget = 1000,
-                onBudgetExhausted = BudgetExhaustedBehavior.FAIL
-        )
-        @InputSource("standardInstructions")
-        void failsWhenBudgetRunsOut(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+        @Nested
+        @DisplayName("High Temperature")
+        class HighTemp {
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.50,
-                tokenCharge = 200,
-                tokenBudget = 1000,
-                onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
-        )
-        @InputSource("standardInstructions")
-        void evaluatesPartialResultsOnBudgetPass(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.90,
-                tokenCharge = 200,
-                tokenBudget = 1000,
-                onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
-        )
-        @InputSource("standardInstructions")
-        void evaluatesPartialResultsOnBudgetFail(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(1.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 1.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.50,
-                tokenCharge = 200,
-                tokenBudget = 1000,
-                onBudgetExhausted = BudgetExhaustedBehavior.FAIL,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void failsWhenBudgetRunsOutTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.90,
+                    tokenCharge = 200,
+                    tokenBudget = 1000,
+                    onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
+            )
+            @InputSource("standardInstructions")
+            void evaluatesPartialResultsOnBudgetFail(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.50,
-                tokenCharge = 200,
-                tokenBudget = 1000,
-                onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void evaluatesPartialResultsOnBudgetPassTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
-
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.90,
-                tokenCharge = 200,
-                tokenBudget = 1000,
-                onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void evaluatesPartialResultsOnBudgetFailTransparent(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(1.0);
-            useCase.translateInstruction(instruction).assertAll();
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.90,
+                    tokenCharge = 200,
+                    tokenBudget = 1000,
+                    onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void evaluatesPartialResultsOnBudgetFailTransparent(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
     }
 
@@ -320,6 +380,12 @@ public class VerdictCatalogueTest {
             return VerdictCatalogueTest.standardInstructions();
         }
 
+        @BeforeEach
+        void setUp() {
+            provider.register(ShoppingBasketUseCase.class, () ->
+                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+        }
+
         @ProbabilisticTest(
                 useCase = ShoppingBasketUseCase.class,
                 samples = 50,
@@ -330,7 +396,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void slaPassShowsComplianceHypothesis(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
 
@@ -343,7 +408,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void sloPassShowsTargetHypothesis(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
 
@@ -356,7 +420,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void policyPassShowsPolicyHypothesis(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
 
@@ -369,7 +432,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void empiricalPassShowsBaselineHypothesis(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
     }
@@ -382,47 +444,70 @@ public class VerdictCatalogueTest {
     @DisplayName("Statistical Caveats")
     class StatisticalCaveats {
 
-        static Stream<String> standardInstructions() {
-            return VerdictCatalogueTest.standardInstructions();
+        @Nested
+        @DisplayName("Low Temperature")
+        class LowTemp {
+
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
+
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 20,
+                    minPassRate = 0.30,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void smallSampleInterpretWithCaution(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 50,
+                    minPassRate = 0.9999,
+                    thresholdOrigin = ThresholdOrigin.SLA,
+                    contractRef = "Acme Payment SLA v3.2 §4.1",
+                    transparentStats = true,
+                    intent = TestIntent.SMOKE
+            )
+            @InputSource("standardInstructions")
+            void complianceUndersizedSmokeTestOnly(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 20,
-                minPassRate = 0.30,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void smallSampleInterpretWithCaution(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+        @Nested
+        @DisplayName("High Temperature")
+        class HighTemp {
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 100,
-                minPassRate = 0.88,
-                transparentStats = true
-        )
-        @InputSource("standardInstructions")
-        void closeToThresholdMayFluctuate(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.5);
-            useCase.translateInstruction(instruction).assertAll();
-        }
+            static Stream<String> standardInstructions() {
+                return VerdictCatalogueTest.standardInstructions();
+            }
 
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50,
-                minPassRate = 0.9999,
-                thresholdOrigin = ThresholdOrigin.SLA,
-                contractRef = "Acme Payment SLA v3.2 §4.1",
-                transparentStats = true,
-                intent = TestIntent.SMOKE
-        )
-        @InputSource("standardInstructions")
-        void complianceUndersizedSmokeTestOnly(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
-            useCase.translateInstruction(instruction).assertAll();
+            @BeforeEach
+            void setUp() {
+                provider.register(ShoppingBasketUseCase.class, () ->
+                        new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.5, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+            }
+
+            @ProbabilisticTest(
+                    useCase = ShoppingBasketUseCase.class,
+                    samples = 100,
+                    minPassRate = 0.88,
+                    transparentStats = true
+            )
+            @InputSource("standardInstructions")
+            void closeToThresholdMayFluctuate(ShoppingBasketUseCase useCase, String instruction) {
+                useCase.translateInstruction(instruction).assertAll();
+            }
         }
     }
 
@@ -445,11 +530,8 @@ public class VerdictCatalogueTest {
             // because covariate resolution happens before the test body runs.
             // TEMPORAL covariates (time_of_day) will naturally differ from the
             // baseline, producing the misalignment warning/caveat we want to show.
-            provider.register(ShoppingBasketUseCase.class, () -> {
-                ShoppingBasketUseCase uc = new ShoppingBasketUseCase();
-                uc.setModel("mock-llm");
-                return uc;
-            });
+            provider.register(ShoppingBasketUseCase.class, () ->
+                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "mock-llm", 0.3, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
         }
 
         @ProbabilisticTest(
@@ -484,6 +566,12 @@ public class VerdictCatalogueTest {
             return VerdictCatalogueTest.standardInstructions();
         }
 
+        @BeforeEach
+        void setUp() {
+            provider.register(ShoppingBasketUseCase.class, () ->
+                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.0, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
+        }
+
         @ProbabilisticTest(
                 useCase = ShoppingBasketUseCase.class,
                 samples = 50,
@@ -495,7 +583,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void verificationPassSized(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
 
@@ -509,7 +596,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void smokeUndersizedNormative(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
 
@@ -523,7 +609,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void smokeSizedNormativeHint(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
 
@@ -537,7 +622,6 @@ public class VerdictCatalogueTest {
         )
         @InputSource("standardInstructions")
         void smokeNonNormative(ShoppingBasketUseCase useCase, String instruction) {
-            useCase.setTemperature(0.0);
             useCase.translateInstruction(instruction).assertAll();
         }
     }
