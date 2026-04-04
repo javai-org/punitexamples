@@ -1,28 +1,25 @@
 package org.javai.punit.examples.experiments;
 
 import java.util.stream.Stream;
+import org.javai.punit.api.ConfigSource;
 import org.javai.punit.api.ExploreExperiment;
-import org.javai.punit.api.Factor;
-import org.javai.punit.api.FactorArguments;
-import org.javai.punit.api.FactorSource;
-import org.javai.punit.api.Input;
-import org.javai.punit.api.InputSource;
+import org.javai.punit.api.NamedConfig;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.UseCaseProvider;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * EXPLORE experiments for finding the best model and temperature configuration.
+ * EXPLORE experiment comparing LLM model configurations.
  *
  * <p>Before establishing a production baseline, you need to decide which LLM model
- * and temperature setting to use. These experiments help you compare configurations.
+ * to use. This experiment compares models by running each as a named, immutable
+ * use case instance — the instance <em>is</em> the factor specification.
  *
  * <h2>Typical Workflow</h2>
  * <ol>
- *   <li><b>Explore</b> - Run these experiments to compare models and temperatures</li>
+ *   <li><b>Explore</b> - Run this experiment to compare models</li>
  *   <li><b>Choose</b> - Select the best configuration based on results</li>
  *   <li><b>Measure</b> - Run {@link ShoppingBasketMeasure} to establish baseline</li>
  *   <li><b>Test</b> - Use the baseline in probabilistic regression tests</li>
@@ -31,9 +28,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * <h2>Running</h2>
  * <pre>{@code
  * ./gradlew exp -Prun=ShoppingBasketExplore
- * ./gradlew exp -Prun=ShoppingBasketExplore.compareModels
  * }</pre>
  *
+ * @see ShoppingBasketExploreInputs
  * @see ShoppingBasketUseCase
  * @see ShoppingBasketMeasure
  */
@@ -43,28 +40,16 @@ public class ShoppingBasketExplore {
     @RegisterExtension
     UseCaseProvider provider = new UseCaseProvider();
 
-    @BeforeEach
-    void setUp() {
-        provider.registerWithFactors(ShoppingBasketUseCase.class, factors -> {
-            String model = factors.has("model") ? factors.getString("model") : "gpt-4o-mini";
-            double temp = factors.has("temperature") ? factors.getDouble("temperature") : 0.1;
-            String prompt = factors.has("systemPrompt") ? factors.getString("systemPrompt")
-                    : ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT;
-            return new ShoppingBasketUseCase(ChatLlmProvider.resolve(), model, temp, prompt);
-        });
-    }
-
-    // Representative instruction for configuration comparison
     private static final String TEST_INSTRUCTION = "Add some apples";
 
     /**
      * Compares different LLM models.
      *
      * <p>This experiment answers: "Which model handles this task most reliably?"
-     * Temperature is fixed (0.1), so the only variable is the model itself.
+     * Each configuration is a fully-constructed, immutable use case instance —
+     * the use case <em>is</em> the factor specification.
      *
-     * @param useCase the use case instance
-     * @param model the model identifier to test
+     * @param useCase the use case instance (provided by the named config)
      * @param captor records outcomes for comparison
      */
     @ExploreExperiment(
@@ -73,79 +58,29 @@ public class ShoppingBasketExplore {
             experimentId = "model-comparison-v1",
             skipWarmup = true
     )
-    @FactorSource(value = "modelConfigurations", factors = {"model"})
-    void compareModels(
-            ShoppingBasketUseCase useCase,
-            @Factor("model") String model,
-            OutcomeCaptor captor
-    ) {
-        // useCase already configured via registerWithFactors — no mutation
+    @ConfigSource("modelConfigurations")
+    void compareModels(ShoppingBasketUseCase useCase, OutcomeCaptor captor) {
         captor.record(useCase.translateInstruction(TEST_INSTRUCTION));
     }
 
     /**
-     * Explores performance across varied inputs.
-     *
-     * <p>This experiment uses a curated set of instructions to understand how the
-     * LLM performs across different instruction types. Inputs are cycled via round-robin
-     * across all samples, producing a single aggregated exploration spec.
-     *
-     * <p>The {@code @Input} annotation explicitly marks which parameter receives
-     * the input value, distinguishing it from the use case parameter.
-     *
-     * @param useCase the use case instance
-     * @param inputData the input data containing instruction and expected output
-     * @param captor records outcomes for comparison
-     */
-    @ExploreExperiment(
-            useCase = ShoppingBasketUseCase.class,
-            samplesPerConfig = 10,
-            experimentId = "input-exploration-v1",
-            skipWarmup = false
-    )
-    @InputSource(file = "fixtures/shopping-instructions.json")
-    void exploreInputVariations(
-            ShoppingBasketUseCase useCase,
-            @Input ShoppingInstructionInput inputData,
-            OutcomeCaptor captor
-    ) {
-        // useCase already configured with defaults via registerWithFactors
-        captor.record(useCase.translateInstruction(inputData.instruction()));
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // INPUT TYPES
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Input data for the {@link #exploreInputVariations} experiment.
-     *
-     * <p>Deserialized from JSON via {@code @InputSource}. The fields can be
-     * whatever the experiment needs — the framework is agnostic about the shape.
-     *
-     * @param instruction the natural language instruction
-     * @param expected the expected JSON response
-     */
-    public record ShoppingInstructionInput(String instruction, String expected) {}
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // FACTOR PROVIDERS - Configuration options to explore
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
      * Models to compare.
      *
-     * <p>These are actual model identifiers recognized by the routing LLM.
-     * In mock mode, any model name works. In real mode, these route to
-     * the appropriate provider (OpenAI or Anthropic).
+     * <p>Each configuration is a fully-constructed use case instance. The instance
+     * carries its own model, temperature, and system prompt — no separate factor
+     * map is needed.
      */
-    public static Stream<FactorArguments> modelConfigurations() {
-        return FactorArguments.configurations()
-                .names("model")
-                .values("gpt-4o-mini")
-                .values("gpt-4o")
-                .values("claude-haiku-4-5-20251001")
-                .values("claude-sonnet-4-5-20250929")
-                .stream();
+    static Stream<NamedConfig<ShoppingBasketUseCase>> modelConfigurations() {
+        var llm = ChatLlmProvider.resolve();
+        return Stream.of(
+                NamedConfig.of("gpt-4o-mini",
+                        new ShoppingBasketUseCase(llm, "gpt-4o-mini", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT)),
+                NamedConfig.of("gpt-4o",
+                        new ShoppingBasketUseCase(llm, "gpt-4o", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT)),
+                NamedConfig.of("claude-haiku",
+                        new ShoppingBasketUseCase(llm, "claude-haiku-4-5-20251001", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT)),
+                NamedConfig.of("claude-sonnet",
+                        new ShoppingBasketUseCase(llm, "claude-sonnet-4-5-20250929", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT))
+        );
     }
 }
