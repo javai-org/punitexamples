@@ -3,6 +3,8 @@ package org.javai.punit.examples.experiments;
 import java.util.stream.Stream;
 import org.javai.punit.api.ConfigSource;
 import org.javai.punit.api.ExploreExperiment;
+import org.javai.punit.api.Input;
+import org.javai.punit.api.InputSource;
 import org.javai.punit.api.NamedConfig;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.UseCaseProvider;
@@ -11,15 +13,17 @@ import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * EXPLORE experiment comparing LLM model configurations.
+ * EXPLORE experiment comparing LLM model configurations across varied inputs.
  *
  * <p>Before establishing a production baseline, you need to decide which LLM model
  * to use. This experiment compares models by running each as a named, immutable
- * use case instance — the instance <em>is</em> the factor specification.
+ * use case instance — the instance <em>is</em> the factor specification — across
+ * a curated set of instructions to understand how each model performs on different
+ * instruction types. Inputs are cycled via round-robin within each configuration.
  *
  * <h2>Typical Workflow</h2>
  * <ol>
- *   <li><b>Explore</b> - Run this experiment to compare models</li>
+ *   <li><b>Explore</b> - Run this experiment to compare models across inputs</li>
  *   <li><b>Choose</b> - Select the best configuration based on results</li>
  *   <li><b>Measure</b> - Run {@link ShoppingBasketMeasure} to establish baseline</li>
  *   <li><b>Test</b> - Use the baseline in probabilistic regression tests</li>
@@ -30,7 +34,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  * ./gradlew exp -Prun=ShoppingBasketExplore
  * }</pre>
  *
- * @see ShoppingBasketExploreInputs
  * @see ShoppingBasketUseCase
  * @see ShoppingBasketMeasure
  */
@@ -40,16 +43,16 @@ public class ShoppingBasketExplore {
     @RegisterExtension
     UseCaseProvider provider = new UseCaseProvider();
 
-    private static final String TEST_INSTRUCTION = "Add some apples";
-
     /**
-     * Compares different LLM models.
+     * Compares different LLM models across varied inputs.
      *
-     * <p>This experiment answers: "Which model handles this task most reliably?"
-     * Each configuration is a fully-constructed, immutable use case instance —
-     * the use case <em>is</em> the factor specification.
+     * <p>This experiment answers: "Which model handles different instruction types
+     * most reliably?" Each configuration is a fully-constructed, immutable use case
+     * instance, and each is tested against a curated set of instructions from the
+     * input source.
      *
      * @param useCase the use case instance (provided by the named config)
+     * @param inputData the input data containing instruction and expected output
      * @param captor records outcomes for comparison
      */
     @ExploreExperiment(
@@ -59,9 +62,22 @@ public class ShoppingBasketExplore {
             skipWarmup = true
     )
     @ConfigSource("modelConfigurations")
-    void compareModels(ShoppingBasketUseCase useCase, OutcomeCaptor captor) {
-        captor.record(useCase.translateInstruction(TEST_INSTRUCTION));
+    @InputSource(file = "fixtures/shopping-instructions.json")
+    void compareModels(
+            ShoppingBasketUseCase useCase,
+            @Input ShoppingInstructionInput inputData,
+            OutcomeCaptor captor
+    ) {
+        captor.record(useCase.translateInstruction(inputData.instruction()));
     }
+
+    /**
+     * Input data for the experiment.
+     *
+     * @param instruction the natural language instruction
+     * @param expected the expected JSON response
+     */
+    public record ShoppingInstructionInput(String instruction, String expected) {}
 
     /**
      * Models to compare.
