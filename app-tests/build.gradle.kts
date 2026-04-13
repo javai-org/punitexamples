@@ -1,13 +1,13 @@
 plugins {
     id("org.javai.punit")
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.20"
 }
 
 dependencies {
     testImplementation(project(":app-usecases"))
 
     // PUnit JUnit5 integration (transitively includes punit-core)
-    testImplementation("org.javai:punit-junit5:0.4.0")
+    testImplementation("org.javai:punit-junit5:0.5.2")
 
     // JUnit 5
     testImplementation(platform("org.junit:junit-bom:5.14.3"))
@@ -21,7 +21,7 @@ dependencies {
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
 
     // Log4j2 core - needed by CatalogueMarkdownAppender for verdict catalog generation
-    testImplementation("org.apache.logging.log4j:log4j-core:2.25.3")
+    testImplementation("org.apache.logging.log4j:log4j-core:2.25.4")
 }
 
 tasks.test {
