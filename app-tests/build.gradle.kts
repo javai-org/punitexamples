@@ -7,7 +7,7 @@ dependencies {
     testImplementation(project(":app-usecases"))
 
     // PUnit JUnit5 integration (transitively includes punit-core)
-    testImplementation("org.javai:punit-junit5:0.4.0")
+    testImplementation("org.javai:punit-junit5:0.6.0")
 
     // JUnit 5
     testImplementation(platform("org.junit:junit-bom:5.14.3"))
