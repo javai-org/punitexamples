@@ -7,7 +7,7 @@ import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.UseCaseProvider;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
-import org.javai.punit.examples.sentinals.PaymentGatewayReliability;
+import org.javai.punit.examples.sentinels.PaymentGatewayReliability;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

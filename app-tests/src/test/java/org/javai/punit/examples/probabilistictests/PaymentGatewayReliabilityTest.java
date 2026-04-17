@@ -1,7 +1,7 @@
 package org.javai.punit.examples.probabilistictests;
 
 import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.sentinals.PaymentGatewayReliability;
+import org.javai.punit.examples.sentinels.PaymentGatewayReliability;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;

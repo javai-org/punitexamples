@@ -1,7 +1,7 @@
 package org.javai.punit.examples.probabilistictests;
 
 import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.sentinals.ShoppingBasketReliability;
+import org.javai.punit.examples.sentinels.ShoppingBasketReliability;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;

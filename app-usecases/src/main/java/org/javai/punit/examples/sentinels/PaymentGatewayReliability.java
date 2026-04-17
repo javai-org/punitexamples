@@ -1,4 +1,4 @@
-package org.javai.punit.examples.sentinals;
+package org.javai.punit.examples.sentinels;
 
 import org.javai.punit.api.Latency;
 import org.javai.punit.api.MeasureExperiment;

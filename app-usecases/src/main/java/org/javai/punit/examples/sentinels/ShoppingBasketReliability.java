@@ -1,4 +1,4 @@
-package org.javai.punit.examples.sentinals;
+package org.javai.punit.examples.sentinels;
 
 import java.util.stream.Stream;
 import org.javai.punit.api.InputSource;

@@ -55,6 +55,7 @@ val verdictCatalogueSummary by tasks.registering(Test::class) {
     classpath = sourceSets.test.get().runtimeClasspath
 
     useJUnitPlatform()
+    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
 
     // Probabilistic tests are expected to have sample-level failures — the verdict
     // is determined by the aggregate pass rate, not individual samples.
@@ -78,6 +79,7 @@ val verdictCatalogueVerbose by tasks.registering(Test::class) {
     classpath = sourceSets.test.get().runtimeClasspath
 
     useJUnitPlatform()
+    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
 
     // Probabilistic tests are expected to have sample-level failures — the verdict
     // is determined by the aggregate pass rate, not individual samples.
@@ -113,8 +115,8 @@ val flowClean by tasks.registering(Delete::class) {
     description = "Cleans generated punit artifacts for a fresh flow run"
     group = "verification"
     delete("src/test/resources/punit/specs")
-    delete("src/test/resources/punit/explorations")
-    delete("src/test/resources/punit/optimizations")
+    delete(layout.buildDirectory.dir("punit/explorations"))
+    delete(layout.buildDirectory.dir("punit/optimizations"))
 }
 
 fun flowExperimentTask(
@@ -132,6 +134,7 @@ fun flowExperimentTask(
     useJUnitPlatform {
         includeTags("punit-experiment")
     }
+    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
 
     filter {
         if (testMethod != null) {
@@ -174,6 +177,7 @@ fun flowTestTask(
     classpath = sourceSets.test.get().runtimeClasspath
 
     useJUnitPlatform()
+    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
 
     filter {
         includeTestsMatching("*$testClass*")

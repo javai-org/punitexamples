@@ -31,9 +31,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 class OperationalFlowVerificationTest {
 
     private static final Path EXPLORATIONS_DIR =
-            Path.of("src/test/resources/punit/explorations/ShoppingBasketUseCase");
+            Path.of("build/punit/explorations/ShoppingBasketUseCase");
     private static final Path OPTIMIZATIONS_DIR =
-            Path.of("src/test/resources/punit/optimizations/ShoppingBasketUseCase");
+            Path.of("build/punit/optimizations/ShoppingBasketUseCase");
     private static final Path SPECS_DIR =
             Path.of("src/test/resources/punit/specs");
 
@@ -130,11 +130,11 @@ class OperationalFlowVerificationTest {
             String content = Files.readString(files.getFirst());
             double minPassRate = extractDouble(content, "minPassRate");
 
-            // With mock LLM at default temperature, expected pass rate ~43%
-            // The minPassRate (lower bound of 95% CI) should be in a plausible range
+            // Mock LLM ≈ 43% pass rate → minPassRate ≈ 0.30–0.55
+            // Real LLM (gpt-4o-mini, temp 0.3) ≈ 77% → minPassRate ≈ 0.65–0.85
             assertThat(minPassRate)
-                    .as("minPassRate should be in plausible range for mock LLM (0.30–0.55)")
-                    .isBetween(0.30, 0.55);
+                    .as("minPassRate should be in plausible range for mock or real LLM (0.30–0.85)")
+                    .isBetween(0.30, 0.85);
         }
     }
 
