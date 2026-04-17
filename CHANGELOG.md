@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-17
+
+### Changed
+- Upgraded PUnit dependency from 0.4.0 to 0.6.0
+- Reworked use cases to be immutable — factor settings (model, temperature, system prompt) are baked into the instance at construction, preserving the i.i.d. assumption required by the Bernoulli model
+- Simplified `ShoppingBasketExplore`: the use case instance *is* the factor specification, eliminating manual factor maps and trial-closure enrichment. Now combines `@ConfigSource` (named immutable use case instances) with `@InputSource` (curated instructions)
+- `@CovariateSource` annotations on `ShoppingBasketUseCase` accessors allow the framework to extract factors from the instance rather than a separate declaration
+- Flow exploration/optimisation output relocated from `src/test/resources/punit/` to `build/punit/` so generated artefacts no longer pollute the source tree
+- Enabled JUnit Jupiter extension autodetection on verdict catalogue and flow test tasks
+
+### Added
+- Warmup on `PaymentGatewayUseCase` to stabilise latency measurements
+- `skipWarmup` option on explore/optimize experiments for the shopping basket (LLM costs)
+- Log4j2 configuration so example runs produce visible log output
+
+### Fixed
+- Flow clean task deletes generated artefacts from the build directory rather than from version-controlled resources
+
 ## [0.3.1] - 2026-03-10
 
 ### Changed
@@ -64,7 +82,8 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/javai-org/punitexamples/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/javai-org/punitexamples/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/javai-org/punitexamples/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/javai-org/punitexamples/compare/v0.1.1...v0.2.0
