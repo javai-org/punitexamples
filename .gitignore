@@ -51,3 +51,4 @@ ex-*.sh
 /CLAUDE.md
 /app-tests/src/test/resources/punit/explorations/
 /app-tests/src/test/resources/punit/optimizations/
+/app-tests/src/test/resources/punit/specs/*.yaml

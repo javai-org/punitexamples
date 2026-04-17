@@ -1,0 +1,33 @@
+# Empirical Baseline for PaymentGatewayUseCase
+# Generated automatically by punit experiment runner
+# DO NOT EDIT - create a specification based on this baseline instead
+
+schemaVersion: punit-spec-1
+useCaseId: PaymentGatewayUseCase
+generatedAt: 2026-04-16T07:09:04.440507Z
+experimentClass: org.javai.punit.examples.probabilistictests.PaymentGatewayReliabilityTest
+experimentMethod: measureBaseline
+footprint: 1fbf696f
+covariates:
+  warmup: 3
+  region: UNDEFINED
+execution:
+  warmup: 3
+  samplesPlanned: 200
+  samplesExecuted: 200
+  terminationReason: COMPLETED
+requirements:
+  minPassRate: 0.9812
+statistics:
+  successRate:
+    observed: 1.0000
+    standardError: 0.0000
+    confidenceInterval95: [0.9812, 1.0000]
+  successes: 200
+  failures: 0
+cost:
+  totalTimeMs: 26224
+  avgTimePerSampleMs: 131
+  totalTokens: 0
+  avgTokensPerSample: 0
+contentFingerprint: aa603330af04e969e4f8cc89c261cad2336b4d948e71d7c8de635b4d2e3ce501
