@@ -18,7 +18,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.27.7")
 
     // ArchUnit
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.1")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
 
     // Log4j2 core - needed by CatalogueMarkdownAppender for verdict catalog generation
     testImplementation("org.apache.logging.log4j:log4j-core:2.25.4")
