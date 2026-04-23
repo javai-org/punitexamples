@@ -46,7 +46,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
  *
  * <h2>What This Demonstrates</h2>
  * <ul>
- *   <li>{@code initialControlFactorSource} for specifying a weak starting point</li>
+ *   <li>{@code initialFactor} for specifying a weak starting point</li>
  *   <li>{@code @ControlFactor} for receiving the current prompt value</li>
  *   <li>Custom {@link ShoppingBasketPromptMutator} for targeted improvements</li>
  *   <li>{@link ShoppingBasketSuccessRateScorer} for iteration scoring</li>
@@ -131,7 +131,7 @@ public class ShoppingBasketOptimizePrompt {
     @OptimizeExperiment(
             useCase = ShoppingBasketUseCase.class,
             controlFactor = "systemPrompt",
-            initialControlFactorSource = "weakStartingPrompt",
+            initialFactor = "weakStartingPrompt",
             scorer = ShoppingBasketSuccessRateScorer.class,
             mutator = ShoppingBasketPromptMutator.class,
             objective = OptimizationObjective.MAXIMIZE,
