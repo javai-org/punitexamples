@@ -102,7 +102,7 @@ public class ShoppingBasketOptimizeTemperature {
     @OptimizeExperiment(
             useCase = ShoppingBasketUseCase.class,
             controlFactor = "temperature",
-            initialControlFactorSource = "naiveStartingTemperature",
+            initialFactor = "naiveStartingTemperature",
             scorer = ShoppingBasketSuccessRateScorer.class,
             mutator = TemperatureMutator.class,
             objective = OptimizationObjective.MAXIMIZE,

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Updated optimize experiments (`ShoppingBasketOptimizePrompt`, `ShoppingBasketOptimizeTemperature`) to the renamed `initialFactor` attribute on `@OptimizeExperiment`. Tracks punit's first experiment DX refactor PR (`refactor/experiment-dx` on `javai-org/punit`), which renamed `initialControlFactorSource` → `initialFactor` and removed the inline `initialControlFactorValue` attribute.
+
 ## [0.4.0] - 2026-04-17
 
 ### Changed
