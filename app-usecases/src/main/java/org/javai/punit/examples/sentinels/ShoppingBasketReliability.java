@@ -2,9 +2,9 @@ package org.javai.punit.examples.sentinels;
 
 import java.util.stream.Stream;
 import org.javai.punit.api.InputSource;
-import org.javai.punit.api.MeasureExperiment;
+import org.javai.punit.api.legacy.MeasureExperiment;
 import org.javai.punit.api.OutcomeCaptor;
-import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.legacy.ProbabilisticTest;
 import org.javai.punit.api.Sentinel;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.usecase.UseCaseFactory;

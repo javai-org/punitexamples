@@ -1,9 +1,9 @@
 package org.javai.punit.examples.sentinels;
 
 import org.javai.punit.api.Latency;
-import org.javai.punit.api.MeasureExperiment;
+import org.javai.punit.api.legacy.MeasureExperiment;
 import org.javai.punit.api.OutcomeCaptor;
-import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.legacy.ProbabilisticTest;
 import org.javai.punit.api.Sentinel;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;

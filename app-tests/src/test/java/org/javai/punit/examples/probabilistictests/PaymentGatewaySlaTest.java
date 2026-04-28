@@ -1,6 +1,6 @@
 package org.javai.punit.examples.probabilistictests;
 
-import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.legacy.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.UseCaseProvider;

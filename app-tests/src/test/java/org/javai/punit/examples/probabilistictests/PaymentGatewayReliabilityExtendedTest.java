@@ -2,7 +2,7 @@ package org.javai.punit.examples.probabilistictests;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.legacy.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.UseCaseProvider;

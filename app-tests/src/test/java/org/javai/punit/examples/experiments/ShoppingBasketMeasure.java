@@ -2,7 +2,7 @@ package org.javai.punit.examples.experiments;
 
 import java.util.stream.Stream;
 import org.javai.punit.api.InputSource;
-import org.javai.punit.api.MeasureExperiment;
+import org.javai.punit.api.legacy.MeasureExperiment;
 import org.javai.punit.api.OutcomeCaptor;
 import org.javai.punit.api.UseCaseProvider;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
