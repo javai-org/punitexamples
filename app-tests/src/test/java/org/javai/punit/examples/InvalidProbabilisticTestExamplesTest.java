@@ -1,6 +1,6 @@
 package org.javai.punit.examples;
 
-import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.legacy.ProbabilisticTest;
 import org.junit.jupiter.api.Disabled;
 
 /**

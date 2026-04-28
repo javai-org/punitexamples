@@ -2,7 +2,7 @@ package org.javai.punit.examples.experiments;
 
 import java.util.stream.Stream;
 import org.javai.punit.api.ConfigSource;
-import org.javai.punit.api.ExploreExperiment;
+import org.javai.punit.api.legacy.ExploreExperiment;
 import org.javai.punit.api.Input;
 import org.javai.punit.api.InputSource;
 import org.javai.punit.api.NamedConfig;

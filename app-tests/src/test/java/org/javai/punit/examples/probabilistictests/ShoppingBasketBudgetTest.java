@@ -3,7 +3,7 @@ package org.javai.punit.examples.probabilistictests;
 import java.util.stream.Stream;
 import org.javai.punit.api.BudgetExhaustedBehavior;
 import org.javai.punit.api.InputSource;
-import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.legacy.ProbabilisticTest;
 import org.javai.punit.api.ProbabilisticTestBudget;
 import org.javai.punit.api.TokenChargeRecorder;
 import org.javai.punit.api.UseCaseProvider;
