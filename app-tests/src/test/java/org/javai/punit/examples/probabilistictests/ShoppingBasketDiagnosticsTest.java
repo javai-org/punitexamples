@@ -10,53 +10,55 @@ import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.junit5.Punit;
 
 /**
- * Demonstrates the diagnostic output the typed pipeline produces
- * when a probabilistic test does not pass.
+ * Demonstrates the diagnostic output the framework produces when a
+ * probabilistic test runs.
  *
- * <h2>What's available today</h2>
+ * <h2>Diagnostic features in punit</h2>
  *
- * <ul>
- *   <li><b>Per-criterion explanation</b> — every {@code CriterionResult}
- *       carries a human-readable explanation. For
- *       {@link BernoulliPassRate#empirical() empirical} runs this is
- *       e.g.
- *       <pre>{@code observed=0.94 (Wilson-95% lower=0.93) vs threshold=0.85 (origin=EMPIRICAL) over 100 samples}</pre>
- *       which surfaces the observed rate, the Wilson-score lower
- *       bound, the threshold and its origin, and the sample count
- *       — the figures that drive the verdict.</li>
- *   <li><b>Detail map</b> — the same numbers are available
- *       structurally on {@code CriterionResult.detail()} for tooling
- *       that wants to render them differently.</li>
- *   <li><b>Misalignment notes</b> — when no baseline matches, the
- *       verdict's warnings list each rejected candidate and the
- *       category mismatch that rejected it (CV-4).</li>
- *   <li><b>FAIL / INCONCLUSIVE diagnostics</b> — surfaced through
- *       the JUnit assertion message; visible in the IDE's test
- *       output, the surefire report, etc.</li>
- * </ul>
+ * <p><b>Per-criterion explanation and detail.</b> Every
+ * {@code CriterionResult} carries a human-readable explanation
+ * string and a structured {@code detail()} map. For empirical
+ * {@link BernoulliPassRate} runs the explanation reads e.g.
+ * <pre>{@code observed=0.94 (Wilson-95% lower=0.93) vs threshold=0.85 (origin=EMPIRICAL) over 100 samples}</pre>
+ * — the figures that drove the verdict. The typed pipeline surfaces
+ * these on FAIL and INCONCLUSIVE verdicts via the JUnit assertion
+ * message.
  *
- * <h2>What's deferred (legacy {@code transparentStats=true} feature)</h2>
+ * <p><b>Misalignment notes.</b> When no baseline matches the run's
+ * covariate profile, the verdict's warnings list each rejected
+ * candidate and the category mismatch that rejected it (CV-4).
  *
- * <p>The legacy pipeline supports {@code transparentStats = true},
- * which renders a full hypothesis-test breakdown — null hypothesis,
- * z-statistic, p-value — on <em>every</em> verdict, including PASS.
- * This is useful for audit / compliance documentation where the
- * statistical reasoning behind a passing run also needs to be
- * shown. The typed pipeline doesn't yet emit this verbose per-PASS
- * output; criterion-level diagnostics are only surfaced on FAIL /
- * INCONCLUSIVE today. Wiring transparentStats into the typed
- * pipeline is on the post-1.0 roadmap.
+ * <p><b>Verbose statistical reporting</b> (legacy
+ * {@code transparentStats = true}). The framework can render a full
+ * hypothesis-test breakdown — null hypothesis, z-statistic, p-value,
+ * statistical inference — on every verdict including PASS. This is
+ * essential for audit / compliance documentation where the
+ * statistical reasoning behind a passing run also has to be shown.
+ * The verbose console-rendering path is currently surfaced through
+ * the legacy {@code @ProbabilisticTest(transparentStats = true)}
+ * annotation; the typed pipeline owes a builder-side equivalent
+ * (e.g. {@code Punit.testing(...).transparentStats()}) before
+ * this feature is fully exposed in the typed authoring surface.
  *
- * <p>Early-termination visibility (impossibility / success-guaranteed)
- * is similarly legacy-only at the moment.
+ * <p><b>Early-termination visibility</b>
+ * (impossibility / success-guaranteed). The engine can stop a run
+ * early when the verdict is mathematically determined ahead of the
+ * configured sample count. The legacy annotation surfaces this
+ * naturally; the typed pipeline reaches into the same evaluator
+ * but its diagnostic carriage in the verdict still needs to land.
+ *
+ * <p>Both verbose reporting and early-termination diagnostics are
+ * <em>tracked typed-pipeline work</em>, not legacy-only features —
+ * they're recorded as features of punit and need their typed
+ * authoring surfaces wired before this file can demonstrate them.
  *
  * <h2>The tests below</h2>
  *
- * <p>Three configurations, each sharing the use case but exercising
- * a different criterion path. The migrated file is currently
- * pedagogically equivalent to {@link ShoppingBasketTest}; its
- * distinct identity returns when transparentStats lands in the
- * typed pipeline.
+ * <p>Three configurations exercising distinct criterion paths.
+ * Once verbose reporting and early-termination diagnostics have
+ * typed-builder surfaces, this file's tests will opt into them
+ * explicitly and the diagnostic-feature demonstration becomes
+ * concrete.
  */
 public class ShoppingBasketDiagnosticsTest {
 
@@ -80,9 +82,13 @@ public class ShoppingBasketDiagnosticsTest {
     @ProbabilisticTest
     void empiricalAtHigherSampleCount() {
         // Larger sample count tightens the Wilson-score margin
-        // around the observed rate. A run that's borderline at n=100
-        // can be definitively PASS or FAIL at n=200 — diagnostics
-        // are the same in shape, just with tighter numbers.
+        // around the observed rate. A run that's borderline at
+        // n=100 can be definitively PASS or FAIL at n=200 — same
+        // criterion explanation shape, tighter numbers. Once
+        // early-termination diagnostics have a typed-builder
+        // surface, the larger sample count is also where
+        // impossibility / success-guaranteed signals become most
+        // visible.
         Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 200), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
