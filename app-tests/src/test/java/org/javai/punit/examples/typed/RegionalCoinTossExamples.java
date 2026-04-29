@@ -6,7 +6,6 @@ import java.util.stream.IntStream;
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.api.typed.Sampling;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.junit5.Punit;
 
@@ -76,10 +75,6 @@ public class RegionalCoinTossExamples {
             IntStream.rangeClosed(1, 100).boxed()
                     .collect(Collectors.toUnmodifiableList());
 
-    private static Sampling<RegionalCoinTossUseCase.Bias, Integer, String> sampling(int samples) {
-        return Sampling.of(RegionalCoinTossUseCase::new, samples, CYCLE_1_TO_100);
-    }
-
     // ── Phase 1: measure baselines, one per region ─────────────────
 
     @Experiment
@@ -88,7 +83,7 @@ public class RegionalCoinTossExamples {
         // region → "EU" once at the start of the run and stamps it
         // into the baseline file's filename + body. A subsequent
         // run under a different region writes to a different file.
-        Punit.measuring(sampling(1000), BIAS_94)
+        Punit.measuring(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .run();
     }
@@ -99,7 +94,7 @@ public class RegionalCoinTossExamples {
         // different region — a separate baseline file results, and
         // tests under region=APAC will match this one rather than
         // the EU baseline.
-        Punit.measuring(sampling(1000), BIAS_94)
+        Punit.measuring(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .run();
     }
@@ -119,7 +114,7 @@ public class RegionalCoinTossExamples {
         // — the educational point is covariate-aware lookup, not
         // statistical sizing (see CoinTossReliabilityExamples for
         // the sizing chapter).
-        Punit.testing(sampling(50), BIAS_94)
+        Punit.testing(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 50), BIAS_94)
                 // Explicit witness needed when chaining .atConfidence:
                 // the chain breaks target-type inference and empirical()
                 // would otherwise resolve to BernoulliPassRate<Object>.
@@ -135,7 +130,7 @@ public class RegionalCoinTossExamples {
         // Contractual tests don't consult a baseline, so covariates
         // play no role here — the threshold is an external SLA. A
         // test running under any region uses the same threshold.
-        Punit.testing(sampling(200), BIAS_94)
+        Punit.testing(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
                 .criterion(BernoulliPassRate.meeting(
                         0.90, ThresholdOrigin.SLA))
                 .assertPasses();

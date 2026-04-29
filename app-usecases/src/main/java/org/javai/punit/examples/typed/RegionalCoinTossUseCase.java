@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import org.javai.punit.api.CovariateCategory;
+import org.javai.punit.api.typed.Sampling;
 import org.javai.punit.api.typed.UseCase;
 import org.javai.punit.api.typed.UseCaseOutcome;
 import org.javai.punit.api.typed.covariate.Covariate;
@@ -55,6 +56,15 @@ public final class RegionalCoinTossUseCase
 
     public RegionalCoinTossUseCase(Bias bias) {
         this.threshold = bias.threshold();
+    }
+
+    /**
+     * Builds a {@link Sampling} for this use case with the triple
+     * {@code <Bias, Integer, String>} baked in.
+     */
+    public static Sampling<Bias, Integer, String> sampling(
+            List<Integer> inputs, int samples) {
+        return Sampling.of(RegionalCoinTossUseCase::new, samples, inputs);
     }
 
     @Override

@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.javai.outcome.Outcome;
 import org.javai.punit.api.CovariateCategory;
+import org.javai.punit.api.typed.Sampling;
 import org.javai.punit.api.typed.UseCase;
 import org.javai.punit.api.typed.UseCaseOutcome;
 import org.javai.punit.api.typed.covariate.Covariate;
@@ -112,6 +113,28 @@ public final class ShoppingBasketUseCase
     public ShoppingBasketUseCase(ChatLlm llm, Config config) {
         this.llm = llm;
         this.config = config;
+    }
+
+    /**
+     * Builds a {@link Sampling} configured to construct this use case
+     * via {@link ChatLlmProvider#resolve()}. The triple
+     * {@code <Config, String, ValidationResult>} is baked in here so
+     * test methods don't need to spell it out.
+     *
+     * <p>For tests that need to inject a custom {@link ChatLlm}
+     * (mocked LLMs in offline runs, alternative providers), use
+     * {@link #samplingWith(ChatLlm, List, int)} instead.
+     */
+    public static Sampling<Config, String, ValidationResult> sampling(
+            List<String> inputs, int samples) {
+        return samplingWith(ChatLlmProvider.resolve(), inputs, samples);
+    }
+
+    public static Sampling<Config, String, ValidationResult> samplingWith(
+            ChatLlm llm, List<String> inputs, int samples) {
+        return Sampling.of(
+                cfg -> new ShoppingBasketUseCase(llm, cfg),
+                samples, inputs);
     }
 
     @Override
