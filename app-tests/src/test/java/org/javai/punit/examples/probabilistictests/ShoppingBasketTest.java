@@ -69,14 +69,14 @@ public class ShoppingBasketTest {
     @ProbabilisticTest
     void testInstructionTranslation() {
         Punit.testing(sampling(STANDARD_INSTRUCTIONS, 100), Config.defaults())
-                .criterion(BernoulliPassRate.<ValidationResult>empirical())
+                .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
 
     @ProbabilisticTest
     void testControlledInstruction() {
         Punit.testing(sampling(SINGLE_INSTRUCTION, 100), Config.defaults())
-                .criterion(BernoulliPassRate.<ValidationResult>empirical())
+                .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
 }

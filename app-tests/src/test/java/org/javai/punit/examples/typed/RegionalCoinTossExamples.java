@@ -124,6 +124,9 @@ public class RegionalCoinTossExamples {
         // statistical sizing (see CoinTossReliabilityExamples for
         // the sizing chapter).
         Punit.testing(sampling(50), BIAS_94)
+                // Explicit witness needed when chaining .atConfidence:
+                // the chain breaks target-type inference and empirical()
+                // would otherwise resolve to BernoulliPassRate<Object>.
                 .criterion(BernoulliPassRate.<String>empirical()
                         .atConfidence(0.50))
                 .assertPasses();
@@ -137,7 +140,7 @@ public class RegionalCoinTossExamples {
         // play no role here — the threshold is an external SLA. A
         // test running under any region uses the same threshold.
         Punit.testing(sampling(200), BIAS_94)
-                .criterion(BernoulliPassRate.<String>meeting(
+                .criterion(BernoulliPassRate.meeting(
                         0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }

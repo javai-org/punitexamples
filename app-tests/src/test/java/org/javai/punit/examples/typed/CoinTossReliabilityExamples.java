@@ -124,7 +124,7 @@ public class CoinTossReliabilityExamples {
         // and the contractual path uses observed >= threshold (no Wilson
         // wrap), so 0.94 ≥ 0.90 → PASS straightforwardly.
         Punit.testing(sampling(200), BIAS_94)
-                .criterion(BernoulliPassRate.<String>meeting(0.90, ThresholdOrigin.SLA))
+                .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 
@@ -142,7 +142,7 @@ public class CoinTossReliabilityExamples {
         // backing.
         Punit.testing(this::baseline)
                 .samples(50)
-                .criterion(BernoulliPassRate.<String>empirical())
+                .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
 }
