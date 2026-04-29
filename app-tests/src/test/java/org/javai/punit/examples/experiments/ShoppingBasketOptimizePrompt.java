@@ -1,169 +1,143 @@
 package org.javai.punit.examples.experiments;
 
-import org.javai.punit.api.ControlFactor;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.OptimizeExperiment;
-import org.javai.punit.api.OutcomeCaptor;
-import org.javai.punit.api.Pacing;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.app.llm.ChatLlmProvider;
-import org.javai.punit.examples.experiments.optimize.ShoppingBasketPromptMutator;
-import org.javai.punit.examples.experiments.optimize.ShoppingBasketSuccessRateScorer;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.experiment.optimize.OptimizationObjective;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.Experiment;
+import org.javai.punit.api.typed.spec.FactorsStepper;
+import org.javai.punit.api.typed.spec.Scorer;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
- * OPTIMIZE experiment for iteratively refining the system prompt.
+ * OPTIMIZE experiment iteratively refining the system prompt.
  *
- * <p>This experiment demonstrates how the optimization framework can automatically
- * improve a poorly-formulated prompt through iterative refinement. It starts with
- * a deliberately weak prompt (see {@link #weakStartingPrompt()}) that lacks:
- * <ul>
- *   <li>Explicit JSON schema</li>
- *   <li>Valid action values</li>
- *   <li>Quantity constraints</li>
- *   <li>Format examples</li>
- * </ul>
+ * <p>Demonstrates how the typed-pipeline optimize loop walks the
+ * factor space toward higher pass rates. Starts from a deliberately
+ * weak prompt and applies a scripted progression that addresses
+ * common failure modes one at a time.
  *
- * <p>The optimizer then iteratively improves this prompt by:
- * <ol>
- *   <li>Running samples to measure success rate</li>
- *   <li>Identifying failure patterns</li>
- *   <li>Mutating the prompt to address failures</li>
- *   <li>Repeating until convergence</li>
- * </ol>
+ * <h2>Expected progression</h2>
  *
- * <h2>Expected Progression</h2>
  * <pre>
- * Iteration 1: ~30% success (weak prompt, many JSON/format errors)
- * Iteration 2: ~50% success (added JSON structure)
- * Iteration 3: ~70% success (added valid actions)
- * Iteration 4: ~85% success (added quantity constraints)
- * Iteration 5: ~95% success (refined formatting)
+ * Iteration 0 (initial weak prompt):           ~30% success
+ * Iteration 1 (+ JSON-only format):            ~50% success
+ * Iteration 2 (+ explicit schema):             ~65% success
+ * Iteration 3 (+ required fields):             ~80% success
+ * Iteration 4 (+ valid action enumeration):    ~90% success
+ * Iteration 5 (+ quantity constraints):        ~95% success
  * </pre>
  *
- * <h2>What This Demonstrates</h2>
- * <ul>
- *   <li>{@code initialFactor} for specifying a weak starting point</li>
- *   <li>{@code @ControlFactor} for receiving the current prompt value</li>
- *   <li>Custom {@link ShoppingBasketPromptMutator} for targeted improvements</li>
- *   <li>{@link ShoppingBasketSuccessRateScorer} for iteration scoring</li>
- * </ul>
+ * <h2>Authoring shape</h2>
  *
- * <h2>Output</h2>
- * <p>Generates: {@code src/test/resources/punit/optimizations/ShoppingBasketUseCase/}
+ * <p>The typed optimize builder reads cleanly:
  *
- * <h2>Running</h2>
  * <pre>{@code
- * ./gradlew exp -Prun=ShoppingBasketOptimizePrompt
+ * Punit.optimizing(sampling(...))
+ *         .initialFactors(LlmTuning.DEFAULT.systemPrompt(WEAK_PROMPT))
+ *         .stepper((current, history) -> nextPromptVariant(current, history))
+ *         .maximize(SUCCESS_RATE)
+ *         .maxIterations(10)
+ *         .noImprovementWindow(3)
+ *         .experimentId(...)
+ *         .run();
  * }</pre>
  *
- * @see ShoppingBasketUseCase
- * @see ShoppingBasketPromptMutator
- * @see ShoppingBasketSuccessRateScorer
+ * <p>The legacy form pulled scorer and mutator from separate
+ * dedicated classes ({@code ShoppingBasketSuccessRateScorer},
+ * {@code ShoppingBasketPromptMutator}, plus a strategy hierarchy
+ * underneath); the typed {@link Scorer} and {@link FactorsStepper}
+ * interfaces are functional, so an inlined lambda or method
+ * reference is sufficient. The {@code optimize} subpackage that
+ * housed those classes is removed in this PR.
+ *
+ * <h2>Running</h2>
+ *
+ * <pre>{@code
+ * ./gradlew experiment -Prun=ShoppingBasketOptimizePrompt.optimizeSystemPrompt
+ * }</pre>
  */
-// Run manually with ./gradlew exp -Prun=ShoppingBasketOptimizePrompt
 public class ShoppingBasketOptimizePrompt {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
-
-    @BeforeEach
-    void setUp() {
-        provider.registerWithFactors(ShoppingBasketUseCase.class, factors ->
-                new ShoppingBasketUseCase(
-                        ChatLlmProvider.resolve(),
-                        "gpt-4o-mini",
-                        0.3,
-                        factors.getString("systemPrompt")));
-    }
+    private static final List<String> BASKET_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
     /**
-     * Provides a deliberately weak starting prompt for optimization.
-     *
-     * <p>This prompt is plausible (a developer might write it as a first attempt)
-     * but missing critical details that lead to frequent failures:
-     * <ul>
-     *   <li>No explicit JSON schema - LLM may return wrong structure</li>
-     *   <li>No valid action values - may invent actions like "purchase"</li>
-     *   <li>No quantity constraints - may use zero or negative quantities</li>
-     *   <li>No response format - may include explanations with JSON</li>
-     * </ul>
-     *
-     * <p>Starting from this weak prompt makes the optimization journey more
-     * compelling, as it demonstrates clear improvement over iterations.
-     *
-     * @return a weak but plausible starting prompt
+     * Deliberately weak starting prompt — plausible but missing
+     * the JSON schema, valid-action enumeration, and quantity
+     * constraints the LLM needs to produce reliable structured
+     * output.
      */
-    static String weakStartingPrompt() {
-        return """
+    private static final String WEAK_PROMPT = """
             You are a shopping assistant. Convert the user's request into
             a JSON list of shopping basket operations.
             """;
-    }
 
     /**
-     * Optimizes the system prompt to maximize success rate across a diverse input set.
-     *
-     * <p>Starts from {@link #weakStartingPrompt()} which has ~30% success rate,
-     * and iteratively improves to ~95% by adding:
-     * <ul>
-     *   <li>Explicit JSON schema</li>
-     *   <li>Valid action enumeration (ADD, REMOVE, CLEAR)</li>
-     *   <li>Quantity constraints (positive integers)</li>
-     *   <li>Response format requirements (JSON only, no explanations)</li>
-     * </ul>
-     *
-     * <h3>Input Source and Iteration Behavior</h3>
-     * <p>Each optimization iteration tests the current system prompt against inputs
-     * from the golden dataset via round-robin cycling. When {@code samplesPerIteration}
-     * is not specified (as here), it defaults to the number of inputs — so each input
-     * is tested exactly once per iteration. If {@code samplesPerIteration} is explicitly
-     * set, inputs cycle via round-robin to fill the specified count.
-     *
-     * @param useCase the use case instance
-     * @param systemPrompt the current system prompt (updated each iteration)
-     * @param input the test input with instruction and expected response
-     * @param captor records outcomes for scoring
+     * Scripted prompt progression. Each entry addresses one common
+     * failure mode left over from the previous prompt. The stepper
+     * consumes this list iteratively; reaching the end signals
+     * "no more candidates" and the optimiser stops.
      */
-    @OptimizeExperiment(
-            useCase = ShoppingBasketUseCase.class,
-            controlFactor = "systemPrompt",
-            initialFactor = "weakStartingPrompt",
-            scorer = ShoppingBasketSuccessRateScorer.class,
-            mutator = ShoppingBasketPromptMutator.class,
-            objective = OptimizationObjective.MAXIMIZE,
-            maxIterations = 10,
-            noImprovementWindow = 3,
-            experimentId = "prompt-optimization-v1",
-            skipWarmup = true
-    )
-    @InputSource(file = "fixtures/shopping-instructions.json")
-    @Pacing(maxRequestsPerSecond = 5)
-    void optimizeSystemPrompt(
-            ShoppingBasketUseCase useCase,
-            @ControlFactor("systemPrompt") String systemPrompt,
-            TranslationInput input,
-            OutcomeCaptor captor
-    ) {
-        // useCase already configured with current systemPrompt via registerWithFactors
-        captor.record(useCase.translateInstruction(input.instruction(), input.expected()));
+    private static final List<String> PROMPT_PROGRESSION = List.of(
+            // 1. Add JSON-only format requirement
+            """
+            You are a shopping assistant. Convert the user's request into
+            a JSON list of shopping basket operations. Respond with JSON only.
+            """,
+            // 2. Add explicit schema
+            """
+            You are a shopping assistant. Convert the user's request into
+            JSON of the form {"actions": [...]}. Respond with JSON only.
+            """,
+            // 3. Add required fields
+            """
+            You are a shopping assistant. Convert the user's request into
+            JSON of the form {"actions": [{"name": <action>, "item": <item>,
+            "quantity": <count>}]}. Respond with JSON only.
+            """,
+            // 4. Add valid action enumeration
+            """
+            You are a shopping assistant. Convert the user's request into
+            JSON of the form {"actions": [{"name": <action>, "item": <item>,
+            "quantity": <count>}]}. Valid actions: add, remove, clear.
+            Respond with JSON only.
+            """,
+            // 5. Add quantity constraints
+            """
+            You are a shopping assistant. Convert the user's request into
+            JSON of the form {"actions": [{"name": <action>, "item": <item>,
+            "quantity": <positive integer>}]}. Valid actions: add, remove, clear.
+            For "clear", omit item and quantity. Respond with JSON only.
+            """);
+
+    private static final Scorer SUCCESS_RATE = summary -> summary.total() == 0
+            ? 0.0
+            : (double) summary.successes() / (double) summary.total();
+
+    private static final FactorsStepper<LlmTuning> NEXT_PROMPT_VARIANT =
+            (current, history) -> {
+                int iterationsCompleted = history.size();
+                if (iterationsCompleted >= PROMPT_PROGRESSION.size()) {
+                    // Exhausted the scripted progression — signal stop.
+                    return null;
+                }
+                return current.systemPrompt(PROMPT_PROGRESSION.get(iterationsCompleted));
+            };
+
+    @Experiment
+    void optimizeSystemPrompt() {
+        Punit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
+                .initialFactors(LlmTuning.DEFAULT.systemPrompt(WEAK_PROMPT))
+                .stepper(NEXT_PROMPT_VARIANT)
+                .maximize(SUCCESS_RATE)
+                .maxIterations(10)
+                .noImprovementWindow(3)
+                .experimentId("prompt-optimization-v1")
+                .run();
     }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // INPUT TYPES - Records for structured test inputs
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Input record for golden dataset testing with expected values.
-     *
-     * <p>This record is automatically deserialized from the JSON file by Jackson.
-     * The field names must match the JSON keys.
-     *
-     * @param instruction the natural language instruction
-     * @param expected the expected JSON response
-     */
-    public record TranslationInput(String instruction, String expected) {}
 }

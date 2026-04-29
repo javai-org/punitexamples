@@ -105,6 +105,10 @@ public final class ShoppingBasketUseCase
         public LlmTuning temperature(double temperature) {
             return new LlmTuning(this.model, temperature, this.systemPrompt);
         }
+
+        public LlmTuning systemPrompt(String systemPrompt) {
+            return new LlmTuning(this.model, this.temperature, systemPrompt);
+        }
     }
 
     private final ChatLlm llm;
