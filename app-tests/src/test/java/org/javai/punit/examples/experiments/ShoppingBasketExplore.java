@@ -9,35 +9,15 @@ import org.javai.punit.junit5.PUnit;
 
 /**
  * EXPLORE experiment comparing LLM model configurations across the
- * same input set.
+ * same input set. The grid cycles through four models at a fixed
+ * low temperature; each model receives {@code samplesPerConfig}
+ * samples and the framework reports the pass rate per configuration.
  *
- * <p>Before establishing a production baseline, you decide which
- * model is the right one for the task. This experiment answers:
- * "Which model handles these instructions most reliably?" — by
- * cycling the same input list through each model in turn and
- * comparing the resulting pass rates.
+ * <h2>Setup</h2>
  *
- * <h2>Typical workflow</h2>
- *
- * <ol>
- *   <li><b>Explore</b> — this experiment compares models.</li>
- *   <li><b>Choose</b> — pick the configuration with the best
- *       pass rate / latency tradeoff for your domain.</li>
- *   <li><b>Measure</b> — {@link ShoppingBasketMeasure} establishes
- *       a baseline for that chosen configuration.</li>
- *   <li><b>Test</b> — {@code ShoppingBasketTest} verifies the
- *       LLM still meets the recorded baseline in CI.</li>
- * </ol>
- *
- * <h2>Grid as factor variants</h2>
- *
- * <p>Each grid entry is a {@link LlmTuning} value — the typed
- * factor record. The framework iterates the grid, constructs one
- * use case per entry via the sampling's factory closure, and runs
- * {@code samplesPerConfig} samples through each. The four entries
- * here all hold temperature at 0.1 (low randomness, more
- * deterministic output for translation tasks); the {@code model}
- * is what varies.
+ * <p>This experiment makes real LLM calls. Configure the
+ * {@code ChatLlm} provider via {@code OPENAI_API_KEY} and
+ * {@code ANTHROPIC_API_KEY} for the models in the grid.
  *
  * <h2>Running</h2>
  *

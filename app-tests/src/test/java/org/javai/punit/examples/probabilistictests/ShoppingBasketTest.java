@@ -10,35 +10,26 @@ import org.javai.punit.junit5.PUnit;
 
 /**
  * Core probabilistic test for the typed
- * {@link ShoppingBasketUseCase}.
+ * {@link ShoppingBasketUseCase}, demonstrating the empirical-pair
+ * pattern with a real LLM-backed use case: a measure run records
+ * the LLM's observed pass rate under a configuration, and this
+ * test verifies a future run under the same configuration still
+ * meets the recorded baseline. The empirical
+ * {@link BernoulliPassRate} criterion passes when the Wilson-score
+ * lower bound on observed success rate clears the recorded baseline.
  *
- * <p>Demonstrates the empirical-pair pattern with a real LLM-backed
- * use case: a measure run records the LLM's observed pass rate
- * under a configuration, and this test verifies a future run under
- * the same configuration still meets the recorded baseline.
+ * <h2>Setup</h2>
  *
- * <h2>What this demonstrates</h2>
- *
- * <ul>
- *   <li>Typed-API authoring for an LLM-backed use case (the use case
- *       ships its own {@code sampling(...)} helper, so the test
- *       method body has no type-parameter ceremony).</li>
- *   <li>Empirical {@link BernoulliPassRate} criterion — the test
- *       passes when the Wilson-score lower bound on observed
- *       success rate clears the recorded baseline rate.</li>
- *   <li>Two test variants — one over varied instructions, one
- *       over a controlled single instruction. The single-instruction
- *       form isolates the test from input variance, making it
- *       easier to detect drift in LLM behaviour.</li>
- * </ul>
+ * <p>This test reads a baseline produced by a prior measure run.
+ * Run the measure phase first.
  *
  * <h2>Running</h2>
  *
  * <pre>{@code
- * # Phase 1 — establish the baseline:
+ * # 1. Establish the baseline:
  * ./gradlew experiment -Prun=ShoppingBasketMeasure
  *
- * # Phase 2 — verify against the baseline:
+ * # 2. Verify against the baseline:
  * ./gradlew test --tests "ShoppingBasketTest"
  * }</pre>
  */

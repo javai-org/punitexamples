@@ -16,16 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
 /**
- * Verifies that the operational flow (explore → optimize → measure) produced
- * the expected artifacts before the probabilistic test runs.
- *
- * <p>This test is NOT an experiment and NOT a probabilistic test — it is a plain
- * JUnit test that inspects generated YAML files. It runs as part of the
- * {@code operationalFlowTest} task, after the explore/optimize/measure steps
- * and before the final probabilistic test.
- *
- * <p>By verifying artifacts exist and contain plausible values, this test
- * confirms that each prior step in the flow executed successfully.
+ * Verifies that the operational flow (explore, optimize, measure) produced
+ * the expected artefacts before the probabilistic test runs. Plain JUnit
+ * test that inspects generated YAML files; runs as part of the
+ * {@code operationalFlowTest} task.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OperationalFlowVerificationTest {

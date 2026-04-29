@@ -10,25 +10,15 @@ import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
 
 /**
- * Typed-API payment-gateway use case.
- *
- * <p>Demonstrates the <b>SLA approach</b> to probabilistic testing,
- * where thresholds come from contractual agreements rather than
- * empirical baselines: the gateway's documented availability and
- * latency targets are external to the test, and the test verifies
- * conformance.
+ * Typed-API payment-gateway use case demonstrating the SLA approach
+ * to probabilistic testing: thresholds come from contractual
+ * agreements rather than empirical baselines.
  *
  * <p>The factor record {@link Tier} carries the operating tier the
- * gateway is invoked under. In a real system this would also carry
- * region, configured limits, and other deliberate-choice dimensions
- * the test author varies; here we keep it minimal.
- *
- * <p>The input type is a {@link Charge} record bundling card token
- * and amount. The success-output type is the gateway's
- * {@link PaymentResult}; a sample fails when {@code result.success()}
- * is {@code false}.
- *
- * <h2>Latency assertions</h2>
+ * gateway is invoked under. The input type is a {@link Charge}
+ * record bundling card token and amount; the success-output type
+ * is the gateway's {@link PaymentResult}, and a sample fails when
+ * {@code result.success()} is {@code false}.
  *
  * <p>Per-sample duration is captured automatically by the engine on
  * every {@link UseCaseOutcome}. For SLA-style latency assertions
@@ -41,22 +31,18 @@ public final class PaymentGatewayUseCase
         implements UseCase<PaymentGatewayUseCase.Tier, PaymentGatewayUseCase.Charge, PaymentResult> {
 
     /**
-     * The factor record. {@code Tier} captures the SLA tier under
-     * which the gateway is being verified — different tiers may
-     * have different target pass rates / latency limits, and a
-     * baseline measured under one tier is not the right reference
-     * for a test running under another.
+     * The factor record: the SLA tier under which the gateway is
+     * being verified. Different tiers may have different target pass
+     * rates and latency limits, and a baseline measured under one
+     * tier is not the right reference for a test running under
+     * another.
      */
     public record Tier(String name) {
 
         public static final Tier DEFAULT = new Tier("standard");
     }
 
-    /**
-     * The per-sample input. A real gateway integration would carry
-     * more fields (currency, customer reference, idempotency key);
-     * we keep the worked example minimal.
-     */
+    /** The per-sample input: a card token plus amount in cents. */
     public record Charge(String cardToken, long amountCents) { }
 
     private static final int WARMUP_INVOCATIONS = 3;
@@ -80,8 +66,8 @@ public final class PaymentGatewayUseCase
 
     @Override
     public int warmup() {
-        // The legacy use case declared `warmup = 3` to discard the
-        // first three responses (cold-start / connection-pool warm).
+        // Discard the first three responses to cover cold-start and
+        // connection-pool warmup.
         return WARMUP_INVOCATIONS;
     }
 
@@ -103,10 +89,9 @@ public final class PaymentGatewayUseCase
 
     /**
      * Builds a {@link Sampling} configured with the
-     * {@link MockPaymentGateway} singleton — the worked-example
-     * default. Tests that need a custom gateway implementation
-     * (a real provider, an alternative mock) supply their own
-     * factory closure via {@link Sampling#builder()}.
+     * {@link MockPaymentGateway} singleton. Tests that need a
+     * different gateway implementation supply their own factory
+     * closure via {@link Sampling#builder()}.
      */
     public static Sampling<Tier, Charge, PaymentResult> sampling(
             List<Charge> charges, int samples) {

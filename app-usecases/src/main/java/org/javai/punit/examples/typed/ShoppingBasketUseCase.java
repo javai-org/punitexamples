@@ -23,36 +23,22 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  * into structured actions via an LLM.
  *
  * <p>The factor record {@link LlmTuning} carries the LLM model,
- * sampling temperature, and system prompt — the parameters an
- * experiment varies. The input type is the natural-language
- * instruction. The success-output type is the validated
- * {@link BasketTranslation} carrying the parsed actions; a sample
- * fails when the LLM response is unparseable, deserialises to
- * unknown actions, or carries an action whose name is invalid for
- * its declared context.
- *
- * <h2>Covariates</h2>
+ * sampling temperature, and system prompt. The input type is the
+ * natural-language instruction; the success-output type is the
+ * validated {@link BasketTranslation}. A sample fails when the LLM
+ * response is unparseable, deserialises to unknown actions, or
+ * carries an action whose name is invalid for its declared context.
  *
  * <p>{@code llm_model} and {@code temperature} are declared as
- * {@link CovariateCategory#CONFIGURATION}: deliberate setup choices
- * that determine which baseline a probabilistic test should match.
- * The framework hard-gates CONFIGURATION mismatches — a baseline
- * recorded under {@code gpt-4o-mini @ 0.3} cannot silently match a
- * test running under {@code gpt-4-turbo @ 0.1}, since the two
- * configurations produce statistically distinct populations.
+ * {@link CovariateCategory#CONFIGURATION} covariates. The framework
+ * hard-gates CONFIGURATION mismatches — a baseline recorded under
+ * {@code gpt-4o-mini @ 0.3} cannot silently match a test running
+ * under {@code gpt-4-turbo @ 0.1}.
  *
- * <p>The legacy use case used {@link CovariateCategory#EXTERNAL_DEPENDENCY}
- * for {@code temperature} (soft match). The typed migration tightens
- * this to CONFIGURATION because temperature is an authored choice,
- * not a third-party variable.
- *
- * <h2>LLM construction</h2>
- *
- * <p>The use case takes a {@link ChatLlm} in its constructor — the
- * factory closure (see worked examples) is responsible for resolving
- * one via {@link ChatLlmProvider#resolve()}. Tests that need a
- * different LLM (e.g. for offline / mocked runs) supply their own
- * factory.
+ * <p>The use case takes a {@link ChatLlm} in its constructor; the
+ * factory closure resolves one via {@link ChatLlmProvider#resolve()}
+ * by default. Tests that need a different LLM supply their own
+ * factory through {@link #samplingWith(ChatLlm, List, int)}.
  */
 public final class ShoppingBasketUseCase
         implements UseCase<ShoppingBasketUseCase.LlmTuning, String, BasketTranslation> {
@@ -90,8 +76,7 @@ public final class ShoppingBasketUseCase
     /**
      * The factor record. Tests vary configuration by passing a
      * different {@code LlmTuning} instance to {@code PUnit.testing(...)}
-     * or {@code PUnit.measuring(...)}; baselines are partitioned by
-     * the resulting factors fingerprint.
+     * or {@code PUnit.measuring(...)}.
      */
     public record LlmTuning(String model, double temperature, String systemPrompt) {
 
@@ -132,12 +117,9 @@ public final class ShoppingBasketUseCase
 
     /**
      * Builds a {@link Sampling} configured to construct this use case
-     * via {@link ChatLlmProvider#resolve()}. The triple
-     * {@code <LlmTuning, String, BasketTranslation>} is baked in here so
-     * test methods don't need to spell it out.
-     *
-     * <p>For tests that need to inject a custom {@link ChatLlm}
-     * (mocked LLMs in offline runs, alternative providers), use
+     * with a {@link ChatLlm} resolved via
+     * {@link ChatLlmProvider#resolve()}. For tests that need to
+     * inject a different {@link ChatLlm}, use
      * {@link #samplingWith(ChatLlm, List, int)} instead.
      */
     public static Sampling<LlmTuning, String, BasketTranslation> sampling(
@@ -154,10 +136,7 @@ public final class ShoppingBasketUseCase
 
     /**
      * Sampling whose constructed use case respects the supplied
-     * {@link Pacing}. Pacing belongs to the service under test —
-     * the typed pipeline reads it from {@link #pacing()} on the
-     * use case instance — and this helper threads a per-test
-     * pacing choice through the factory closure.
+     * {@link Pacing}.
      */
     public static Sampling<LlmTuning, String, BasketTranslation> samplingPaced(
             Pacing pacing, List<String> inputs, int samples) {
@@ -210,9 +189,6 @@ public final class ShoppingBasketUseCase
                     tuning.systemPrompt(), instruction,
                     tuning.model(), tuning.temperature());
         } catch (RuntimeException e) {
-            // Network / API failures are surface-level errors that
-            // belong on the Outcome channel — they're an expected
-            // class of LLM behaviour, not a defect in the test.
             return UseCaseOutcome.<BasketTranslation>fail(
                     "llm-error", e.getMessage())
                     .withTokens(0);

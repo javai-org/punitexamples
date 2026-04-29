@@ -12,27 +12,16 @@ import org.javai.punit.api.typed.covariate.Covariate;
 
 /**
  * A region-aware variant of {@link CoinTossUseCase} that declares a
- * custom {@code region} covariate.
- *
- * <p>Behaviour is the same as {@link CoinTossUseCase}: deterministic
- * {@code "heads"}/{@code "tails"} based on the configured threshold.
- * The point of this class is to demonstrate the
- * <em>covariate-aware authoring pattern</em>: the use case knows
- * what environmental conditions it is sensitive to ({@code region}
- * here, but in real use cases this is typically the LLM model, the
- * deployment region, or a feature flag), and the framework
- * automatically partitions baselines by the resolved values.
+ * custom {@code region} covariate. Behaviour is the same as
+ * {@link CoinTossUseCase}: deterministic {@code "heads"}/{@code "tails"}
+ * based on the configured threshold.
  *
  * <p>The {@code region} value is captured at sample time from the
- * {@code punit.example.region} system property — a stand-in for any
- * runtime resolution mechanism (environment variable, configuration
- * service, deployment metadata).
- *
- * <p>{@link CovariateCategory#CONFIGURATION} is the right category
- * here: the region is a deliberate choice that explains behaviour
- * differences. The framework hard-gates CONFIGURATION mismatches —
- * a baseline measured under {@code region=EU} cannot silently match
- * a test running under {@code region=APAC}.
+ * {@code punit.example.region} system property. The covariate is
+ * declared with category {@link CovariateCategory#CONFIGURATION},
+ * which the framework hard-gates: a baseline measured under
+ * {@code region=EU} cannot silently match a test running under
+ * {@code region=APAC}.
  */
 public final class RegionalCoinTossUseCase
         implements UseCase<RegionalCoinTossUseCase.Bias, Integer, String> {

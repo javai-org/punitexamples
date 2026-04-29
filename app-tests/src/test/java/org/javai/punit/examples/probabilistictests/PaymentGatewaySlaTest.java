@@ -19,25 +19,20 @@ import org.javai.punit.junit5.PUnit;
  * <h2>Intent modes</h2>
  *
  * <ul>
- *   <li>{@link TestIntent#VERIFICATION} — sample size is sufficient
- *       for the target pass rate, so the framework can provide
- *       statistical evidence that the SUT meets the threshold.
- *       This is the default; if the configuration is undersized for
- *       the target, the framework rejects it pre-flight (the
- *       feasibility gate, see CV-feasibility / punit#77).</li>
+ *   <li>{@link TestIntent#VERIFICATION} (default) — sample size is
+ *       sufficient for the target pass rate, so the framework can
+ *       provide statistical evidence that the SUT meets the
+ *       threshold. Configurations undersized for the target are
+ *       rejected pre-flight.</li>
  *   <li>{@link TestIntent#SMOKE} — sample size is intentionally
- *       small relative to the target. Acts as a sentinel: catches
- *       catastrophic regressions quickly but does not claim
- *       statistical verification. The verdict notes the sizing gap
- *       so reviewers can see the caveat.</li>
+ *       small relative to the target. Catches catastrophic
+ *       regressions quickly but does not claim statistical
+ *       verification; the verdict records the sizing gap.</li>
  * </ul>
  *
- * <h2>Provenance</h2>
- *
  * <p>The {@link ThresholdOrigin} on the contractual criterion records
- * <em>where</em> the threshold came from — SLA, SLO, POLICY — for
- * audit traceability. Doesn't affect verdict logic; surfaces in
- * verdict reports and the YAML/XML output.
+ * where the threshold came from — SLA, SLO, POLICY — for audit
+ * traceability and surfaces in the verdict reports.
  */
 public class PaymentGatewaySlaTest {
 

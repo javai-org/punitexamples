@@ -10,12 +10,8 @@ import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.junit5.PUnit;
 
 /**
- * Demonstrates rate-limiting via {@link Pacing}.
- *
- * <p>When testing against rate-limited APIs (LLMs typically), the
- * test loop has to throttle requests below the API's documented
- * limits. The framework's {@link Pacing} record captures the
- * available knobs:
+ * Demonstrates rate-limiting via {@link Pacing}, useful when testing
+ * against rate-limited APIs (LLMs typically).
  *
  * <ul>
  *   <li>{@link Pacing.Builder#maxRequestsPerSecond(double)
@@ -26,32 +22,15 @@ import org.javai.punit.junit5.PUnit;
  *       {@code 60_000 / rpm} ms between samples.</li>
  *   <li>{@link Pacing.Builder#minMillisPerSample(long)
  *       minMillisPerSample} — explicit floor on the inter-sample
- *       gap, regardless of rate-derived calculation.</li>
+ *       gap.</li>
  *   <li>When multiple knobs combine, the most restrictive wins.</li>
  * </ul>
  *
- * <h2>Where pacing lives</h2>
- *
- * <p>The typed pipeline puts pacing on the use case via
- * {@link ShoppingBasketUseCase#pacing()}. Per the framework's
- * design, "pacing belongs to the service under test, not to a
- * specific experiment or probabilistic test exercising it" — every
- * test of the same service should respect the same rate limit.
- *
- * <p>For pedagogic demonstration of multiple pacing options we
- * thread the choice through the factory closure via
+ * <p>Pacing is a property of the use case (it belongs to the
+ * service under test, not to a particular test). The
  * {@link ShoppingBasketUseCase#samplingPaced(Pacing, List, int)
- * samplingPaced}; in real usage authors would pick one pacing for
- * their use case and not vary it per test.
- *
- * <h2>Migration shape</h2>
- *
- * <p>The legacy file used {@code @Pacing} on each test method to
- * declare per-test pacing. The typed file packages pacing into the
- * use case construction so authors who want one pacing for all
- * tests of a use case write it once on the use-case implementation;
- * the {@code samplingPaced(...)} factory exists only to demonstrate
- * the API surface here.
+ * samplingPaced} factory threads the pacing through for the
+ * demonstrations below.
  */
 public class ShoppingBasketPacingTest {
 

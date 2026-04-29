@@ -19,10 +19,9 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Use case for translating natural language shopping instructions to structured actions.
- *
- * <p>This use case demonstrates the <b>empirical approach</b> to probabilistic testing,
- * where thresholds are derived from measured baselines rather than external contracts.
+ * Use case for translating natural-language shopping instructions
+ * into structured actions via an LLM. Used by the empirical-baseline
+ * probabilistic-testing examples.
  *
  * <h2>Domain</h2>
  * <p>A user provides natural language instructions like "Add 2 apples" or "Clear the basket",

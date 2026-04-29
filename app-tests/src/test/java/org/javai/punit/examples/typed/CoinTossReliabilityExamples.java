@@ -11,10 +11,9 @@ import org.javai.punit.examples.typed.CoinTossUseCase;
 import org.javai.punit.junit5.PUnit;
 
 /**
- * Worked example — typed-compositional authoring under JUnit.
- *
- * <p>Demonstrates the three canonical authoring shapes that ship in
- * punit 1.0:
+ * Worked example for typed-compositional authoring under JUnit
+ * against {@link CoinTossUseCase}, a deterministic configurable
+ * use case. Demonstrates three authoring shapes:
  *
  * <ol>
  *   <li>{@code @Experiment} measure — produces a baseline file at
@@ -26,44 +25,33 @@ import org.javai.punit.junit5.PUnit;
  *       Wilson-score lower bound clears the recorded baseline rate.</li>
  * </ol>
  *
- * <p>The use case under test is {@link CoinTossUseCase} —
- * deterministic, configurable threshold, no external dependencies.
- * Real-world examples would substitute an LLM- or service-backed
- * use case in the same shape.
+ * <h2>Setup</h2>
+ *
+ * <p>Both phases need the same {@code punit.baseline.dir} system
+ * property pointing at a shared baseline directory.
  *
  * <h2>Running</h2>
  *
- * <p>The {@code @Experiment}-tagged tests are excluded from default
- * test runs; the punit Gradle plugin's {@code experiment} task
- * runs only them. {@code @ProbabilisticTest}-tagged tests run with
- * the standard {@code test} task. Both phases need the same
- * {@code punit.baseline.dir} system property pointing at a shared
- * baseline directory.
- *
  * <pre>{@code
- * # Phase 1 — establish the baseline.
+ * # 1. Establish the baseline.
  * ./gradlew experiment -Prun=CoinTossReliabilityExamples.measureBaseline \
  *     -Dpunit.baseline.dir="$PWD/build/punit/baselines"
  *
- * # Phase 2 — verify against the baseline.
+ * # 2. Verify against the baseline.
  * ./gradlew test --tests "CoinTossReliabilityExamples.shouldMeetSla" \
  *                --tests "CoinTossReliabilityExamples.shouldMatchBaseline" \
  *     -Dpunit.baseline.dir="$PWD/build/punit/baselines"
  * }</pre>
  *
- * <p><b>Why the two phases need separate sample shapes for the
- * empirical pair to PASS:</b> Wilson-score's one-sided lower bound
- * on the test's observed rate at confidence 95% is always strictly
- * below the test's observed value (by a margin that shrinks as
- * sample size grows). So when test and baseline observe the same
- * rate, the test's lower bound dips below the baseline's recorded
- * rate and the criterion FAILs — correctly enforcing statistical
- * rigour ("we observed 95% but cannot confidently claim the true
- * rate is ≥ 95%"). The example below uses a deterministic use case
- * whose observed rate at the test's smaller sample window
- * ({@code n=50}) is above the baseline's recorded rate (computed
- * across {@code n=1000} cycling through 100 inputs), giving the
- * Wilson check enough margin to clear.
+ * <p>Note on the empirical pair: Wilson-score's one-sided lower
+ * bound on the observed rate is always strictly below the observed
+ * value, by a margin that shrinks as sample size grows. So when
+ * test and baseline observe the same rate, the test's lower bound
+ * dips below the baseline rate and the criterion FAILs. The
+ * example uses a smaller sample window in the test ({@code n=50}
+ * over inputs 1..50, all passing under {@code threshold=94}) so
+ * the Wilson lower bound at observed=1.0 just clears the recorded
+ * 0.94 baseline.
  */
 public class CoinTossReliabilityExamples {
 
@@ -77,14 +65,9 @@ public class CoinTossReliabilityExamples {
             IntStream.rangeClosed(1, 100).boxed().collect(Collectors.toUnmodifiableList());
 
     /**
-     * The baseline supplier — a non-test method that returns a
-     * built {@link org.javai.punit.api.typed.spec.Experiment} value.
-     * Consumed by the empirical test below via
-     * {@link PUnit#testing(java.util.function.Supplier)}.
-     *
-     * <p>The {@link CoinTossUseCase#sampling sampling} helper is
-     * declared on the use case itself, so the type triple
-     * {@code <Bias, Integer, String>} doesn't appear here.
+     * Baseline supplier consumed by the empirical test below via
+     * {@link PUnit#testing(java.util.function.Supplier)}. Same
+     * sampling and factors as {@link #measureBaseline()}.
      */
     private org.javai.punit.api.typed.spec.Experiment baseline() {
         return PUnit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)

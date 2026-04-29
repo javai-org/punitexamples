@@ -7,20 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * JUnit test for PaymentGatewayUseCase reliability, derived from the
- * {@link PaymentGatewayReliability @Sentinel} specification.
- *
- * <p>Test methods ({@code testFunctionalCorrectness}, {@code testLatency},
- * {@code testCombinedReliability}) and the measure experiment are all inherited
- * from the Sentinel spec. This class provides only the JUnit-native setup via
- * {@code @RegisterExtension} and {@code @BeforeEach}, making it runnable on
- * developer workstations and in CI.
- *
- * <p>This is the <b>minimal JUnit adapter</b> pattern: a single line of
- * inheritance is sufficient to bridge a Sentinel reliability specification
- * into the JUnit ecosystem.
- *
- * @see PaymentGatewayReliability
+ * JUnit test for PaymentGatewayUseCase reliability. Inherits all probabilistic
+ * test methods and the measure experiment from
+ * {@link PaymentGatewayReliability @Sentinel}; supplies only the JUnit-native
+ * use-case provider wiring.
  */
 public class PaymentGatewayReliabilityTest extends PaymentGatewayReliability {
 

@@ -11,33 +11,29 @@ import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.usecase.UseCaseFactory;
 
 /**
- * Reliability specification for PaymentGatewayUseCase — demonstrating the
- * <b>two-dimension stochasticity model</b> with both functional and latency assertions.
+ * Reliability specification for {@link PaymentGatewayUseCase}, a
+ * {@link Sentinel @Sentinel}-annotated pure-Java spec containing a
+ * {@code @MeasureExperiment} and several {@code @ProbabilisticTest}
+ * methods.
  *
- * <p>This class is a {@link Sentinel @Sentinel}-annotated reliability specification:
- * pure Java, no JUnit dependencies. It uses {@link UseCaseFactory} directly and
- * contains {@code @MeasureExperiment} and {@code @ProbabilisticTest} methods.
- *
- * <p>The payment gateway use case has a {@link org.javai.punit.contract.ServiceContract}
- * with both a functional postcondition ("Transaction succeeded") and a
- * {@link org.javai.punit.contract.DurationConstraint} ("SLA: under 1 second").
- * This enables three dimension-scoped assertion styles:
+ * <p>The payment gateway use case has a service contract with both
+ * a functional postcondition and a duration constraint, so this
+ * spec exercises the three dimension-scoped assertion styles:
  * <ul>
- *   <li>{@code assertContract()} — functional correctness only</li>
- *   <li>{@code assertLatency()} — timing constraint only</li>
- *   <li>{@code assertAll()} — both dimensions (adaptive)</li>
+ *   <li>{@code assertContract()} — functional correctness only.</li>
+ *   <li>{@code assertLatency()} — timing constraint only.</li>
+ *   <li>{@code assertAll()} — both dimensions.</li>
  * </ul>
  *
- * <h2>Workflow</h2>
- * <pre>{@code
- * # Phase 1: Establish baseline (produces both functional and latency specs)
- * ./gradlew exp -Prun=PaymentGatewayReliabilityTest.measureBaseline
+ * <h2>Running</h2>
  *
- * # Phase 2: Verify against baseline (run in CI)
+ * <pre>{@code
+ * # 1. Establish baseline.
+ * ./gradlew experiment -Prun=PaymentGatewayReliabilityTest.measureBaseline
+ *
+ * # 2. Verify against baseline.
  * ./gradlew test --tests "PaymentGatewayReliabilityTest"
  * }</pre>
- *
- * @see PaymentGatewayUseCase
  */
 @Sentinel
 public class PaymentGatewayReliability {
@@ -48,22 +44,12 @@ public class PaymentGatewayReliability {
 		factory.register(PaymentGatewayUseCase.class, PaymentGatewayUseCase::new);
 	}
 
-	// =========================================================================
-	// MEASURE — establish baseline (run once / periodically)
-	// =========================================================================
-
 	/**
-	 * Establishes the production baseline for payment gateway reliability.
-	 *
-	 * <p>With 200 samples, this experiment captures both the functional success rate
-	 * and latency distribution. The framework produces two spec files:
-	 * <ul>
-	 *   <li>{@code PaymentGatewayUseCase.yaml} — functional baseline (pass rate)</li>
-	 *   <li>{@code PaymentGatewayUseCase.latency.yaml} — latency baseline (percentiles)</li>
-	 * </ul>
-	 *
-	 * @param useCase the use case instance (injected by PUnit)
-	 * @param captor records outcomes for aggregation
+	 * Establishes the baseline for payment gateway reliability.
+	 * Captures both the functional success rate and the latency
+	 * distribution; the framework produces both
+	 * {@code PaymentGatewayUseCase.yaml} (pass rate) and
+	 * {@code PaymentGatewayUseCase.latency.yaml} (percentiles).
 	 */
 	@MeasureExperiment(useCase = PaymentGatewayUseCase.class, samples = 200,
 			experimentId = "baseline-v1")
@@ -71,24 +57,11 @@ public class PaymentGatewayReliability {
 		captor.record(useCase.chargeCard("tok_visa_4242", 1999L));
 	}
 
-	// =========================================================================
-	// TEST — verify against baseline (run in CI)
-	// =========================================================================
-
 	/**
-	 * Tests functional correctness only — postconditions are evaluated,
-	 * but the latency constraint is not.
-	 *
-	 * <p>This test demonstrates {@code assertContract()} which isolates the
-	 * functional dimension. The verdict reports only functional pass/fail
-	 * statistics; latency data is absent.
-	 *
-	 * <p><b>Latency mechanisms:</b> None. {@code assertContract()} bypasses
-	 * the service contract's duration constraint. No {@code @Latency} annotation
-	 * is present, and any baseline-derived latency thresholds are not evaluated
-	 * because the latency dimension is not exercised.
-	 *
-	 * @param useCase the use case instance (injected by PUnit)
+	 * Tests functional correctness only via {@code assertContract()},
+	 * which evaluates postconditions but bypasses the service
+	 * contract's duration constraint. The verdict reports only
+	 * functional pass/fail statistics.
 	 */
 	@ProbabilisticTest(
 			useCase = PaymentGatewayUseCase.class,
@@ -103,21 +76,11 @@ public class PaymentGatewayReliability {
 	}
 
 	/**
-	 * Tests latency constraint only — the duration must be within the SLA limit,
-	 * but functional postconditions are not evaluated.
-	 *
-	 * <p>This test demonstrates {@code assertLatency()} which isolates the
-	 * latency dimension. The verdict reports only latency pass/fail statistics;
-	 * functional postcondition data is absent.
-	 *
-	 * <p><b>Latency mechanisms:</b> Service contract duration constraint only.
-	 * {@code assertLatency()} evaluates the {@code ensureDurationBelow("SLA",
-	 * Duration.ofSeconds(5))} constraint per sample. No {@code @Latency}
-	 * annotation is present, so no aggregate percentile thresholds are applied.
-	 * If a baseline spec with latency data exists, PUnit will additionally derive
-	 * aggregate percentile thresholds automatically (advisory by default).
-	 *
-	 * @param useCase the use case instance (injected by PUnit)
+	 * Tests the latency constraint only via {@code assertLatency()},
+	 * which evaluates the service contract's duration constraint
+	 * per sample but skips functional postconditions. If a baseline
+	 * spec with latency data exists, aggregate percentile thresholds
+	 * are also derived automatically (advisory by default).
 	 */
 	@ProbabilisticTest(
 			useCase = PaymentGatewayUseCase.class,
@@ -132,27 +95,16 @@ public class PaymentGatewayReliability {
 	}
 
 	/**
-	 * Tests functional correctness with explicit latency thresholds from the SLA.
+	 * Tests functional correctness with explicit aggregate latency
+	 * thresholds declared via the {@code latency = @Latency(...)}
+	 * attribute. PUnit measures wall-clock time per successful
+	 * sample, computes the observed percentile distribution, and
+	 * compares against the declared p95 and p99 thresholds. Both
+	 * pass-rate and latency dimensions must pass.
 	 *
-	 * <p>This test demonstrates the {@code latency} attribute of
-	 * {@code @ProbabilisticTest}, which declares contractual percentile
-	 * thresholds directly on the annotation. The SLA requires that 95% of
-	 * transactions complete within 500ms and 99% within 1000ms.
-	 *
-	 * <p>PUnit measures the wall-clock time of each successful sample, computes
-	 * the observed percentile distribution, and compares it against the declared
-	 * thresholds. Both the pass-rate and latency dimensions must pass for the
-	 * test to pass.
-	 *
-	 * <p><b>Latency mechanisms:</b> Two mechanisms are active. (1) The service
-	 * contract's duration constraint ({@code ensureDurationBelow}) is evaluated
-	 * per sample via {@code assertAll()}. (2) The explicit {@code @Latency}
-	 * annotation provides aggregate percentile thresholds (p95, p99) evaluated
-	 * after all samples complete. Note: explicit {@code @Latency} thresholds are
-	 * mutually exclusive with baseline-derived thresholds — if a baseline spec
-	 * with latency data exists, PUnit raises a configuration error.
-	 *
-	 * @param useCase the use case instance (injected by PUnit)
+	 * <p>Explicit {@code @Latency} thresholds are mutually exclusive
+	 * with baseline-derived thresholds — PUnit raises a configuration
+	 * error if a baseline spec with latency data also exists.
 	 */
 	@ProbabilisticTest(
 			useCase = PaymentGatewayUseCase.class,
@@ -171,23 +123,13 @@ public class PaymentGatewayReliability {
 	}
 
 	/**
-	 * Tests both dimensions — functional postconditions <b>and</b> latency constraint
-	 * are evaluated together. A sample passes only if both dimensions pass.
-	 *
-	 * <p>This test demonstrates {@code assertAll()} which adaptively asserts
-	 * whichever dimensions are configured on the service contract. Since
-	 * {@link PaymentGatewayUseCase} has both a functional postcondition and a
-	 * {@link org.javai.punit.contract.DurationConstraint}, both are evaluated.
-	 * The verdict includes per-dimension breakdown.
-	 *
-	 * <p><b>Latency mechanisms:</b> The service contract's duration constraint
-	 * is evaluated per sample via {@code assertAll()}. No explicit
-	 * {@code @Latency} annotation is present, but if a baseline spec with
-	 * latency data exists (from {@code measureBaseline}), PUnit automatically
-	 * derives aggregate percentile thresholds — advisory by default, enforced
-	 * when {@code -Dpunit.latency.enforce=true}.
-	 *
-	 * @param useCase the use case instance (injected by PUnit)
+	 * Tests both dimensions — functional postconditions and the
+	 * latency constraint — via {@code assertAll()}, which adaptively
+	 * asserts whichever dimensions are configured on the service
+	 * contract. The verdict includes a per-dimension breakdown. If
+	 * a baseline spec with latency data exists, aggregate percentile
+	 * thresholds are also derived automatically (advisory by default,
+	 * enforced under {@code -Dpunit.latency.enforce=true}).
 	 */
 	@ProbabilisticTest(
 			useCase = PaymentGatewayUseCase.class,

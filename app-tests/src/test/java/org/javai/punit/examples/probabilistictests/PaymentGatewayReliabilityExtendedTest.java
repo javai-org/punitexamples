@@ -16,23 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 /**
- * Extended JUnit test for PaymentGatewayUseCase reliability, demonstrating
- * that JUnit-specific concerns layer on top of the {@link PaymentGatewayReliability
- * @Sentinel} specification without modifying it.
- *
- * <p>This class inherits all test and measure methods from the Sentinel spec
- * and adds:
- * <ul>
- *   <li>{@code @DisplayName} for human-readable test names in reports</li>
- *   <li>{@code @Tag} for filtering and categorization</li>
- *   <li>Additional JUnit-only tests that complement the reliability specification</li>
- * </ul>
- *
- * <p>This pattern shows that JUnit concerns are additive — the reliability
- * specification remains the single source of truth, and the JUnit subclass
- * enriches it with framework-specific metadata and supplementary assertions.
- *
- * @see PaymentGatewayReliability
+ * Extends a {@code @Sentinel} reliability specification
+ * ({@link PaymentGatewayReliability}) with JUnit-only additions:
+ * {@code @DisplayName}, {@code @Tag}, and supplementary tests
+ * (probabilistic and standard) that share the same use case provider.
  */
 @DisplayName("Payment Gateway Reliability Suite")
 @Tag("reliability")
@@ -47,18 +34,6 @@ public class PaymentGatewayReliabilityExtendedTest extends PaymentGatewayReliabi
         provider.register(PaymentGatewayUseCase.class, PaymentGatewayUseCase::new);
     }
 
-    // =========================================================================
-    // ADDITIONAL JUNIT-ONLY TESTS
-    // =========================================================================
-
-    /**
-     * Verifies gateway consistency with a higher sample count.
-     *
-     * <p>This test is specific to the JUnit test suite — it uses a different
-     * card token and amount to exercise a broader input surface than the
-     * Sentinel spec defines. The reliability specification captures the
-     * canonical verification; this test extends coverage for CI.
-     */
     @ProbabilisticTest(
             useCase = PaymentGatewayUseCase.class,
             samples = 50,
@@ -72,12 +47,6 @@ public class PaymentGatewayReliabilityExtendedTest extends PaymentGatewayReliabi
         useCase.chargeCard("tok_mastercard_5555", 4999L).assertAll();
     }
 
-    /**
-     * Non-probabilistic sanity check: verifies the mock gateway is a singleton.
-     *
-     * <p>This is a standard JUnit test (not probabilistic), demonstrating that
-     * JUnit subclasses can freely mix probabilistic and deterministic tests.
-     */
     @Test
     @DisplayName("Mock gateway is a consistent singleton")
     void mockGatewaySingleton() {
