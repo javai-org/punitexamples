@@ -81,7 +81,7 @@ public class ShoppingBasketCovariateTest {
         // Switching to gpt-4-turbo. The covariate hash on the baseline
         // filename changes, so this test resolves a different baseline
         // file than the default-configuration test above.
-        LlmTuning gpt4Turbo = LlmTuning.DEFAULT.withModel("gpt-4-turbo");
+        LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
         Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), gpt4Turbo)
                 .criterion(BernoulliPassRate.empirical())
@@ -93,7 +93,7 @@ public class ShoppingBasketCovariateTest {
         // Lower temperature means the LLM is more deterministic. A
         // separate baseline captures whatever pass rate that produces
         // — typically higher than the default-temperature baseline.
-        LlmTuning lowTemp = LlmTuning.DEFAULT.withTemperature(0.1);
+        LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
         Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), lowTemp)
                 .criterion(BernoulliPassRate.empirical())
@@ -104,7 +104,7 @@ public class ShoppingBasketCovariateTest {
     void runsUnderHighTemperature() {
         // Higher temperature increases output variance. The baseline
         // for this configuration captures the looser pass rate.
-        LlmTuning highTemp = LlmTuning.DEFAULT.withTemperature(0.7);
+        LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
         Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), highTemp)
                 .criterion(BernoulliPassRate.empirical())
