@@ -97,11 +97,11 @@ public final class ShoppingBasketUseCase
         public static final LlmTuning DEFAULT = new LlmTuning(
                 DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_SYSTEM_PROMPT);
 
-        public LlmTuning withModel(String model) {
+        public LlmTuning model(String model) {
             return new LlmTuning(model, this.temperature, this.systemPrompt);
         }
 
-        public LlmTuning withTemperature(double temperature) {
+        public LlmTuning temperature(double temperature) {
             return new LlmTuning(this.model, temperature, this.systemPrompt);
         }
     }

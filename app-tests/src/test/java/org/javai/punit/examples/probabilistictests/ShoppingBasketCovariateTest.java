@@ -1,244 +1,113 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.app.llm.ChatLlmProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
- * Demonstrates the covariate system for environment-aware baseline matching.
+ * Demonstrates covariate-aware baseline matching with different LLM
+ * configurations.
  *
- * <p>Covariates are contextual factors that may influence system behavior but
- * aren't directly controlled by the test. PUnit uses covariates to:
+ * <p>{@link ShoppingBasketUseCase} declares {@code llm_model} and
+ * {@code temperature} as {@code CONFIGURATION}-category covariates.
+ * The framework's hard-gating rule means a baseline measured under
+ * one configuration ({@code gpt-4o-mini @ 0.3}) cannot silently
+ * match a test running under another ({@code gpt-4-turbo @ 0.1}) —
+ * each configuration partitions into its own baseline file.
+ *
+ * <h2>What this demonstrates</h2>
+ *
  * <ul>
- *   <li>Record environmental context in baselines</li>
- *   <li>Match tests to appropriate baselines</li>
- *   <li>Explain unexpected variance in results</li>
+ *   <li><b>Automatic covariate resolution</b> — the use case's
+ *       {@link ShoppingBasketUseCase#customCovariateResolvers()
+ *       customCovariateResolvers} reads model/temperature from the
+ *       resolved {@link LlmTuning} factor. No manual
+ *       {@code @CovariateSource} methods.</li>
+ *   <li><b>Automatic baseline partitioning</b> — measure runs under
+ *       different LlmTuning values produce separate baselines, each
+ *       stamped with its covariate hash per EX09.</li>
+ *   <li><b>Hard CONFIGURATION gating</b> — a test running under a
+ *       configuration with no matching baseline produces
+ *       INCONCLUSIVE rather than silently using a baseline from a
+ *       different configuration. The verdict's misalignment notes
+ *       explain which baseline was rejected and why.</li>
  * </ul>
  *
- * <h2>What This Demonstrates</h2>
- * <ul>
- *   <li>{@code covariateDayOfWeek} - Day-of-week partitioning via {@code @DayGroup}</li>
- *   <li>{@code covariateTimeOfDay} - Time-of-day partitioning</li>
- *   <li>Custom covariates via {@code @Covariate} in {@code @UseCase}</li>
- *   <li>{@code @CovariateSource} methods for custom covariate values</li>
- *   <li>{@code CovariateCategory} - How covariates affect baseline matching</li>
- * </ul>
+ * <h2>Migration note</h2>
  *
- * <h2>Covariate Categories</h2>
- * <ul>
- *   <li><b>TEMPORAL</b> - Time-based (day of week, time of day)</li>
- *   <li><b>CONFIGURATION</b> - System configuration (model, temperature)</li>
- *   <li><b>OPERATIONAL</b> - Operational context (region, timezone)</li>
- * </ul>
- *
- * <h2>How ShoppingBasketUseCase Uses Covariates</h2>
- * <p>The use case is annotated with:
- * <pre>{@code
- * @UseCase(
- *     covariateDayOfWeek = { @DayGroup({SATURDAY, SUNDAY}) },
- *     covariateTimeOfDay = { "08:00/4h", "16:00/4h" },
- *     covariates = {
- *         @Covariate(key = "llm_model", category = CONFIGURATION),
- *         @Covariate(key = "temperature", category = CONFIGURATION)
- *     }
- * )
- * }</pre>
- *
- * <p>The {@code @CovariateSource} methods provide values:
- * <pre>{@code
- * @CovariateSource("llm_model")
- * public String getModel() { return model; }
- *
- * @CovariateSource("temperature")
- * public double getTemperature() { return temperature; }
- * }</pre>
+ * <p>The legacy test used four nested {@code @Nested} classes
+ * (DefaultConfiguration, ExplicitModelConfiguration,
+ * LowTemperatureConfiguration, HighTemperatureConfiguration) — each
+ * with its own {@code @BeforeEach} registering a different
+ * {@code ShoppingBasketUseCase} variant via {@code UseCaseProvider}.
+ * The typed pipeline collapses this to four flat tests: configuration
+ * is a value (the {@link LlmTuning} factor) passed to
+ * {@code Punit.testing}, not a setup step. The use case's covariate
+ * declarations make the framework's selection automatic.
  *
  * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew test --tests "ShoppingBasketCovariateTest"
- * }</pre>
  *
- * @see ShoppingBasketUseCase
+ * <p>Each configuration needs its own baseline measurement. See
+ * {@code ShoppingBasketMeasure} for the measure phase (configurations
+ * mirror the test variants here).
  */
-// Run manually after generating baseline
 public class ShoppingBasketCovariateTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
+    @ProbabilisticTest
+    void runsUnderDefaultConfiguration() {
+        // Default LlmTuning: gpt-4o-mini @ 0.3 with the use case's
+        // shipping system prompt. The framework records llm_model
+        // and temperature as covariates on the resolved profile, so
+        // the baseline this test consults is the one measured under
+        // the same configuration.
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Tests with default configuration — automatic covariate recording.
-     */
-    @Nested
-    class DefaultConfiguration {
+    @ProbabilisticTest
+    void runsUnderExplicitModel() {
+        // Switching to gpt-4-turbo. The covariate hash on the baseline
+        // filename changes, so this test resolves a different baseline
+        // file than the default-configuration test above.
+        LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
-        static Stream<String> standardInstructions() {
-            return ShoppingBasketCovariateTest.standardInstructions();
-        }
-
-        @BeforeEach
-        void setUp() {
-            provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
-        }
-
-        /**
-         * Test that demonstrates automatic covariate recording.
-         *
-         * <p>When this test runs:
-         * <ul>
-         *   <li>PUnit captures current temporal covariates (day of week, time of day)</li>
-         *   <li>Retrieves configuration covariates from use case methods</li>
-         *   <li>Records all covariates in the test results</li>
-         *   <li>Uses covariates to find matching baseline</li>
-         * </ul>
-         *
-         * @param useCase the use case instance
-         * @param instruction the instruction to process
-         */
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50
-        )
-        @InputSource("standardInstructions")
-        void testWithAutomaticCovariates(
-                ShoppingBasketUseCase useCase,
-                String instruction
-        ) {
-            useCase.translateInstruction(instruction).assertContract();
-        }
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), gpt4Turbo)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Tests with an explicitly configured model covariate.
-     */
-    @Nested
-    class ExplicitModelConfiguration {
+    @ProbabilisticTest
+    void runsUnderLowTemperature() {
+        // Lower temperature means the LLM is more deterministic. A
+        // separate baseline captures whatever pass rate that produces
+        // — typically higher than the default-temperature baseline.
+        LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
-        static Stream<String> standardInstructions() {
-            return ShoppingBasketCovariateTest.standardInstructions();
-        }
-
-        @BeforeEach
-        void setUp() {
-            provider.register(ShoppingBasketUseCase.class, () ->
-                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4-turbo", 0.3,
-                            ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
-        }
-
-        /**
-         * Test with explicitly configured model covariate.
-         *
-         * <p>By setting the model explicitly, this test will match baselines
-         * that were recorded with the same model setting.
-         *
-         * @param useCase the use case instance
-         * @param instruction the instruction to process
-         */
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50
-        )
-        @InputSource("standardInstructions")
-        void testWithExplicitModelCovariate(
-                ShoppingBasketUseCase useCase,
-                String instruction
-        ) {
-            useCase.translateInstruction(instruction).assertContract();
-        }
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), lowTemp)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Tests with low temperature for high reliability.
-     */
-    @Nested
-    class LowTemperatureConfiguration {
+    @ProbabilisticTest
+    void runsUnderHighTemperature() {
+        // Higher temperature increases output variance. The baseline
+        // for this configuration captures the looser pass rate.
+        LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
-        static Stream<String> standardInstructions() {
-            return ShoppingBasketCovariateTest.standardInstructions();
-        }
-
-        @BeforeEach
-        void setUp() {
-            provider.register(ShoppingBasketUseCase.class, () ->
-                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.1,
-                            ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
-        }
-
-        /**
-         * Test with low temperature setting.
-         *
-         * <p>Temperature affects the "temperature" configuration covariate.
-         * Different temperatures will match different baselines (if available).
-         *
-         * @param useCase the use case instance
-         * @param instruction the instruction to process
-         */
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50
-        )
-        @InputSource("standardInstructions")
-        void testWithLowTemperature(
-                ShoppingBasketUseCase useCase,
-                String instruction
-        ) {
-            useCase.translateInstruction(instruction).assertContract();
-        }
-    }
-
-    /**
-     * Tests with high temperature demonstrating covariate impact on baseline selection.
-     */
-    @Nested
-    class HighTemperatureConfiguration {
-
-        static Stream<String> standardInstructions() {
-            return ShoppingBasketCovariateTest.standardInstructions();
-        }
-
-        @BeforeEach
-        void setUp() {
-            provider.register(ShoppingBasketUseCase.class, () ->
-                    new ShoppingBasketUseCase(ChatLlmProvider.resolve(), "gpt-4o-mini", 0.7,
-                            ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT));
-        }
-
-        /**
-         * Test demonstrating covariate impact on baseline selection.
-         *
-         * <p>When baselines exist for multiple covariate combinations, PUnit
-         * selects the most appropriate baseline based on current covariate values.
-         * If no exact match exists, it may use a default or report the mismatch.
-         *
-         * @param useCase the use case instance
-         * @param instruction the instruction to process
-         */
-        @ProbabilisticTest(
-                useCase = ShoppingBasketUseCase.class,
-                samples = 50
-        )
-        @InputSource("standardInstructions")
-        void testWithHighTemperature(
-                ShoppingBasketUseCase useCase,
-                String instruction
-        ) {
-            useCase.translateInstruction(instruction).assertContract();
-        }
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), highTemp)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 }
