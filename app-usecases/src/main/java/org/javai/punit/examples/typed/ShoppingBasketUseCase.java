@@ -136,6 +136,22 @@ public final class ShoppingBasketUseCase
                 samples, inputs);
     }
 
+    /**
+     * Builder form for tests that need to configure budgets, exception
+     * policy, or other Sampling knobs not exposed on the simpler
+     * {@link #sampling(List, int)} factory. Returns a partially-built
+     * Sampling.Builder ready for {@code .timeBudget(...)},
+     * {@code .tokenBudget(...)}, etc., terminated with {@code .build()}.
+     */
+    public static Sampling.Builder<LlmTuning, String, BasketTranslation> samplingBuilder(
+            List<String> inputs, int samples) {
+        return Sampling.<LlmTuning, String, BasketTranslation>builder()
+                .useCaseFactory(tuning -> new ShoppingBasketUseCase(
+                        ChatLlmProvider.resolve(), tuning))
+                .inputs(inputs)
+                .samples(samples);
+    }
+
     @Override
     public String id() {
         return "shopping-basket";
