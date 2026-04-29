@@ -1,6 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.nio.file.Path;
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
@@ -37,7 +36,7 @@ import org.javai.punit.power.PowerAnalysis;
  * <p>Use when statistical power is the binding constraint —
  * typically SLA monitoring where you must reliably detect
  * regressions of a specific size. The typed pipeline's
- * {@link PowerAnalysis#sampleSize(Path, java.util.function.Supplier, double, double)
+ * {@link PowerAnalysis#sampleSize(java.util.function.Supplier, double, double)
  * PowerAnalysis.sampleSize} computes the required sample count
  * from the baseline rate plus the (MDE, power) pair; the test
  * then runs at that count.
@@ -58,17 +57,6 @@ import org.javai.punit.power.PowerAnalysis;
  * recorded for audit.
  */
 public class ShoppingBasketThresholdApproachesTest {
-
-    /**
-     * The baseline directory the typed pipeline uses by default.
-     * Production code reads this from {@code punit.baseline.dir}
-     * via {@code BaselineProviderResolver}; we hardcode the
-     * convention path here so the confidence-first test can call
-     * {@link PowerAnalysis#sampleSize PowerAnalysis.sampleSize}
-     * without reaching into framework-internal API.
-     */
-    private static final Path BASELINE_DIR =
-            Path.of("src/test/resources/punit/baselines");
 
     private static final List<String> STANDARD_INSTRUCTIONS = List.of(
             "Add 2 apples",
@@ -107,7 +95,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // to detect a 5%-point degradation against the baseline
         // rate at 95% confidence and 80% power. The test then runs
         // at that count.
-        int n = PowerAnalysis.sampleSize(BASELINE_DIR, this::baseline, 0.05, 0.80);
+        int n = PowerAnalysis.sampleSize(this::baseline, 0.05, 0.80);
 
         Punit.testing(this::baseline)
                 .samples(n)
