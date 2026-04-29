@@ -1,5 +1,8 @@
 package org.javai.punit.examples.typed;
 
+import java.util.List;
+
+import org.javai.punit.api.typed.Sampling;
 import org.javai.punit.api.typed.UseCase;
 import org.javai.punit.api.typed.UseCaseOutcome;
 
@@ -42,6 +45,17 @@ public final class CoinTossUseCase implements UseCase<CoinTossUseCase.Bias, Inte
 
     public CoinTossUseCase(Bias bias) {
         this.threshold = bias.threshold();
+    }
+
+    /**
+     * Builds a {@link Sampling} for this use case with the triple
+     * {@code <Bias, Integer, String>} baked in. Tests can call this
+     * without spelling out the type parameters in their own
+     * signatures.
+     */
+    public static Sampling<Bias, Integer, String> sampling(
+            List<Integer> inputs, int samples) {
+        return Sampling.of(CoinTossUseCase::new, samples, inputs);
     }
 
     @Override
