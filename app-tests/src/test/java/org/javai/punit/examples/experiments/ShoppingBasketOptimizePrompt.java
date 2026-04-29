@@ -118,8 +118,7 @@ public class ShoppingBasketOptimizePrompt {
                 // null returns "no more candidates" which is fine.
                 return null;
             }
-            FactorsStepper.IterationResult<LlmTuning> last =
-                    history.get(history.size() - 1);
+            FactorsStepper.IterationResult<LlmTuning> last = history.getLast();
             String userMessage = """
                     Current system prompt:
                     %s
