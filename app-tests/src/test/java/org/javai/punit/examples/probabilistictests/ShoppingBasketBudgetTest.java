@@ -1,197 +1,114 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.BudgetExhaustedBehavior;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.ProbabilisticTestBudget;
-import org.javai.punit.api.TokenChargeRecorder;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.time.Duration;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.typed.spec.BudgetExhaustionPolicy;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
  * Demonstrates budget management features in probabilistic testing.
  *
- * <p>Budget management allows you to control resource consumption (time, tokens)
- * across probabilistic tests. This is essential when testing against paid APIs
- * or when tests need to complete within time constraints.
+ * <p>Budget management controls resource consumption (wall-clock
+ * time, LLM tokens) per test run. Essential when testing against
+ * paid APIs or when tests need to complete within a time-box.
  *
- * <h2>What This Demonstrates</h2>
+ * <h2>What this demonstrates</h2>
+ *
  * <ul>
- *   <li>{@code @ProbabilisticTestBudget} - Class-level shared budget</li>
- *   <li>{@code timeBudgetMs} - Time limit per test method</li>
- *   <li>{@code tokenBudget} - Token limit per test method</li>
- *   <li>{@code tokenCharge} - Static token charge per sample</li>
- *   <li>{@code TokenChargeRecorder} - Dynamic token recording</li>
- *   <li>{@code BudgetExhaustedBehavior} - What to do when budget runs out</li>
+ *   <li>{@code .timeBudget(Duration)} — wall-clock cap on the run.</li>
+ *   <li>{@code .tokenBudget(long)} — token cap on the run. The use
+ *       case stamps actual tokens via
+ *       {@code UseCaseOutcome.withTokens(...)} per sample, so the
+ *       engine totals real usage rather than relying on estimates.</li>
+ *   <li>{@code .onBudgetExhausted(BudgetExhaustionPolicy)} — what to
+ *       do when a budget is exceeded:
+ *       <ul>
+ *         <li>{@link BudgetExhaustionPolicy#FAIL} — fail the run,
+ *             refuse to emit a verdict on incomplete data</li>
+ *         <li>{@link BudgetExhaustionPolicy#PASS_INCOMPLETE} —
+ *             synthesise a verdict from samples completed so far,
+ *             attach a warning</li>
+ *       </ul>
+ *   </li>
  * </ul>
  *
- * <h2>Budget Hierarchy</h2>
- * <p>Budgets are checked in order: Suite → Class → Method.
- * The first exhausted budget triggers termination.
+ * <h2>What's <em>not</em> in the typed migration</h2>
  *
- * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew test --tests "ShoppingBasketBudgetTest"
- * }</pre>
+ * <p>The legacy test featured a class-level {@code @ProbabilisticTestBudget}
+ * shared across methods, plus a static-charge {@code tokenCharge}
+ * per-sample variant and a dynamic {@code TokenChargeRecorder}
+ * parameter. The typed pipeline doesn't have a class-level shared
+ * budget concept — budgets attach to a {@link Sampling} instance,
+ * one per test. Class-level budget enforcement would be a future
+ * framework addition; nothing prevents authors from declaring the
+ * same budget across multiple tests in the meantime.
  *
- * @see ShoppingBasketUseCase
+ * <p>The typed pipeline also folds static and dynamic token
+ * accounting into one path: the use case stamps actual tokens on
+ * each {@link org.javai.punit.api.typed.UseCaseOutcome}, the engine
+ * totals them, no recorder parameter required. This is strictly more
+ * accurate than the legacy static-charge estimate and removes a step
+ * from the test author's mental model.
  */
-// Run manually
-@ProbabilisticTestBudget(
-        timeBudgetMs = 60000,    // 60 second class budget
-        tokenBudget = 100000     // 100K token class budget
-)
 public class ShoppingBasketBudgetTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+    @ProbabilisticTest
+    void timeBudgetFailsRunOnExhaustion() {
+        // 10-second cap; budget exhaustion fails the run rather than
+        // emitting a verdict on incomplete data. Use this when the
+        // statistical claim requires the full sample set.
+        Punit.testing(
+                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                        .timeBudget(Duration.ofSeconds(10))
+                        .onBudgetExhausted(BudgetExhaustionPolicy.FAIL)
+                        .build(),
+                LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with time budget that fails on exhaustion.
-     *
-     * <p>If the test runs longer than 10 seconds, it will fail immediately
-     * rather than continuing with partial results.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            timeBudgetMs = 10000,  // 10 second method budget
-            onBudgetExhausted = BudgetExhaustedBehavior.FAIL
-    )
-    @InputSource("standardInstructions")
-    void testWithTimeBudgetFail(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+    @ProbabilisticTest
+    void timeBudgetEvaluatesPartialOnExhaustion() {
+        // Same time cap, but on exhaustion the engine synthesises a
+        // verdict from completed samples and attaches a warning. Use
+        // this when partial information is better than none — but be
+        // aware the verdict may not be statistically significant.
+        Punit.testing(
+                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                        .timeBudget(Duration.ofSeconds(10))
+                        .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
+                        .build(),
+                LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with time budget that evaluates partial results.
-     *
-     * <p>If the test runs longer than 10 seconds, it will evaluate whatever
-     * samples completed successfully. Use with caution - partial results
-     * may not be statistically significant.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            timeBudgetMs = 10000,
-            onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
-    )
-    @InputSource("standardInstructions")
-    void testWithTimeBudgetPartial(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with static token charge per sample.
-     *
-     * <p>Use this when you know the approximate token cost per invocation.
-     * The test will stop when total tokens would exceed the budget.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            tokenCharge = 150,      // Estimated 150 tokens per sample
-            tokenBudget = 10000,    // 10K token method budget
-            onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
-    )
-    @InputSource("standardInstructions")
-    void testWithStaticTokenCharge(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with dynamic token recording.
-     *
-     * <p>Use this when token costs vary per invocation. Record actual tokens
-     * used via the {@link TokenChargeRecorder} parameter.
-     *
-     * <p>The {@link ShoppingBasketUseCase} tracks tokens from each LLM call via
-     * {@link ShoppingBasketUseCase#getLastTokensUsed()}, which we pass to the
-     * token recorder.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     * @param tokenRecorder records actual token usage per sample
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            tokenBudget = 10000,
-            onBudgetExhausted = BudgetExhaustedBehavior.EVALUATE_PARTIAL
-    )
-    @InputSource("standardInstructions")
-    void testWithDynamicTokenRecording(
-            ShoppingBasketUseCase useCase,
-            String instruction,
-            TokenChargeRecorder tokenRecorder
-    ) {
-        var outcome = useCase.translateInstruction(instruction);
-
-        // Record actual tokens from the outcome metadata (extracted from response via withResult)
-        outcome.getMetadataLong("tokensUsed").ifPresent(tokenRecorder::recordTokens);
-
-        outcome.assertContract();
-    }
-
-    /**
-     * Multiple tests sharing the class-level budget.
-     *
-     * <p>When {@code @ProbabilisticTestBudget} is at class level, all methods
-     * share the budget. This test will contribute to class budget consumption.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @InputSource("standardInstructions")
-    void testContributingToClassBudget(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
+    @ProbabilisticTest
+    void tokenBudgetWithDynamicTracking() {
+        // 10K-token cap. The typed ShoppingBasketUseCase stamps
+        // response.totalTokens() onto each UseCaseOutcome via
+        // .withTokens(...), so the engine sees real usage per sample.
+        // No recorder parameter; no estimate; the use case is the
+        // source of truth.
+        Punit.testing(
+                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                        .tokenBudget(10_000L)
+                        .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
+                        .build(),
+                LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 }
