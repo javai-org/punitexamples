@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import org.javai.outcome.Outcome;
 import org.javai.punit.api.CovariateCategory;
+import org.javai.punit.api.typed.Pacing;
 import org.javai.punit.api.typed.Sampling;
 import org.javai.punit.api.typed.UseCase;
 import org.javai.punit.api.typed.UseCaseOutcome;
@@ -108,10 +109,21 @@ public final class ShoppingBasketUseCase
 
     private final ChatLlm llm;
     private final LlmTuning tuning;
+    private final Pacing pacing;
 
     public ShoppingBasketUseCase(ChatLlm llm, LlmTuning tuning) {
+        this(llm, tuning, Pacing.unlimited());
+    }
+
+    public ShoppingBasketUseCase(ChatLlm llm, LlmTuning tuning, Pacing pacing) {
         this.llm = llm;
         this.tuning = tuning;
+        this.pacing = pacing;
+    }
+
+    @Override
+    public Pacing pacing() {
+        return pacing;
     }
 
     /**
@@ -133,6 +145,21 @@ public final class ShoppingBasketUseCase
             ChatLlm llm, List<String> inputs, int samples) {
         return Sampling.of(
                 tuning -> new ShoppingBasketUseCase(llm, tuning),
+                samples, inputs);
+    }
+
+    /**
+     * Sampling whose constructed use case respects the supplied
+     * {@link Pacing}. Pacing belongs to the service under test —
+     * the typed pipeline reads it from {@link #pacing()} on the
+     * use case instance — and this helper threads a per-test
+     * pacing choice through the factory closure.
+     */
+    public static Sampling<LlmTuning, String, BasketTranslation> samplingPaced(
+            Pacing pacing, List<String> inputs, int samples) {
+        return Sampling.of(
+                tuning -> new ShoppingBasketUseCase(
+                        ChatLlmProvider.resolve(), tuning, pacing),
                 samples, inputs);
     }
 
