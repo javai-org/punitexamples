@@ -1,128 +1,82 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.typed.Sampling;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.app.llm.ChatLlmProvider;
+import org.javai.punit.examples.app.shopping.ShoppingActionValidator.ValidationResult;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.Config;
+import org.javai.punit.junit5.Punit;
 
 /**
- * Core probabilistic test for ShoppingBasketUseCase.
+ * Core probabilistic test for the typed
+ * {@link ShoppingBasketUseCase}.
  *
- * <p>This test demonstrates the fundamental pattern of spec-driven probabilistic
- * testing, where thresholds are derived from baselines established by
- * {@link org.javai.punit.examples.experiments.ShoppingBasketMeasure}.
+ * <p>Demonstrates the empirical-pair pattern with a real LLM-backed
+ * use case: a measure run records the LLM's observed pass rate
+ * under a configuration, and this test verifies a future run under
+ * the same configuration still meets the recorded baseline.
  *
- * <h2>What This Demonstrates</h2>
+ * <h2>What this demonstrates</h2>
+ *
  * <ul>
- *   <li>{@code @ProbabilisticTest} annotation for probabilistic testing</li>
- *   <li>{@code useCase} parameter for automatic use case instantiation</li>
- *   <li>Spec-driven thresholds (loaded from baseline measurements)</li>
- *   <li>Statistical significance in pass/fail determination</li>
+ *   <li>Typed-API authoring for an LLM-backed use case
+ *       (factor record, typed apply, covariate declarations).</li>
+ *   <li>Empirical {@link BernoulliPassRate} criterion — the test
+ *       passes when the Wilson-score lower bound on observed
+ *       success rate clears the recorded baseline rate.</li>
+ *   <li>Two test variants — one over varied instructions, one
+ *       over a controlled single instruction. The single-instruction
+ *       form isolates the test from input variance, making it
+ *       easier to detect drift in LLM behaviour.</li>
  * </ul>
  *
- * <h2>How It Works</h2>
- * <ol>
- *   <li>PUnit loads the spec from {@code punit/specs/ShoppingBasketUseCase.yaml}</li>
- *   <li>Derives the minimum pass rate threshold from baseline statistics</li>
- *   <li>Runs the configured number of samples</li>
- *   <li>Passes if observed rate meets/exceeds derived threshold</li>
- * </ol>
- *
  * <h2>Running</h2>
- * <pre>{@code
- * # First, generate the baseline (if not already done)
- * ./gradlew test --tests "ShoppingBasketMeasure"
  *
- * # Then run the test
+ * <pre>{@code
+ * # Phase 1 — establish the baseline:
+ * ./gradlew experiment -Prun=ShoppingBasketMeasure
+ *
+ * # Phase 2 — verify against the baseline:
  * ./gradlew test --tests "ShoppingBasketTest"
  * }</pre>
- *
- * @see ShoppingBasketUseCase
- * @see org.javai.punit.examples.experiments.ShoppingBasketMeasure
  */
-// Run manually after generating baseline with ShoppingBasketMeasure
 public class ShoppingBasketTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+    private static final List<String> SINGLE_INSTRUCTION =
+            List.of("Add 2 apples and remove the bread");
+
+    private static Sampling<Config, String, ValidationResult> sampling(
+            List<String> inputs, int samples) {
+        return Sampling.<Config, String, ValidationResult>builder()
+                .useCaseFactory(cfg -> new ShoppingBasketUseCase(
+                        ChatLlmProvider.resolve(), cfg))
+                .inputs(inputs)
+                .samples(samples)
+                .build();
     }
 
-    /**
-     * Tests shopping basket instruction translation with spec-derived threshold.
-     *
-     * <p>This test:
-     * <ul>
-     *   <li>Runs 100 samples with varied instructions</li>
-     *   <li>Uses threshold derived from baseline measurement</li>
-     *   <li>Passes if success rate meets statistical expectations</li>
-     * </ul>
-     *
-     * @param useCase the use case instance (auto-wired by PUnit)
-     * @param instruction the instruction to translate
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100
-    )
-    @InputSource("standardInstructions")
-    void testInstructionTranslation(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+    @ProbabilisticTest
+    void testInstructionTranslation() {
+        Punit.testing(sampling(STANDARD_INSTRUCTIONS, 100), Config.defaults())
+                .criterion(BernoulliPassRate.<ValidationResult>empirical())
+                .assertPasses();
     }
 
-    /**
-     * Tests with a controlled single instruction for focused verification.
-     *
-     * <p>Using a single instruction isolates the test from input variance,
-     * making it easier to detect changes in LLM behavior.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction (always "Add 2 apples and remove the bread")
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100
-    )
-    @InputSource("singleInstruction")
-    void testControlledInstruction(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════
-    // INPUT SOURCES - Test input data
-    // ═══════════════════════════════════════════════════════════════════════════
-
-    /**
-     * Standard instructions for varied testing.
-     */
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
-    }
-
-    /**
-     * Single instruction for controlled testing.
-     */
-    static Stream<String> singleInstruction() {
-        return Stream.of("Add 2 apples and remove the bread");
+    @ProbabilisticTest
+    void testControlledInstruction() {
+        Punit.testing(sampling(SINGLE_INSTRUCTION, 100), Config.defaults())
+                .criterion(BernoulliPassRate.<ValidationResult>empirical())
+                .assertPasses();
     }
 }
