@@ -58,12 +58,10 @@ public class ShoppingBasketTest {
 
     private static Sampling<Config, String, ValidationResult> sampling(
             List<String> inputs, int samples) {
-        return Sampling.<Config, String, ValidationResult>builder()
-                .useCaseFactory(cfg -> new ShoppingBasketUseCase(
-                        ChatLlmProvider.resolve(), cfg))
-                .inputs(inputs)
-                .samples(samples)
-                .build();
+        return Sampling.of(
+                cfg -> new ShoppingBasketUseCase(ChatLlmProvider.resolve(), cfg),
+                samples,
+                inputs);
     }
 
     @ProbabilisticTest

@@ -77,11 +77,7 @@ public class RegionalCoinTossExamples {
                     .collect(Collectors.toUnmodifiableList());
 
     private static Sampling<RegionalCoinTossUseCase.Bias, Integer, String> sampling(int samples) {
-        return Sampling.<RegionalCoinTossUseCase.Bias, Integer, String>builder()
-                .useCaseFactory(RegionalCoinTossUseCase::new)
-                .inputs(CYCLE_1_TO_100)
-                .samples(samples)
-                .build();
+        return Sampling.of(RegionalCoinTossUseCase::new, samples, CYCLE_1_TO_100);
     }
 
     // ── Phase 1: measure baselines, one per region ─────────────────
