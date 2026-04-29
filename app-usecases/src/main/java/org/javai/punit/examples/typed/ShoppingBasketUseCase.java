@@ -15,7 +15,7 @@ import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.app.llm.ChatResponse;
 import org.javai.punit.examples.app.shopping.ShoppingAction;
 import org.javai.punit.examples.app.shopping.ShoppingActionValidator;
-import org.javai.punit.examples.app.shopping.ShoppingActionValidator.ValidationResult;
+import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTranslation;
 
 /**
  * Typed-API translation of natural-language shopping instructions
@@ -25,7 +25,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.ValidationR
  * sampling temperature, and system prompt — the parameters an
  * experiment varies. The input type is the natural-language
  * instruction. The success-output type is the validated
- * {@link ValidationResult} carrying the parsed actions; a sample
+ * {@link BasketTranslation} carrying the parsed actions; a sample
  * fails when the LLM response is unparseable, deserialises to
  * unknown actions, or carries an action whose name is invalid for
  * its declared context.
@@ -54,7 +54,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.ValidationR
  * factory.
  */
 public final class ShoppingBasketUseCase
-        implements UseCase<ShoppingBasketUseCase.LlmTuning, String, ValidationResult> {
+        implements UseCase<ShoppingBasketUseCase.LlmTuning, String, BasketTranslation> {
 
     public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final double DEFAULT_TEMPERATURE = 0.3;
@@ -117,19 +117,19 @@ public final class ShoppingBasketUseCase
     /**
      * Builds a {@link Sampling} configured to construct this use case
      * via {@link ChatLlmProvider#resolve()}. The triple
-     * {@code <LlmTuning, String, ValidationResult>} is baked in here so
+     * {@code <LlmTuning, String, BasketTranslation>} is baked in here so
      * test methods don't need to spell it out.
      *
      * <p>For tests that need to inject a custom {@link ChatLlm}
      * (mocked LLMs in offline runs, alternative providers), use
      * {@link #samplingWith(ChatLlm, List, int)} instead.
      */
-    public static Sampling<LlmTuning, String, ValidationResult> sampling(
+    public static Sampling<LlmTuning, String, BasketTranslation> sampling(
             List<String> inputs, int samples) {
         return samplingWith(ChatLlmProvider.resolve(), inputs, samples);
     }
 
-    public static Sampling<LlmTuning, String, ValidationResult> samplingWith(
+    public static Sampling<LlmTuning, String, BasketTranslation> samplingWith(
             ChatLlm llm, List<String> inputs, int samples) {
         return Sampling.of(
                 tuning -> new ShoppingBasketUseCase(llm, tuning),
@@ -156,7 +156,7 @@ public final class ShoppingBasketUseCase
     }
 
     @Override
-    public UseCaseOutcome<ValidationResult> apply(String instruction) {
+    public UseCaseOutcome<BasketTranslation> apply(String instruction) {
         ChatResponse response;
         try {
             response = llm.chatWithMetadata(
@@ -166,26 +166,26 @@ public final class ShoppingBasketUseCase
             // Network / API failures are surface-level errors that
             // belong on the Outcome channel — they're an expected
             // class of LLM behaviour, not a defect in the test.
-            return UseCaseOutcome.<ValidationResult>fail(
+            return UseCaseOutcome.<BasketTranslation>fail(
                     "llm-error", e.getMessage())
                     .withTokens(0);
         }
         if (response.content() == null || response.content().isBlank()) {
-            return UseCaseOutcome.<ValidationResult>fail(
+            return UseCaseOutcome.<BasketTranslation>fail(
                     "empty-response", "LLM returned no content")
                     .withTokens(response.totalTokens());
         }
-        Outcome<ValidationResult> validated = ShoppingActionValidator.validate(response);
-        if (validated instanceof Outcome.Fail<ValidationResult> failure) {
-            return UseCaseOutcome.<ValidationResult>fail(
+        Outcome<BasketTranslation> validated = ShoppingActionValidator.validate(response);
+        if (validated instanceof Outcome.Fail<BasketTranslation> failure) {
+            return UseCaseOutcome.<BasketTranslation>fail(
                     failure.failure().id().name(),
                     failure.failure().message())
                     .withTokens(response.totalTokens());
         }
-        ValidationResult result = validated.getOrThrow();
+        BasketTranslation result = validated.getOrThrow();
         for (ShoppingAction action : result.actions()) {
             if (!action.context().isValidAction(action.name())) {
-                return UseCaseOutcome.<ValidationResult>fail(
+                return UseCaseOutcome.<BasketTranslation>fail(
                         "invalid-action",
                         "Invalid action '%s' for context %s"
                                 .formatted(action.name(), action.context()))

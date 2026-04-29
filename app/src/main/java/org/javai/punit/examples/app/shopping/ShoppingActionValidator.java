@@ -23,9 +23,9 @@ public class ShoppingActionValidator {
      *
      * @param actions the parsed actions (empty if validation failed)
      */
-	public record ValidationResult(List<ShoppingAction> actions) {
-        static ValidationResult of(List<ShoppingAction> actions) {
-            return new ValidationResult(List.copyOf(actions));
+	public record BasketTranslation(List<ShoppingAction> actions) {
+        static BasketTranslation of(List<ShoppingAction> actions) {
+            return new BasketTranslation(List.copyOf(actions));
         }
     }
 
@@ -37,7 +37,7 @@ public class ShoppingActionValidator {
      * @param response the chat response containing JSON content
      * @return an outcome containing the validation result, or a failure with details
      */
-    public static Outcome<ValidationResult> validate(ChatResponse response) {
+    public static Outcome<BasketTranslation> validate(ChatResponse response) {
         String json = response.content();
         if (json == null || json.isBlank()) {
             return Outcome.fail("validation", "Response content is null or blank");
@@ -62,7 +62,7 @@ public class ShoppingActionValidator {
         return parseActionArray(actionsNode);
     }
 
-    private static Outcome<ValidationResult> parseActionArray(JsonNode arrayNode) {
+    private static Outcome<BasketTranslation> parseActionArray(JsonNode arrayNode) {
         List<ShoppingAction> actions = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
@@ -87,6 +87,6 @@ public class ShoppingActionValidator {
             return Outcome.fail("validation", "Empty actions array");
         }
 
-        return Outcome.ok(ValidationResult.of(actions));
+        return Outcome.ok(BasketTranslation.of(actions));
     }
 }

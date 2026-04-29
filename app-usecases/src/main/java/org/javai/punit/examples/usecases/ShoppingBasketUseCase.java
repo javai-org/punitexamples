@@ -92,7 +92,7 @@ public class ShoppingBasketUseCase {
                 : Outcome.fail("check", "content was null or blank");
     }
 
-    private static @NonNull Outcome<Void> hasValidAction(ShoppingActionValidator.ValidationResult result) {
+    private static @NonNull Outcome<Void> hasValidAction(ShoppingActionValidator.BasketTranslation result) {
         if (result.actions().isEmpty()) {
             return Outcome.fail("check", "No actions in result");
         }
