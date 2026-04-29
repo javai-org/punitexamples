@@ -11,49 +11,26 @@ import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.junit5.PUnit;
 
 /**
- * Demonstrates budget management features in probabilistic testing.
- *
- * <p>Budget management controls resource consumption (wall-clock
- * time, LLM tokens) per test run. Essential when testing against
- * paid APIs or when tests need to complete within a time-box.
- *
- * <h2>What this demonstrates</h2>
+ * Demonstrates budget management — controlling wall-clock time and
+ * LLM token consumption per test run, essential when testing against
+ * paid APIs or under a CI time-box.
  *
  * <ul>
  *   <li>{@code .timeBudget(Duration)} — wall-clock cap on the run.</li>
  *   <li>{@code .tokenBudget(long)} — token cap on the run. The use
  *       case stamps actual tokens via
- *       {@code UseCaseOutcome.withTokens(...)} per sample, so the
- *       engine totals real usage rather than relying on estimates.</li>
+ *       {@code UseCaseOutcome.withTokens(...)} per sample.</li>
  *   <li>{@code .onBudgetExhausted(BudgetExhaustionPolicy)} — what to
  *       do when a budget is exceeded:
  *       <ul>
  *         <li>{@link BudgetExhaustionPolicy#FAIL} — fail the run,
- *             refuse to emit a verdict on incomplete data</li>
+ *             refuse to emit a verdict on incomplete data.</li>
  *         <li>{@link BudgetExhaustionPolicy#PASS_INCOMPLETE} —
  *             synthesise a verdict from samples completed so far,
- *             attach a warning</li>
+ *             attach a warning.</li>
  *       </ul>
  *   </li>
  * </ul>
- *
- * <h2>What's <em>not</em> in the typed migration</h2>
- *
- * <p>The legacy test featured a class-level {@code @ProbabilisticTestBudget}
- * shared across methods, plus a static-charge {@code tokenCharge}
- * per-sample variant and a dynamic {@code TokenChargeRecorder}
- * parameter. The typed pipeline doesn't have a class-level shared
- * budget concept — budgets attach to a {@link Sampling} instance,
- * one per test. Class-level budget enforcement would be a future
- * framework addition; nothing prevents authors from declaring the
- * same budget across multiple tests in the meantime.
- *
- * <p>The typed pipeline also folds static and dynamic token
- * accounting into one path: the use case stamps actual tokens on
- * each {@link org.javai.punit.api.typed.UseCaseOutcome}, the engine
- * totals them, no recorder parameter required. This is strictly more
- * accurate than the legacy static-charge estimate and removes a step
- * from the test author's mental model.
  */
 public class ShoppingBasketBudgetTest {
 
@@ -97,11 +74,9 @@ public class ShoppingBasketBudgetTest {
 
     @ProbabilisticTest
     void tokenBudgetWithDynamicTracking() {
-        // 10K-token cap. The typed ShoppingBasketUseCase stamps
-        // response.totalTokens() onto each UseCaseOutcome via
-        // .withTokens(...), so the engine sees real usage per sample.
-        // No recorder parameter; no estimate; the use case is the
-        // source of truth.
+        // 10K-token cap. The use case stamps response.totalTokens()
+        // onto each UseCaseOutcome via .withTokens(...), so the engine
+        // sees real usage per sample.
         PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .tokenBudget(10_000L)

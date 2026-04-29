@@ -10,43 +10,25 @@ import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.junit5.PUnit;
 
 /**
- * Worked example — covariate-aware testing under JUnit.
+ * Worked example for covariate-aware testing. The use case
+ * ({@link RegionalCoinTossUseCase}) declares a
+ * {@code CONFIGURATION}-category {@code region} covariate captured
+ * at sample time from a system property. Measure runs under
+ * different regions produce separate baseline files; tests
+ * automatically resolve the matching baseline. A test running
+ * under a region with no recorded baseline produces INCONCLUSIVE
+ * rather than silently using a baseline from a different region.
  *
- * <p>Companion to {@link CoinTossReliabilityExamples}, demonstrating
- * the framework's covariate machinery: a use case declares
- * environmental conditions it's sensitive to, the framework
- * partitions baselines by resolved values, and tests automatically
- * select the matching baseline.
- *
- * <h2>What this demonstrates</h2>
- *
- * <ol>
- *   <li><b>Custom covariate declarations</b> — see
- *       {@link RegionalCoinTossUseCase#covariates()}: a
- *       {@code CONFIGURATION}-category {@code region} covariate
- *       captured at sample time from a system property.</li>
- *   <li><b>Automatic baseline partitioning</b> — measure runs under
- *       different region values produce separate baseline files,
- *       distinguished by per-covariate hashes in the filename
- *       (per EX09).</li>
- *   <li><b>Hard CONFIGURATION gating</b> — a probabilistic test
- *       running under a region with no recorded baseline fails as
- *       INCONCLUSIVE rather than silently using a baseline measured
- *       under a different region.</li>
- *   <li><b>Misalignment surfaced in the verdict</b> — when no
- *       baseline matches, the verdict warning explains <i>why</i>
- *       (e.g. {@code rejected …yaml — CONFIGURATION mismatch on
- *       region (current=APAC, baseline=EU)}).</li>
- * </ol>
- *
- * <h2>Running</h2>
+ * <h2>Setup</h2>
  *
  * <p>Both phases need {@code punit.baseline.dir} pointing at a
  * shared baseline directory and {@code punit.example.region} set to
- * the region under test:
+ * the region under test.
+ *
+ * <h2>Running</h2>
  *
  * <pre>{@code
- * # Phase 1 — establish baselines under each region.
+ * # 1. Establish baselines under each region.
  * ./gradlew experiment -Prun=RegionalCoinTossExamples.measureBaselineEu \
  *     -Dpunit.baseline.dir="$PWD/build/punit/baselines" \
  *     -Dpunit.example.region=EU
@@ -55,16 +37,15 @@ import org.javai.punit.junit5.PUnit;
  *     -Dpunit.baseline.dir="$PWD/build/punit/baselines" \
  *     -Dpunit.example.region=APAC
  *
- * # Phase 2 — verify against the baseline matching the runtime region.
+ * # 2. Verify against the baseline matching the runtime region.
  * ./gradlew test --tests "RegionalCoinTossExamples.shouldMatchBaseline" \
  *     -Dpunit.baseline.dir="$PWD/build/punit/baselines" \
  *     -Dpunit.example.region=EU
  * }</pre>
  *
- * <p>A test run with {@code -Dpunit.example.region=US} (no baseline
- * recorded) demonstrates the INCONCLUSIVE-with-misalignment-notes
- * outcome — useful for showcasing what authors see when their test
- * environment drifts from the measurement environment.
+ * <p>Running the test with {@code -Dpunit.example.region=US} (no
+ * recorded baseline) produces an INCONCLUSIVE verdict whose
+ * misalignment notes explain which baselines were rejected and why.
  */
 public class RegionalCoinTossExamples {
 
@@ -75,14 +56,11 @@ public class RegionalCoinTossExamples {
             IntStream.rangeClosed(1, 100).boxed()
                     .collect(Collectors.toUnmodifiableList());
 
-    // ── Phase 1: measure baselines, one per region ─────────────────
-
     @Experiment
     void measureBaselineEu() {
         // Run with -Dpunit.example.region=EU. The framework resolves
-        // region → "EU" once at the start of the run and stamps it
-        // into the baseline file's filename + body. A subsequent
-        // run under a different region writes to a different file.
+        // region → "EU" at run start and stamps it into the baseline
+        // file's filename and body.
         PUnit.measuring(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .run();
@@ -90,30 +68,20 @@ public class RegionalCoinTossExamples {
 
     @Experiment
     void measureBaselineApac() {
-        // Run with -Dpunit.example.region=APAC. Same use case,
-        // different region — a separate baseline file results, and
-        // tests under region=APAC will match this one rather than
-        // the EU baseline.
+        // Run with -Dpunit.example.region=APAC. Writes to a separate
+        // baseline file from the EU run.
         PUnit.measuring(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .run();
     }
 
-    // ── Phase 2: probabilistic test resolves the matching baseline ─
-
     @ProbabilisticTest
     void shouldMatchBaseline() {
-        // The framework reads punit.example.region at run start,
-        // looks for a baseline whose covariate profile matches
-        // (region=EU resolves the EU baseline; region=APAC resolves
-        // the APAC baseline; region=US would be INCONCLUSIVE since
-        // no baseline matches and CONFIGURATION is hard-gated).
-        //
-        // The criterion's confidence is loosened to 0.50 so the
-        // worked example doesn't depend on a tighter Wilson margin
-        // — the educational point is covariate-aware lookup, not
-        // statistical sizing (see CoinTossReliabilityExamples for
-        // the sizing chapter).
+        // The framework reads punit.example.region at run start and
+        // looks for a baseline whose covariate profile matches.
+        // Confidence loosened to 0.50 so the assertion doesn't
+        // depend on a tight Wilson margin — the focus here is
+        // covariate-aware lookup, not statistical sizing.
         PUnit.testing(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 50), BIAS_94)
                 // Explicit witness needed when chaining .atConfidence:
                 // the chain breaks target-type inference and empirical()
@@ -123,13 +91,10 @@ public class RegionalCoinTossExamples {
                 .assertPasses();
     }
 
-    // ── A contractual sibling for comparison ───────────────────────
-
     @ProbabilisticTest
     void shouldMeetSla() {
-        // Contractual tests don't consult a baseline, so covariates
-        // play no role here — the threshold is an external SLA. A
-        // test running under any region uses the same threshold.
+        // Contractual: threshold is an external SLA. Covariates play
+        // no role — the same threshold applies regardless of region.
         PUnit.testing(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
                 .criterion(BernoulliPassRate.meeting(
                         0.90, ThresholdOrigin.SLA))

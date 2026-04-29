@@ -9,51 +9,19 @@ import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.junit5.PUnit;
 
 /**
- * Demonstrates covariate-aware baseline matching with different LLM
- * configurations.
+ * Demonstrates covariate-aware baseline matching across LLM
+ * configurations. {@link ShoppingBasketUseCase} declares
+ * {@code llm_model} and {@code temperature} as {@code CONFIGURATION}
+ * covariates, and each configuration partitions into its own
+ * baseline file. A test running under a configuration with no
+ * matching baseline produces INCONCLUSIVE rather than silently
+ * using a different configuration's baseline.
  *
- * <p>{@link ShoppingBasketUseCase} declares {@code llm_model} and
- * {@code temperature} as {@code CONFIGURATION}-category covariates.
- * The framework's hard-gating rule means a baseline measured under
- * one configuration ({@code gpt-4o-mini @ 0.3}) cannot silently
- * match a test running under another ({@code gpt-4-turbo @ 0.1}) —
- * each configuration partitions into its own baseline file.
+ * <h2>Setup</h2>
  *
- * <h2>What this demonstrates</h2>
- *
- * <ul>
- *   <li><b>Automatic covariate resolution</b> — the use case's
- *       {@link ShoppingBasketUseCase#customCovariateResolvers()
- *       customCovariateResolvers} reads model/temperature from the
- *       resolved {@link LlmTuning} factor. No manual
- *       {@code @CovariateSource} methods.</li>
- *   <li><b>Automatic baseline partitioning</b> — measure runs under
- *       different LlmTuning values produce separate baselines, each
- *       stamped with its covariate hash per EX09.</li>
- *   <li><b>Hard CONFIGURATION gating</b> — a test running under a
- *       configuration with no matching baseline produces
- *       INCONCLUSIVE rather than silently using a baseline from a
- *       different configuration. The verdict's misalignment notes
- *       explain which baseline was rejected and why.</li>
- * </ul>
- *
- * <h2>Migration note</h2>
- *
- * <p>The legacy test used four nested {@code @Nested} classes
- * (DefaultConfiguration, ExplicitModelConfiguration,
- * LowTemperatureConfiguration, HighTemperatureConfiguration) — each
- * with its own {@code @BeforeEach} registering a different
- * {@code ShoppingBasketUseCase} variant via {@code UseCaseProvider}.
- * The typed pipeline collapses this to four flat tests: configuration
- * is a value (the {@link LlmTuning} factor) passed to
- * {@code PUnit.testing}, not a setup step. The use case's covariate
- * declarations make the framework's selection automatic.
- *
- * <h2>Running</h2>
- *
- * <p>Each configuration needs its own baseline measurement. See
- * {@code ShoppingBasketMeasure} for the measure phase (configurations
- * mirror the test variants here).
+ * <p>Each configuration needs its own baseline measurement before
+ * the matching test will succeed. See {@code ShoppingBasketMeasure}
+ * for the measure phase.
  */
 public class ShoppingBasketCovariateTest {
 

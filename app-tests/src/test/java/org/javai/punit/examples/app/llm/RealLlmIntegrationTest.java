@@ -9,25 +9,21 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 /**
- * Manual integration tests for real LLM providers.
+ * Manual integration tests that exercise real LLM providers (OpenAI, Anthropic)
+ * end-to-end through {@link RoutingChatLlm}.
  *
- * <p>These tests are disabled by default because they require API keys.
- * To run manually:
+ * <h2>Setup</h2>
  *
  * <pre>{@code
- * # Set up API keys
  * export OPENAI_API_KEY=sk-...
  * export ANTHROPIC_API_KEY=sk-ant-...
- *
- * # Run a specific test
- * ./gradlew test --tests "RealLlmIntegrationTest.OpenAiIntegration" -Dpunit.llm.mode=real
- *
- * # Or run all integration tests
- * ./gradlew test --tests "RealLlmIntegrationTest" -Dpunit.llm.mode=real
  * }</pre>
  *
- * <p>These tests verify that the real LLM implementations work correctly
- * with actual API calls. They are not part of the regular CI pipeline.
+ * <h2>Running</h2>
+ *
+ * <pre>{@code
+ * ./gradlew test --tests "RealLlmIntegrationTest" -Dpunit.llm.mode=real
+ * }</pre>
  */
 @Disabled("Manual integration tests - require API keys. See class javadoc.")
 @DisplayName("Real LLM Integration Tests")

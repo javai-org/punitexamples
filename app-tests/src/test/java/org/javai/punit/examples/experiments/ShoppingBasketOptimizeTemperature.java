@@ -11,30 +11,17 @@ import org.javai.punit.junit5.PUnit;
 
 /**
  * OPTIMIZE experiment demonstrating temperature's effect on
- * structured-output reliability.
+ * structured-output reliability. The stepper walks temperature
+ * down from 1.0 to 0.0 in 0.1 steps; the run's score should climb
+ * as temperature falls and the JSON output becomes more
+ * deterministic.
  *
- * <p>A developer might naively set temperature 1.0 thinking "more
- * creativity is better." For structured JSON output that's wrong —
- * higher temperatures produce format deviations, hallucinated
- * field names, and invalid values. This experiment walks the
- * temperature down from 1.0 to 0.0 in 0.1 steps and shows the
- * pass rate climb.
+ * <h2>Setup</h2>
  *
- * <h2>Expected progression</h2>
- *
- * <pre>
- * Iteration  0:  temp=1.0  →  ~50% success (high hallucination)
- * Iteration  1:  temp=0.9  →  ~55% success
- * ...
- * Iteration 10:  temp=0.0  → ~100% success (deterministic)
- * </pre>
- *
- * <p>Demonstrates a numeric stepper — simpler than the prompt
- * stepper since the search space is one continuous dimension and
- * the strategy is just linear decrease. Authors writing real
- * gradient-descent / hill-climbing search write the same
- * {@link FactorsStepper}-shaped lambda; the framework only cares
- * about (current, history) → next.
+ * <p>This experiment makes real LLM calls. Configure the
+ * {@code ChatLlm} provider via {@code OPENAI_API_KEY} (or the
+ * equivalent for your provider). With 11 iterations and 20 samples
+ * per iteration, expect ~220 sample calls.
  *
  * <h2>Running</h2>
  *
@@ -54,10 +41,6 @@ public class ShoppingBasketOptimizeTemperature {
             ? 0.0
             : (double) summary.successes() / (double) summary.total();
 
-    /**
-     * Linear search: decrease temperature by {@value #STEP} each
-     * iteration; stop when the floor (0.0) would be passed.
-     */
     private static final FactorsStepper<LlmTuning> COOL_DOWN = (current, history) -> {
         double next = current.temperature() - STEP;
         if (next < TEMPERATURE_FLOOR) {

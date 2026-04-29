@@ -12,23 +12,16 @@ import org.javai.punit.examples.app.payment.PaymentResult;
 import org.jspecify.annotations.NonNull;
 
 /**
- * Use case for processing payment transactions through a payment gateway.
- *
- * <p>This use case demonstrates the <b>SLA approach</b> to probabilistic testing,
- * where thresholds come from contractual agreements rather than empirical baselines.
- *
- * <h2>SLA Context</h2>
- * <p>Payment gateways typically have contractual SLAs specifying both availability
- * and response time targets. For example:
+ * Use case for processing payment transactions through a payment
+ * gateway, demonstrating the SLA approach to probabilistic testing
+ * where thresholds come from contractual agreements rather than
+ * empirical baselines. Payment gateways typically have contractual
+ * SLAs specifying both availability and response time targets,
+ * for example:
  * <ul>
  *   <li>"Payment Provider SLA v2.3, Section 4.1: 99.99% availability"</li>
  *   <li>"Payment Provider SLA v2.3, Section 4.2: Transactions complete within 1 second"</li>
  * </ul>
- *
- * <p>Unlike the shopping basket use case (where we discover acceptable failure rates
- * through measurement), here we <b>know</b> the acceptable thresholds upfront from
- * the contract. Tests verify that the gateway meets its contractual obligations
- * for both correctness and timing.
  *
  * @see org.javai.punit.examples.probabilistictests.PaymentGatewaySlaTest
  */

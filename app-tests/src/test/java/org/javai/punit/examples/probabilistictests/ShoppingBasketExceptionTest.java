@@ -43,15 +43,6 @@ import org.javai.punit.junit5.PUnit;
  * failure outcomes are retained for diagnostic display. Latency
  * statistics still see every sample; only the retained-for-display
  * detail is capped.
- *
- * <h2>Default change vs the legacy</h2>
- *
- * <p>The legacy default was {@code FAIL_SAMPLE} — exceptions were
- * silently counted as failures unless the author opted into
- * {@code ABORT_TEST}. The typed default is {@code ABORT_TEST}
- * because silently converting a defect into a counted-failure
- * sample hides bugs. Authors who want the count-as-failure
- * behaviour opt in explicitly.
  */
 public class ShoppingBasketExceptionTest {
 

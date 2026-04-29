@@ -11,27 +11,17 @@ import org.javai.punit.api.typed.UseCaseOutcome;
  * {@code "heads"} when the input value satisfies the configured
  * threshold, otherwise {@code "tails"}. The contract under test is
  * "the result is {@code "heads"}" — so the observed pass rate is
- * the fraction of inputs falling under the threshold.
- *
- * <p>Determinism (rather than randomness) makes the worked example
- * reproducible — the baseline records an exact observed rate, and
- * the empirical-paired test observes the same rate when run over
- * the same inputs.
- *
- * <p>Used by the typed worked example to illustrate the full
- * authoring pattern (measure / probabilistic test / empirical pair)
- * without depending on an external service. Real-world use cases
- * that wrap LLMs, payment gateways, etc. follow exactly the same
- * shape — see the sibling {@code sentinels} package's legacy
- * examples for the LLM- and payment-backed variants.
+ * the fraction of inputs falling under the threshold. Determinism
+ * makes the worked example reproducible: the baseline records an
+ * exact observed rate, and the empirical-paired test observes the
+ * same rate when run over the same inputs.
  */
 public final class CoinTossUseCase implements UseCase<CoinTossUseCase.Bias, Integer, String> {
 
     /**
-     * The use-case factor: a threshold in {@code [0, 100]} controlling
-     * which inputs return {@code "heads"} ({@code input % 100 < threshold}).
-     * A real-world factor record would carry the model identifier,
-     * temperature, or any other parameter the use case is configured by.
+     * The use-case factor: a threshold in {@code [0, 100]}
+     * controlling which inputs return {@code "heads"}
+     * ({@code input % 100 < threshold}).
      */
     public record Bias(int threshold) {
         public Bias {
