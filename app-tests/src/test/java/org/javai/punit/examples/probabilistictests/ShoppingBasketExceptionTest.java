@@ -1,190 +1,112 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.ExceptionHandling;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.typed.spec.ExceptionPolicy;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
- * Demonstrates exception handling modes in probabilistic testing.
+ * Demonstrates exception-handling policies in probabilistic
+ * testing.
  *
- * <p>When individual samples throw exceptions, you can configure how PUnit
- * should respond:
+ * <p>The typed pipeline reserves <em>thrown exceptions</em> from
+ * {@code UseCase.apply()} for genuine defects — programming
+ * mistakes, misconfiguration, catastrophe. Anticipated failures
+ * (contract violations, validation errors, service-returned error
+ * codes) travel through {@code UseCaseOutcome.fail(...)} as data,
+ * never as exceptions. See
+ * {@link org.javai.punit.api.typed.UseCaseOutcome}.
+ *
+ * <p>That said, real-world use cases occasionally throw despite
+ * the convention — flaky network, third-party libraries that
+ * surface failures as exceptions. The {@link ExceptionPolicy} knob
+ * controls what the engine does:
+ *
  * <ul>
- *   <li><b>FAIL_SAMPLE</b> - Treat exception as failed sample, continue testing</li>
- *   <li><b>ABORT_TEST</b> - Immediately abort the test with the exception</li>
+ *   <li>{@link ExceptionPolicy#ABORT_TEST} (default) — the defect
+ *       propagates, the run dies. Use when any exception indicates
+ *       a serious problem and you want fast feedback.</li>
+ *   <li>{@link ExceptionPolicy#FAIL_SAMPLE} — synthesise a failing
+ *       sample, continue the run, count the exception toward the
+ *       observed pass rate. Use when exceptions are part of the
+ *       expected failure-mode space being measured.</li>
  * </ul>
  *
- * <h2>What This Demonstrates</h2>
- * <ul>
- *   <li>{@code onException = ExceptionHandling.FAIL_SAMPLE} - Treat as failure</li>
- *   <li>{@code onException = ExceptionHandling.ABORT_TEST} - Abort immediately</li>
- *   <li>{@code maxExampleFailures} - Limit captured failure examples</li>
- * </ul>
+ * <p>{@code Error} subtypes (OOM, StackOverflow, LinkageError)
+ * always propagate regardless of policy — they are never caught.
  *
- * <h2>When to Use Each Mode</h2>
+ * <p>The {@code .maxExampleFailures(int)} knob caps how many full
+ * failure outcomes are retained for diagnostic display. Latency
+ * statistics still see every sample; only the retained-for-display
+ * detail is capped.
  *
- * <h3>FAIL_SAMPLE (Default)</h3>
- * <p>Use when:
- * <ul>
- *   <li>Some failures are expected in normal operation</li>
- *   <li>You want to measure overall reliability including exception rate</li>
- *   <li>Exceptions represent business-level failures, not infrastructure issues</li>
- * </ul>
+ * <h2>Default change vs the legacy</h2>
  *
- * <h3>ABORT_TEST</h3>
- * <p>Use when:
- * <ul>
- *   <li>Any exception indicates a serious problem</li>
- *   <li>You want fast feedback when things break</li>
- *   <li>Exceptions indicate infrastructure or configuration issues</li>
- * </ul>
- *
- * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew test --tests "ShoppingBasketExceptionTest"
- * }</pre>
- *
- * @see ShoppingBasketUseCase
+ * <p>The legacy default was {@code FAIL_SAMPLE} — exceptions were
+ * silently counted as failures unless the author opted into
+ * {@code ABORT_TEST}. The typed default is {@code ABORT_TEST}
+ * because silently converting a defect into a counted-failure
+ * sample hides bugs. Authors who want the count-as-failure
+ * behaviour opt in explicitly.
  */
-// Run manually after generating baseline
 public class ShoppingBasketExceptionTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+    @ProbabilisticTest
+    void abortTestPolicyStopsOnFirstDefect() {
+        // Default policy. Any thrown exception from apply() bubbles
+        // out of the engine and aborts the run. The engine never
+        // gets a chance to render a verdict.
+        Punit.testing(
+                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                        .onException(ExceptionPolicy.ABORT_TEST)
+                        .build(),
+                LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with FAIL_SAMPLE exception handling.
-     *
-     * <p>When a sample throws an exception:
-     * <ul>
-     *   <li>The exception is recorded as a failed sample</li>
-     *   <li>Up to {@code maxExampleFailures} examples are captured</li>
-     *   <li>Testing continues with remaining samples</li>
-     *   <li>Final verdict is based on overall success rate</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            onException = ExceptionHandling.FAIL_SAMPLE,
-            maxExampleFailures = 5
-    )
-    @InputSource("standardInstructions")
-    void testFailSampleMode(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+    @ProbabilisticTest
+    void failSamplePolicyCountsExceptionAsFailedSample() {
+        // FAIL_SAMPLE: exceptions become synthetic failed outcomes.
+        // The run completes; the verdict reflects the proportion of
+        // exception-throwing samples among the total. Useful when
+        // intermittent infrastructure failures are part of the
+        // "reliability" you're measuring rather than a signal that
+        // the test setup is broken.
+        Punit.testing(
+                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                        .onException(ExceptionPolicy.FAIL_SAMPLE)
+                        .build(),
+                LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with ABORT_TEST exception handling.
-     *
-     * <p>When a sample throws an exception:
-     * <ul>
-     *   <li>The test immediately stops</li>
-     *   <li>The exception is propagated to the test framework</li>
-     *   <li>No partial results are evaluated</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            onException = ExceptionHandling.ABORT_TEST
-    )
-    @InputSource("standardInstructions")
-    void testAbortTestMode(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with limited failure example capture.
-     *
-     * <p>The {@code maxExampleFailures} parameter limits how many failure
-     * examples are captured for diagnostics. This prevents memory issues
-     * when there are many failures.
-     *
-     * <p>Setting a low limit (like 3) is useful when:
-     * <ul>
-     *   <li>Failure messages are large</li>
-     *   <li>You only need a few examples to understand the issue</li>
-     *   <li>Memory is constrained</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            onException = ExceptionHandling.FAIL_SAMPLE,
-            maxExampleFailures = 3  // Only capture first 3 failures
-    )
-    @InputSource("standardInstructions")
-    void testWithLimitedFailureExamples(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with maximum failure example capture.
-     *
-     * <p>A higher limit (like 20) captures more examples, useful when:
-     * <ul>
-     *   <li>You need to analyze patterns across failures</li>
-     *   <li>Failures are varied and you want comprehensive visibility</li>
-     *   <li>Memory is not a concern</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            onException = ExceptionHandling.FAIL_SAMPLE,
-            maxExampleFailures = 20
-    )
-    @InputSource("standardInstructions")
-    void testWithExtendedFailureExamples(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
+    @ProbabilisticTest
+    void failSampleWithFailureRetentionCap() {
+        // .maxExampleFailures(int) caps the number of full failure
+        // outcomes retained for diagnostic display. The engine still
+        // counts every failure for the verdict and computes latency
+        // over every sample; only the per-failure detail kept for
+        // post-run inspection is bounded. Default is 10.
+        Punit.testing(
+                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                        .onException(ExceptionPolicy.FAIL_SAMPLE)
+                        .maxExampleFailures(3)
+                        .build(),
+                LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 }
