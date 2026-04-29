@@ -56,18 +56,14 @@ public class ShoppingBasketTest {
 
     @ProbabilisticTest
     void testInstructionTranslation() {
-        Punit.testing(
-                ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100),
-                Config.defaults())
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), Config.defaults())
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
 
     @ProbabilisticTest
     void testControlledInstruction() {
-        Punit.testing(
-                ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 100),
-                Config.defaults())
+        Punit.testing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 100), Config.defaults())
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }

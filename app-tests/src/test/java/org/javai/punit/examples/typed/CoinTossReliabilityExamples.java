@@ -87,8 +87,7 @@ public class CoinTossReliabilityExamples {
      * {@code <Bias, Integer, String>} doesn't appear here.
      */
     private org.javai.punit.api.typed.spec.Experiment baseline() {
-        return Punit.measuring(
-                CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
+        return Punit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .build();
     }
@@ -101,8 +100,7 @@ public class CoinTossReliabilityExamples {
         // method writes the baseline YAML to the configured directory.
         // Cycling 1..100 ten times produces an exact 0.94 observed
         // pass rate (94 passes per 100 inputs × 10 cycles).
-        Punit.measuring(
-                CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
+        Punit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .run();
     }
@@ -115,8 +113,7 @@ public class CoinTossReliabilityExamples {
         // No baseline involved — the threshold is declared explicitly,
         // and the contractual path uses observed >= threshold (no Wilson
         // wrap), so 0.94 ≥ 0.90 → PASS straightforwardly.
-        Punit.testing(
-                CoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
+        Punit.testing(CoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
                 .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
