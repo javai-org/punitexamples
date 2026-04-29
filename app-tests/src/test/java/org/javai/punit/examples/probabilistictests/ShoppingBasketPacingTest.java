@@ -1,196 +1,116 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.Pacing;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.typed.Pacing;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
- * Demonstrates rate limiting with the {@code @Pacing} annotation.
+ * Demonstrates rate-limiting via {@link Pacing}.
  *
- * <p>When testing against rate-limited APIs (like LLMs), you need to control
- * request frequency to avoid hitting rate limits. PUnit's pacing system
- * provides several options:
+ * <p>When testing against rate-limited APIs (LLMs typically), the
+ * test loop has to throttle requests below the API's documented
+ * limits. The framework's {@link Pacing} record captures the
+ * available knobs:
  *
- * <h2>What This Demonstrates</h2>
  * <ul>
- *   <li>{@code maxRequestsPerSecond} - RPS limit</li>
- *   <li>{@code maxRequestsPerMinute} - RPM limit (common for LLM APIs)</li>
- *   <li>{@code minMsPerSample} - Direct delay between samples</li>
+ *   <li>{@link Pacing.Builder#maxRequestsPerSecond(double)
+ *       maxRequestsPerSecond} — burst-style RPS cap. Inserts
+ *       {@code 1000 / rps} ms between samples.</li>
+ *   <li>{@link Pacing.Builder#maxRequestsPerMinute(double)
+ *       maxRequestsPerMinute} — sustained RPM cap. Inserts
+ *       {@code 60_000 / rpm} ms between samples.</li>
+ *   <li>{@link Pacing.Builder#minMillisPerSample(long)
+ *       minMillisPerSample} — explicit floor on the inter-sample
+ *       gap, regardless of rate-derived calculation.</li>
+ *   <li>When multiple knobs combine, the most restrictive wins.</li>
  * </ul>
  *
- * <h2>Common LLM API Limits</h2>
- * <ul>
- *   <li>OpenAI: 60-10000 RPM depending on tier</li>
- *   <li>Anthropic: Varies by model and tier</li>
- *   <li>Google: 60-1000 RPM depending on model</li>
- * </ul>
+ * <h2>Where pacing lives</h2>
  *
- * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew test --tests "ShoppingBasketPacingTest"
- * }</pre>
+ * <p>The typed pipeline puts pacing on the use case via
+ * {@link ShoppingBasketUseCase#pacing()}. Per the framework's
+ * design, "pacing belongs to the service under test, not to a
+ * specific experiment or probabilistic test exercising it" — every
+ * test of the same service should respect the same rate limit.
  *
- * @see ShoppingBasketUseCase
+ * <p>For pedagogic demonstration of multiple pacing options we
+ * thread the choice through the factory closure via
+ * {@link ShoppingBasketUseCase#samplingPaced(Pacing, List, int)
+ * samplingPaced}; in real usage authors would pick one pacing for
+ * their use case and not vary it per test.
+ *
+ * <h2>Migration shape</h2>
+ *
+ * <p>The legacy file used {@code @Pacing} on each test method to
+ * declare per-test pacing. The typed file packages pacing into the
+ * use case construction so authors who want one pacing for all
+ * tests of a use case write it once on the use-case implementation;
+ * the {@code samplingPaced(...)} factory exists only to demonstrate
+ * the API surface here.
  */
-// Run manually
 public class ShoppingBasketPacingTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+    @ProbabilisticTest
+    void runsAtRequestsPerSecondLimit() {
+        // 5 RPS → ~200ms between samples. Use when the LLM API
+        // documents a per-second burst limit.
+        Pacing pacing = Pacing.builder().maxRequestsPerSecond(5).build();
+
+        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with requests-per-second limit.
-     *
-     * <p>Use RPS limits when:
-     * <ul>
-     *   <li>The API has burst rate limits</li>
-     *   <li>You need fine-grained control over request timing</li>
-     *   <li>Tests run for short durations</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
+    @ProbabilisticTest
+    void runsAtRequestsPerMinuteLimit() {
+        // 60 RPM → 1000ms between samples. Use when the LLM API
+        // documents a per-minute sustained limit (typical for OpenAI
+        // and Anthropic free / lower tiers).
+        Pacing pacing = Pacing.builder().maxRequestsPerMinute(60).build();
 
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @Pacing(maxRequestsPerSecond = 5)  // Max 5 requests per second
-    @InputSource("standardInstructions")
-    void testWithRpsLimit(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with requests-per-minute limit.
-     *
-     * <p>Use RPM limits when:
-     * <ul>
-     *   <li>The API has minute-based rate limits (common for LLM APIs)</li>
-     *   <li>You want to match the API's documented limits</li>
-     *   <li>Tests run for longer durations</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
+    @ProbabilisticTest
+    void runsAtExplicitMillisPerSample() {
+        // Direct floor on the inter-sample gap. Use when the API's
+        // rate limit isn't well-defined (e.g. self-hosted LLM with
+        // unknown throughput) and you want guaranteed breathing
+        // room between requests.
+        Pacing pacing = Pacing.builder().minMillisPerSample(200).build();
 
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @Pacing(maxRequestsPerMinute = 60)  // Max 60 requests per minute (1/sec avg)
-    @InputSource("standardInstructions")
-    void testWithRpmLimit(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with direct delay between samples.
-     *
-     * <p>Use direct delays when:
-     * <ul>
-     *   <li>You want precise control over timing</li>
-     *   <li>Rate limits aren't well-defined</li>
-     *   <li>You want to add "breathing room" between requests</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
+    @ProbabilisticTest
+    void runsWithCombinedConstraints() {
+        // Burst + sustained, the realistic LLM-API pacing setup.
+        // The most restrictive constraint wins per sample, so this
+        // pacing handles short-burst capacity (10 RPS) without
+        // exceeding the longer-window quota (120 RPM).
+        Pacing pacing = Pacing.builder()
+                .maxRequestsPerSecond(10)
+                .maxRequestsPerMinute(120)
+                .build();
 
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @Pacing(minMsPerSample = 200)  // At least 200ms between samples
-    @InputSource("standardInstructions")
-    void testWithDirectDelay(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with multiple pacing constraints.
-     *
-     * <p>When multiple constraints are specified, the most restrictive wins.
-     * This allows setting both burst limits (RPS) and sustained limits (RPM).
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 50
-    )
-    @Pacing(
-            maxRequestsPerSecond = 10,   // Burst limit
-            maxRequestsPerMinute = 120   // Sustained limit
-    )
-    @InputSource("standardInstructions")
-    void testWithMultipleConstraints(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with conservative LLM API pacing.
-     *
-     * <p>Example of pacing suitable for a typical LLM API with:
-     * <ul>
-     *   <li>60 RPM limit</li>
-     *   <li>No burst above 2 RPS</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 30
-    )
-    @Pacing(
-            maxRequestsPerSecond = 2,
-            maxRequestsPerMinute = 60
-    )
-    @InputSource("standardInstructions")
-    void testWithConservativeLlmPacing(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
+        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 }
