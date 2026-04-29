@@ -7,7 +7,7 @@ import org.javai.punit.api.typed.Pacing;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Demonstrates rate-limiting via {@link Pacing}.
@@ -68,7 +68,7 @@ public class ShoppingBasketPacingTest {
         // documents a per-second burst limit.
         Pacing pacing = Pacing.builder().maxRequestsPerSecond(5).build();
 
-        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -80,7 +80,7 @@ public class ShoppingBasketPacingTest {
         // and Anthropic free / lower tiers).
         Pacing pacing = Pacing.builder().maxRequestsPerMinute(60).build();
 
-        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -93,7 +93,7 @@ public class ShoppingBasketPacingTest {
         // room between requests.
         Pacing pacing = Pacing.builder().minMillisPerSample(200).build();
 
-        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -109,7 +109,7 @@ public class ShoppingBasketPacingTest {
                 .maxRequestsPerMinute(120)
                 .build();
 
-        Punit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }

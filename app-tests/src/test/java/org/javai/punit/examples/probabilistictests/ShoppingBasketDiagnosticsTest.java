@@ -7,7 +7,7 @@ import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Demonstrates the diagnostic output the framework produces when a
@@ -37,7 +37,7 @@ import org.javai.punit.junit5.Punit;
  * The verbose console-rendering path is currently surfaced through
  * the legacy {@code @ProbabilisticTest(transparentStats = true)}
  * annotation; the typed pipeline owes a builder-side equivalent
- * (e.g. {@code Punit.testing(...).transparentStats()}) before
+ * (e.g. {@code PUnit.testing(...).transparentStats()}) before
  * this feature is fully exposed in the typed authoring surface.
  *
  * <p><b>Early-termination visibility</b>
@@ -74,7 +74,7 @@ public class ShoppingBasketDiagnosticsTest {
         // Empirical criterion: threshold derived from the resolved
         // baseline; verdict driven by the Wilson-score lower bound
         // on the observed rate clearing the baseline rate.
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -89,7 +89,7 @@ public class ShoppingBasketDiagnosticsTest {
         // surface, the larger sample count is also where
         // impossibility / success-guaranteed signals become most
         // visible.
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 200), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 200), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -101,7 +101,7 @@ public class ShoppingBasketDiagnosticsTest {
         // observed >= threshold (no Wilson wrap), and the
         // diagnostic message reports the observed rate, the SLA
         // threshold, and the sample count.
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.meeting(0.85, ThresholdOrigin.SLA))
                 .assertPasses();
     }

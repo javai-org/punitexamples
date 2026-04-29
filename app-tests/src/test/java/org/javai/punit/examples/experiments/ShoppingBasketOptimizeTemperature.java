@@ -7,7 +7,7 @@ import org.javai.punit.api.typed.spec.FactorsStepper;
 import org.javai.punit.api.typed.spec.Scorer;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * OPTIMIZE experiment demonstrating temperature's effect on
@@ -72,7 +72,7 @@ public class ShoppingBasketOptimizeTemperature {
 
     @Experiment
     void optimizeTemperature() {
-        Punit.optimizing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 20))
+        PUnit.optimizing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 20))
                 .initialFactors(LlmTuning.DEFAULT.temperature(1.0))
                 .stepper(COOL_DOWN)
                 .maximize(SUCCESS_RATE)

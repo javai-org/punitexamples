@@ -2,7 +2,7 @@
  * Worked example using the typed-compositional authoring API
  * ({@link org.javai.punit.api.ProbabilisticTest @ProbabilisticTest}
  * + {@link org.javai.punit.api.Experiment @Experiment} +
- * {@link org.javai.punit.junit5.Punit Punit} factories).
+ * {@link org.javai.punit.junit5.PUnit PUnit} factories).
  *
  * <p>Self-contained — does not depend on the legacy
  * {@code ShoppingBasketUseCase} or {@code PaymentGatewayUseCase}

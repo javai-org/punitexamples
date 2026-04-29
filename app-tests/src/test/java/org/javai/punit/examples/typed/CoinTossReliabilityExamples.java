@@ -8,7 +8,7 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.CoinTossUseCase;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Worked example — typed-compositional authoring under JUnit.
@@ -80,14 +80,14 @@ public class CoinTossReliabilityExamples {
      * The baseline supplier — a non-test method that returns a
      * built {@link org.javai.punit.api.typed.spec.Experiment} value.
      * Consumed by the empirical test below via
-     * {@link Punit#testing(java.util.function.Supplier)}.
+     * {@link PUnit#testing(java.util.function.Supplier)}.
      *
      * <p>The {@link CoinTossUseCase#sampling sampling} helper is
      * declared on the use case itself, so the type triple
      * {@code <Bias, Integer, String>} doesn't appear here.
      */
     private org.javai.punit.api.typed.spec.Experiment baseline() {
-        return Punit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
+        return PUnit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .build();
     }
@@ -100,7 +100,7 @@ public class CoinTossReliabilityExamples {
         // method writes the baseline YAML to the configured directory.
         // Cycling 1..100 ten times produces an exact 0.94 observed
         // pass rate (94 passes per 100 inputs × 10 cycles).
-        Punit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
+        PUnit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .run();
     }
@@ -113,7 +113,7 @@ public class CoinTossReliabilityExamples {
         // No baseline involved — the threshold is declared explicitly,
         // and the contractual path uses observed >= threshold (no Wilson
         // wrap), so 0.94 ≥ 0.90 → PASS straightforwardly.
-        Punit.testing(CoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
+        PUnit.testing(CoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
                 .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
@@ -130,7 +130,7 @@ public class CoinTossReliabilityExamples {
         // recorded 0.94. The Wilson margin is the integrity check —
         // the test cannot claim "matches baseline" without statistical
         // backing.
-        Punit.testing(this::baseline)
+        PUnit.testing(this::baseline)
                 .samples(50)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();

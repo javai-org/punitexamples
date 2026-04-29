@@ -6,7 +6,7 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Demonstrates covariate-aware baseline matching with different LLM
@@ -46,7 +46,7 @@ import org.javai.punit.junit5.Punit;
  * {@code ShoppingBasketUseCase} variant via {@code UseCaseProvider}.
  * The typed pipeline collapses this to four flat tests: configuration
  * is a value (the {@link LlmTuning} factor) passed to
- * {@code Punit.testing}, not a setup step. The use case's covariate
+ * {@code PUnit.testing}, not a setup step. The use case's covariate
  * declarations make the framework's selection automatic.
  *
  * <h2>Running</h2>
@@ -71,7 +71,7 @@ public class ShoppingBasketCovariateTest {
         // and temperature as covariates on the resolved profile, so
         // the baseline this test consults is the one measured under
         // the same configuration.
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -83,7 +83,7 @@ public class ShoppingBasketCovariateTest {
         // file than the default-configuration test above.
         LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), gpt4Turbo)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), gpt4Turbo)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -95,7 +95,7 @@ public class ShoppingBasketCovariateTest {
         // — typically higher than the default-temperature baseline.
         LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), lowTemp)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), lowTemp)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
@@ -106,7 +106,7 @@ public class ShoppingBasketCovariateTest {
         // for this configuration captures the looser pass rate.
         LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), highTemp)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), highTemp)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }

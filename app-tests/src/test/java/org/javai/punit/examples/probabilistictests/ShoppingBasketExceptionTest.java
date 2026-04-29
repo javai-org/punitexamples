@@ -7,7 +7,7 @@ import org.javai.punit.api.typed.spec.ExceptionPolicy;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Demonstrates exception-handling policies in probabilistic
@@ -67,7 +67,7 @@ public class ShoppingBasketExceptionTest {
         // Default policy. Any thrown exception from apply() bubbles
         // out of the engine and aborts the run. The engine never
         // gets a chance to render a verdict.
-        Punit.testing(
+        PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .onException(ExceptionPolicy.ABORT_TEST)
                         .build(),
@@ -84,7 +84,7 @@ public class ShoppingBasketExceptionTest {
         // intermittent infrastructure failures are part of the
         // "reliability" you're measuring rather than a signal that
         // the test setup is broken.
-        Punit.testing(
+        PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .build(),
@@ -100,7 +100,7 @@ public class ShoppingBasketExceptionTest {
         // counts every failure for the verdict and computes latency
         // over every sample; only the per-failure detail kept for
         // post-run inspection is bounded. Default is 10.
-        Punit.testing(
+        PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .maxExampleFailures(3)

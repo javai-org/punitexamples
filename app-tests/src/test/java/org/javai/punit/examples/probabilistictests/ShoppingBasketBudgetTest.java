@@ -8,7 +8,7 @@ import org.javai.punit.api.typed.spec.BudgetExhaustionPolicy;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Demonstrates budget management features in probabilistic testing.
@@ -69,7 +69,7 @@ public class ShoppingBasketBudgetTest {
         // 10-second cap; budget exhaustion fails the run rather than
         // emitting a verdict on incomplete data. Use this when the
         // statistical claim requires the full sample set.
-        Punit.testing(
+        PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.FAIL)
@@ -85,7 +85,7 @@ public class ShoppingBasketBudgetTest {
         // verdict from completed samples and attaches a warning. Use
         // this when partial information is better than none — but be
         // aware the verdict may not be statistically significant.
-        Punit.testing(
+        PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
@@ -102,7 +102,7 @@ public class ShoppingBasketBudgetTest {
         // .withTokens(...), so the engine sees real usage per sample.
         // No recorder parameter; no estimate; the use case is the
         // source of truth.
-        Punit.testing(
+        PUnit.testing(
                 ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
                         .tokenBudget(10_000L)
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)

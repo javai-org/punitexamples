@@ -9,7 +9,7 @@ import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * OPTIMIZE experiment that uses an LLM acting as a prompt engineer
@@ -138,7 +138,7 @@ public class ShoppingBasketOptimizePrompt {
 
     @Experiment
     void optimizeSystemPrompt() {
-        Punit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
+        PUnit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
                 .initialFactors(LlmTuning.DEFAULT.systemPrompt(INITIAL_PROMPT))
                 .stepper(promptEngineerStepper())
                 .maximize(SUCCESS_RATE)

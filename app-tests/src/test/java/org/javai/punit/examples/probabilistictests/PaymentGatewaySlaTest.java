@@ -9,7 +9,7 @@ import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.PaymentGatewayUseCase;
 import org.javai.punit.examples.typed.PaymentGatewayUseCase.Charge;
 import org.javai.punit.examples.typed.PaymentGatewayUseCase.Tier;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Probabilistic tests for payment-gateway reliability against a
@@ -54,7 +54,7 @@ public class PaymentGatewaySlaTest {
         // grade claim against a 99% target at default 95% confidence
         // — the framework's pre-flight feasibility gate is satisfied.
         // The default intent (VERIFICATION) is implicit.
-        Punit.testing(PaymentGatewayUseCase.sampling(CHARGES, 268), Tier.DEFAULT)
+        PUnit.testing(PaymentGatewayUseCase.sampling(CHARGES, 268), Tier.DEFAULT)
                 .criterion(BernoulliPassRate.meeting(0.99, ThresholdOrigin.SLO))
                 .assertPasses();
     }
@@ -66,7 +66,7 @@ public class PaymentGatewaySlaTest {
         // undersized; treat this as a sentinel, not a verification
         // claim." The framework records the sizing gap on the
         // verdict (the pre-flight gate is bypassed in SMOKE mode).
-        Punit.testing(PaymentGatewayUseCase.sampling(CHARGES, 50), Tier.DEFAULT)
+        PUnit.testing(PaymentGatewayUseCase.sampling(CHARGES, 50), Tier.DEFAULT)
                 .intent(TestIntent.SMOKE)
                 .criterion(BernoulliPassRate.meeting(0.9999, ThresholdOrigin.SLA))
                 .assertPasses();

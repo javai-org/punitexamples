@@ -29,7 +29,7 @@ class ExampleArchitectureTest {
 
     @Test
     @DisplayName("Infrastructure must not depend on PUnit framework")
-    void infrastructureMustNotDependOnPunitFramework() {
+    void infrastructureMustNotDependOnPUnitFramework() {
         ArchRule rule = noClasses()
                 .that().resideInAPackage("org.javai.punit.examples.app..")
                 .should().dependOnClassesThat()

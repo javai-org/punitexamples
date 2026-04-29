@@ -8,7 +8,7 @@ import org.javai.punit.api.typed.spec.Experiment;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 import org.javai.punit.power.PowerAnalysis;
 
 /**
@@ -72,7 +72,7 @@ public class ShoppingBasketThresholdApproachesTest {
      * select the same baseline file at test time.
      */
     private Experiment baseline() {
-        return Punit.measuring(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
+        return PUnit.measuring(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .build();
     }
@@ -83,7 +83,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // empirical criterion's default (0.95). The threshold the
         // verdict tests against is the resolved baseline's
         // observed rate.
-        Punit.testing(this::baseline)
+        PUnit.testing(this::baseline)
                 .samples(100)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
@@ -108,7 +108,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // monitoring; tighten either to require larger samples.
         int n = PowerAnalysis.sampleSize(this::baseline, 0.05, 0.80);
 
-        Punit.testing(this::baseline)
+        PUnit.testing(this::baseline)
                 .samples(n)
                 .criterion(BernoulliPassRate.empirical().atConfidence(0.95))
                 .assertPasses();
@@ -120,7 +120,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // — the verdict is the deterministic observed >= threshold
         // comparison; the threshold's provenance is stamped onto
         // the result for audit.
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }

@@ -5,7 +5,7 @@ import java.util.List;
 import org.javai.punit.api.Experiment;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * MEASURE experiment establishing a baseline for
@@ -70,7 +70,7 @@ public class ShoppingBasketMeasure {
 
     @Experiment
     void measureBaseline() {
-        Punit.measuring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .run();
     }

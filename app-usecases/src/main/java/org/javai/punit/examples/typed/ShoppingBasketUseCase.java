@@ -89,8 +89,8 @@ public final class ShoppingBasketUseCase
 
     /**
      * The factor record. Tests vary configuration by passing a
-     * different {@code LlmTuning} instance to {@code Punit.testing(...)}
-     * or {@code Punit.measuring(...)}; baselines are partitioned by
+     * different {@code LlmTuning} instance to {@code PUnit.testing(...)}
+     * or {@code PUnit.measuring(...)}; baselines are partitioned by
      * the resulting factors fingerprint.
      */
     public record LlmTuning(String model, double temperature, String systemPrompt) {
