@@ -1,102 +1,75 @@
 package org.javai.punit.examples.experiments;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.ConfigSource;
-import org.javai.punit.api.legacy.ExploreExperiment;
-import org.javai.punit.api.Input;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.NamedConfig;
-import org.javai.punit.api.OutcomeCaptor;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.app.llm.ChatLlmProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.Experiment;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
- * EXPLORE experiment comparing LLM model configurations across varied inputs.
+ * EXPLORE experiment comparing LLM model configurations across the
+ * same input set.
  *
- * <p>Before establishing a production baseline, you need to decide which LLM model
- * to use. This experiment compares models by running each as a named, immutable
- * use case instance — the instance <em>is</em> the factor specification — across
- * a curated set of instructions to understand how each model performs on different
- * instruction types. Inputs are cycled via round-robin within each configuration.
+ * <p>Before establishing a production baseline, you decide which
+ * model is the right one for the task. This experiment answers:
+ * "Which model handles these instructions most reliably?" — by
+ * cycling the same input list through each model in turn and
+ * comparing the resulting pass rates.
  *
- * <h2>Typical Workflow</h2>
+ * <h2>Typical workflow</h2>
+ *
  * <ol>
- *   <li><b>Explore</b> - Run this experiment to compare models across inputs</li>
- *   <li><b>Choose</b> - Select the best configuration based on results</li>
- *   <li><b>Measure</b> - Run {@link ShoppingBasketMeasure} to establish baseline</li>
- *   <li><b>Test</b> - Use the baseline in probabilistic regression tests</li>
+ *   <li><b>Explore</b> — this experiment compares models.</li>
+ *   <li><b>Choose</b> — pick the configuration with the best
+ *       pass rate / latency tradeoff for your domain.</li>
+ *   <li><b>Measure</b> — {@link ShoppingBasketMeasure} establishes
+ *       a baseline for that chosen configuration.</li>
+ *   <li><b>Test</b> — {@code ShoppingBasketTest} verifies the
+ *       LLM still meets the recorded baseline in CI.</li>
  * </ol>
  *
- * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew exp -Prun=ShoppingBasketExplore
- * }</pre>
+ * <h2>Grid as factor variants</h2>
  *
- * @see ShoppingBasketUseCase
- * @see ShoppingBasketMeasure
+ * <p>Each grid entry is a {@link LlmTuning} value — the typed
+ * factor record. The framework iterates the grid, constructs one
+ * use case per entry via the sampling's factory closure, and runs
+ * {@code samplesPerConfig} samples through each. The four entries
+ * here all hold temperature at 0.1 (low randomness, more
+ * deterministic output for translation tasks); the {@code model}
+ * is what varies.
+ *
+ * <h2>Running</h2>
+ *
+ * <pre>{@code
+ * ./gradlew experiment -Prun=ShoppingBasketExplore.compareModels
+ * }</pre>
  */
-// Run with ./gradlew exp -Prun=ShoppingBasketExplore
 public class ShoppingBasketExplore {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> BASKET_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Add 5 tomatoes and remove the cheese",
+            "Clear the basket",
+            "Clear everything",
+            "Remove 2 eggs from the basket",
+            "Add a dozen eggs",
+            "I'd like to remove all the vegetables");
 
-    /**
-     * Compares different LLM models across varied inputs.
-     *
-     * <p>This experiment answers: "Which model handles different instruction types
-     * most reliably?" Each configuration is a fully-constructed, immutable use case
-     * instance, and each is tested against a curated set of instructions from the
-     * input source.
-     *
-     * @param useCase the use case instance (provided by the named config)
-     * @param inputData the input data containing instruction and expected output
-     * @param captor records outcomes for comparison
-     */
-    @ExploreExperiment(
-            useCase = ShoppingBasketUseCase.class,
-            samplesPerConfig = 20,
-            experimentId = "model-comparison-v1",
-            skipWarmup = true
-    )
-    @ConfigSource("modelConfigurations")
-    @InputSource(file = "fixtures/shopping-instructions.json")
-    void compareModels(
-            ShoppingBasketUseCase useCase,
-            @Input ShoppingInstructionInput inputData,
-            OutcomeCaptor captor
-    ) {
-        captor.record(useCase.translateInstruction(inputData.instruction()));
-    }
+    private static final LlmTuning LOW_TEMPERATURE = LlmTuning.DEFAULT.temperature(0.1);
 
-    /**
-     * Input data for the experiment.
-     *
-     * @param instruction the natural language instruction
-     * @param expected the expected JSON response
-     */
-    public record ShoppingInstructionInput(String instruction, String expected) {}
-
-    /**
-     * Models to compare.
-     *
-     * <p>Each configuration is a fully-constructed use case instance. The instance
-     * carries its own model, temperature, and system prompt — no separate factor
-     * map is needed.
-     */
-    static Stream<NamedConfig<ShoppingBasketUseCase>> modelConfigurations() {
-        var llm = ChatLlmProvider.resolve();
-        return Stream.of(
-                NamedConfig.of("gpt-4o-mini",
-                        new ShoppingBasketUseCase(llm, "gpt-4o-mini", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT)),
-                NamedConfig.of("gpt-4o",
-                        new ShoppingBasketUseCase(llm, "gpt-4o", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT)),
-                NamedConfig.of("claude-haiku",
-                        new ShoppingBasketUseCase(llm, "claude-haiku-4-5-20251001", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT)),
-                NamedConfig.of("claude-sonnet",
-                        new ShoppingBasketUseCase(llm, "claude-sonnet-4-5-20250929", 0.1, ShoppingBasketUseCase.DEFAULT_SYSTEM_PROMPT))
-        );
+    @Experiment
+    void compareModels() {
+        Punit.exploring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
+                .experimentId("model-comparison-v1")
+                .grid(
+                        LOW_TEMPERATURE.model("gpt-4o-mini"),
+                        LOW_TEMPERATURE.model("gpt-4o"),
+                        LOW_TEMPERATURE.model("claude-haiku-4-5-20251001"),
+                        LOW_TEMPERATURE.model("claude-sonnet-4-5-20250929"))
+                .run();
     }
 }
