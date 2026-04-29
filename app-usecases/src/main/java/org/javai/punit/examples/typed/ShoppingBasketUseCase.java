@@ -94,9 +94,8 @@ public final class ShoppingBasketUseCase
      */
     public record Config(String model, double temperature, String systemPrompt) {
 
-        public static Config defaults() {
-            return new Config(DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_SYSTEM_PROMPT);
-        }
+        public static final Config DEFAULT = new Config(
+                DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_SYSTEM_PROMPT);
 
         public Config withModel(String model) {
             return new Config(model, this.temperature, this.systemPrompt);
