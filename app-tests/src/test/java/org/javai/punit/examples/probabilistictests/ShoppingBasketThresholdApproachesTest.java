@@ -92,9 +92,20 @@ public class ShoppingBasketThresholdApproachesTest {
     @ProbabilisticTest
     void confidenceFirst() {
         // PowerAnalysis computes the minimum sample count required
-        // to detect a 5%-point degradation against the baseline
-        // rate at 95% confidence and 80% power. The test then runs
-        // at that count.
+        // to:
+        //   - detect a degradation of at least 5 percentage points
+        //     against the baseline pass rate (the minimum
+        //     detectable effect, MDE = 0.05), and
+        //   - detect it with probability 0.80 when it really is
+        //     present (statistical power = 0.80, the conventional
+        //     "I am willing to miss a true 5-point regression at
+        //     most 1 run in 5"),
+        // at 95% confidence (criterion default — controls the
+        // false-positive rate, i.e. how often a healthy run is
+        // mis-flagged as regressed).
+        //
+        // MDE 0.05 + power 0.80 are workable defaults for SLA
+        // monitoring; tighten either to require larger samples.
         int n = PowerAnalysis.sampleSize(this::baseline, 0.05, 0.80);
 
         Punit.testing(this::baseline)
