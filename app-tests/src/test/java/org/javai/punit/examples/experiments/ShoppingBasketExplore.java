@@ -5,7 +5,7 @@ import java.util.List;
 import org.javai.punit.api.Experiment;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * EXPLORE experiment comparing LLM model configurations across the
@@ -63,7 +63,7 @@ public class ShoppingBasketExplore {
 
     @Experiment
     void compareModels() {
-        Punit.exploring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
+        PUnit.exploring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
                 .experimentId("model-comparison-v1")
                 .grid(
                         LOW_TEMPERATURE.model("gpt-4o-mini"),

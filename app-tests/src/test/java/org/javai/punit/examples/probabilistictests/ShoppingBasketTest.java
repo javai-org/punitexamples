@@ -6,7 +6,7 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.Punit;
+import org.javai.punit.junit5.PUnit;
 
 /**
  * Core probabilistic test for the typed
@@ -56,14 +56,14 @@ public class ShoppingBasketTest {
 
     @ProbabilisticTest
     void testInstructionTranslation() {
-        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
 
     @ProbabilisticTest
     void testControlledInstruction() {
-        Punit.testing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 100), LlmTuning.DEFAULT)
                 .criterion(BernoulliPassRate.empirical())
                 .assertPasses();
     }
