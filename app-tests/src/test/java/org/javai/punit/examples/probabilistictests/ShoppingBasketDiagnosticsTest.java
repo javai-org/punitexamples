@@ -1,180 +1,102 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.ThresholdOrigin;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
 
 /**
- * Demonstrates diagnostic features in probabilistic testing.
+ * Demonstrates the diagnostic output the typed pipeline produces
+ * when a probabilistic test does not pass.
  *
- * <p>When debugging probabilistic tests, you may need detailed information
- * about the statistical computations. PUnit provides diagnostic features
- * to make the statistics transparent.
+ * <h2>What's available today</h2>
  *
- * <h2>What This Demonstrates</h2>
  * <ul>
- *   <li>{@code transparentStats = true} - Detailed statistical explanations</li>
- *   <li>Early termination visibility (impossibility/success-guaranteed)</li>
+ *   <li><b>Per-criterion explanation</b> — every {@code CriterionResult}
+ *       carries a human-readable explanation. For
+ *       {@link BernoulliPassRate#empirical() empirical} runs this is
+ *       e.g.
+ *       <pre>{@code observed=0.94 (Wilson-95% lower=0.93) vs threshold=0.85 (origin=EMPIRICAL) over 100 samples}</pre>
+ *       which surfaces the observed rate, the Wilson-score lower
+ *       bound, the threshold and its origin, and the sample count
+ *       — the figures that drive the verdict.</li>
+ *   <li><b>Detail map</b> — the same numbers are available
+ *       structurally on {@code CriterionResult.detail()} for tooling
+ *       that wants to render them differently.</li>
+ *   <li><b>Misalignment notes</b> — when no baseline matches, the
+ *       verdict's warnings list each rejected candidate and the
+ *       category mismatch that rejected it (CV-4).</li>
+ *   <li><b>FAIL / INCONCLUSIVE diagnostics</b> — surfaced through
+ *       the JUnit assertion message; visible in the IDE's test
+ *       output, the surefire report, etc.</li>
  * </ul>
  *
- * <h2>Transparent Statistics Output</h2>
- * <p>When enabled, the test output includes:
- * <ul>
- *   <li>Baseline statistics used for threshold derivation</li>
- *   <li>Derived threshold and confidence interval</li>
- *   <li>Observed success rate and sample count</li>
- *   <li>Statistical test details (null hypothesis, p-value)</li>
- *   <li>Early termination reason (if applicable)</li>
- * </ul>
+ * <h2>What's deferred (legacy {@code transparentStats=true} feature)</h2>
  *
- * <h2>Early Termination</h2>
- * <p>PUnit can terminate tests early in two scenarios:
- * <ul>
- *   <li><b>Impossibility</b>: Even if all remaining samples pass, the test cannot pass</li>
- *   <li><b>Success Guaranteed</b>: Even if all remaining samples fail, the test passes</li>
- * </ul>
+ * <p>The legacy pipeline supports {@code transparentStats = true},
+ * which renders a full hypothesis-test breakdown — null hypothesis,
+ * z-statistic, p-value — on <em>every</em> verdict, including PASS.
+ * This is useful for audit / compliance documentation where the
+ * statistical reasoning behind a passing run also needs to be
+ * shown. The typed pipeline doesn't yet emit this verbose per-PASS
+ * output; criterion-level diagnostics are only surfaced on FAIL /
+ * INCONCLUSIVE today. Wiring transparentStats into the typed
+ * pipeline is on the post-1.0 roadmap.
  *
- * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew test --tests "ShoppingBasketDiagnosticsTest"
- * }</pre>
+ * <p>Early-termination visibility (impossibility / success-guaranteed)
+ * is similarly legacy-only at the moment.
  *
- * @see ShoppingBasketUseCase
+ * <h2>The tests below</h2>
+ *
+ * <p>Three configurations, each sharing the use case but exercising
+ * a different criterion path. The migrated file is currently
+ * pedagogically equivalent to {@link ShoppingBasketTest}; its
+ * distinct identity returns when transparentStats lands in the
+ * typed pipeline.
  */
-// Run manually after generating baseline
 public class ShoppingBasketDiagnosticsTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
+    @ProbabilisticTest
+    void empiricalAtModerateSampleCount() {
+        // Empirical criterion: threshold derived from the resolved
+        // baseline; verdict driven by the Wilson-score lower bound
+        // on the observed rate clearing the baseline rate.
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test with transparent statistics enabled.
-     *
-     * <p>When {@code transparentStats = true}, the test output includes
-     * detailed explanations of all statistical computations. This is
-     * invaluable for:
-     * <ul>
-     *   <li>Understanding why a test passed or failed</li>
-     *   <li>Verifying threshold derivation is correct</li>
-     *   <li>Debugging unexpected results</li>
-     *   <li>Explaining results to stakeholders</li>
-     * </ul>
-     *
-     * <p>Example output:
-     * <pre>
-     * === Probabilistic Test: testInstructionTranslation ===
-     *
-     * Baseline:
-     *   Source: punit/specs/ShoppingBasketUseCase.yaml
-     *   Baseline Success Rate: 0.947
-     *   Sample Count: 1000
-     *
-     * Threshold Derivation:
-     *   Confidence Level: 0.95
-     *   Derived Min Pass Rate: 0.918
-     *   Method: Wilson score interval lower bound
-     *
-     * Execution:
-     *   Samples Completed: 100
-     *   Successes: 94
-     *   Failures: 6
-     *   Observed Success Rate: 0.940
-     *
-     * Statistical Test:
-     *   H0: True success rate >= 0.918
-     *   H1: True success rate < 0.918
-     *   Test Statistic: z = 0.802
-     *   p-value: 0.789
-     *   Verdict: PASS (observed rate 0.940 >= threshold 0.918)
-     * </pre>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            transparentStats = true
-    )
-    @InputSource("standardInstructions")
-    void testWithTransparentStats(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+    @ProbabilisticTest
+    void empiricalAtHigherSampleCount() {
+        // Larger sample count tightens the Wilson-score margin
+        // around the observed rate. A run that's borderline at n=100
+        // can be definitively PASS or FAIL at n=200 — diagnostics
+        // are the same in shape, just with tighter numbers.
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 200), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Test demonstrating early termination scenarios.
-     *
-     * <p>With a high sample count, early termination becomes more likely.
-     * PUnit will stop testing early if:
-     * <ul>
-     *   <li>Success is mathematically guaranteed</li>
-     *   <li>Failure is mathematically certain</li>
-     * </ul>
-     *
-     * <p>Transparent stats shows when and why early termination occurred.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 200,
-            transparentStats = true
-    )
-    @InputSource("standardInstructions")
-    void testShowingEarlyTermination(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    /**
-     * Test with explicit threshold showing stats comparison.
-     *
-     * <p>When using an explicit threshold (not derived from baseline),
-     * transparent stats shows how the observed rate compares to the
-     * specified minimum.
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            minPassRate = 0.85,
-            transparentStats = true
-    )
-    @InputSource("standardInstructions")
-    void testWithExplicitThresholdAndStats(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
-    }
-
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
+    @ProbabilisticTest
+    void contractualAtExplicitThreshold() {
+        // Contractual criterion: threshold is an external SLA, not
+        // derived from a baseline. The verdict path is the simple
+        // observed >= threshold (no Wilson wrap), and the
+        // diagnostic message reports the observed rate, the SLA
+        // threshold, and the sample count.
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.meeting(0.85, ThresholdOrigin.SLA))
+                .assertPasses();
     }
 }
