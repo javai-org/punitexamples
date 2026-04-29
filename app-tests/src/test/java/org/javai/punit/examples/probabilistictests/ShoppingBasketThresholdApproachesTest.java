@@ -1,150 +1,128 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.stream.Stream;
-import org.javai.punit.api.InputSource;
-import org.javai.punit.api.legacy.ProbabilisticTest;
-import org.javai.punit.api.UseCaseProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import java.nio.file.Path;
+import java.util.List;
+
+import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.api.ThresholdOrigin;
+import org.javai.punit.api.typed.spec.Experiment;
+import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase;
+import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.junit5.Punit;
+import org.javai.punit.power.PowerAnalysis;
 
 /**
- * Demonstrates the three operational approaches for threshold determination.
+ * Demonstrates the three operational approaches for choosing a
+ * threshold + sample size in probabilistic testing.
  *
- * <p>PUnit supports three ways to configure probabilistic tests, each suited
- * to different scenarios:
+ * <h2>Sample-size-first</h2>
  *
- * <h2>Approach 1: Sample-Size-First</h2>
- * <p><b>Specify:</b> {@code samples} + {@code thresholdConfidence}<br>
- * <b>Framework computes:</b> {@code minPassRate}<br>
- * <b>Use when:</b> You have a fixed compute budget (e.g., 100 API calls)
- * and want the most statistically rigorous threshold possible.
+ * <p>"I have budget for 100 samples. Give me the threshold the
+ * baseline supports at 95% confidence."
  *
- * <h2>Approach 2: Confidence-First</h2>
- * <p><b>Specify:</b> {@code confidence} + {@code minDetectableEffect} + {@code power}<br>
- * <b>Framework computes:</b> {@code samples}<br>
- * <b>Use when:</b> You need to detect specific degradation levels with
- * guaranteed statistical power. Common in SLA monitoring.
+ * <p>Use when compute or token budget is the binding constraint
+ * and you want the most rigorous threshold within that budget. The
+ * typed pipeline's {@code BernoulliPassRate.empirical()} criterion
+ * does this natively — the threshold is the resolved baseline's
+ * observed pass rate, and the verdict comes from the Wilson-score
+ * lower bound on the test's observed rate at the configured
+ * confidence (default 0.95).
  *
- * <h2>Approach 3: Threshold-First</h2>
- * <p><b>Specify:</b> {@code samples} + {@code minPassRate}<br>
- * <b>Framework computes:</b> implied confidence<br>
- * <b>Use when:</b> You have a specific pass rate requirement from
- * external sources (SLA, policy) and want to verify conformance.
+ * <h2>Confidence-first</h2>
  *
- * <h2>Running</h2>
- * <pre>{@code
- * ./gradlew test --tests "ShoppingBasketThresholdApproachesTest"
- * }</pre>
+ * <p>"I need to detect a 5% degradation with 95% confidence and
+ * 80% power. Tell me how many samples that requires."
  *
- * @see ShoppingBasketUseCase
+ * <p>Use when statistical power is the binding constraint —
+ * typically SLA monitoring where you must reliably detect
+ * regressions of a specific size. The typed pipeline's
+ * {@link PowerAnalysis#sampleSize(Path, java.util.function.Supplier, double, double)
+ * PowerAnalysis.sampleSize} computes the required sample count
+ * from the baseline rate plus the (MDE, power) pair; the test
+ * then runs at that count.
+ *
+ * <h2>Threshold-first</h2>
+ *
+ * <p>"I know the pass rate must be at least 90%. Run 100 samples
+ * to verify."
+ *
+ * <p>Use when the threshold is dictated externally — an SLA, a
+ * regulatory requirement, a policy commitment — and the test's job
+ * is to verify conformance. The typed pipeline's
+ * {@code BernoulliPassRate.meeting(threshold, origin)} factory is
+ * the contractual path: a deterministic
+ * {@code observed >= threshold} comparison, with the threshold's
+ * provenance ({@link ThresholdOrigin#SLA SLA},
+ * {@link ThresholdOrigin#SLO SLO}, {@link ThresholdOrigin#POLICY POLICY})
+ * recorded for audit.
  */
-// Run manually after generating baseline
 public class ShoppingBasketThresholdApproachesTest {
 
-    @RegisterExtension
-    UseCaseProvider provider = new UseCaseProvider();
+    /**
+     * The baseline directory the typed pipeline uses by default.
+     * Production code reads this from {@code punit.baseline.dir}
+     * via {@code BaselineProviderResolver}; we hardcode the
+     * convention path here so the confidence-first test can call
+     * {@link PowerAnalysis#sampleSize PowerAnalysis.sampleSize}
+     * without reaching into framework-internal API.
+     */
+    private static final Path BASELINE_DIR =
+            Path.of("src/test/resources/punit/baselines");
 
-    @BeforeEach
-    void setUp() {
-        provider.register(ShoppingBasketUseCase.class, ShoppingBasketUseCase::new);
-    }
+    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Clear the basket");
 
     /**
-     * Approach 1: Sample-Size-First.
-     *
-     * <p>"I have budget for 100 samples. Give me the threshold with 95% confidence."
-     *
-     * <p>This approach is ideal when:
-     * <ul>
-     *   <li>You have a fixed compute/cost budget</li>
-     *   <li>You want maximum statistical rigor within that budget</li>
-     *   <li>You're willing to accept whatever threshold the statistics dictate</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
+     * The baseline measure-experiment the empirical and
+     * confidence-first tests below resolve through. A single
+     * baseline definition shared by both tests guarantees they
+     * select the same baseline file at test time.
      */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            thresholdConfidence = 0.95
-    )
-    @InputSource("standardInstructions")
-    void sampleSizeFirst(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+    private Experiment baseline() {
+        return Punit.measuring(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
+                .experimentId("baseline-v1")
+                .build();
     }
 
-    /**
-     * Approach 2: Confidence-First.
-     *
-     * <p>"I need to detect a 5% degradation with 95% confidence and 80% power."
-     *
-     * <p>This approach is ideal when:
-     * <ul>
-     *   <li>You need to detect specific degradation levels</li>
-     *   <li>You have statistical power requirements</li>
-     *   <li>Sample count is flexible based on what statistics require</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
-
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            confidence = 0.95,
-            minDetectableEffect = 0.05,
-            power = 0.80
-    )
-    @InputSource("standardInstructions")
-    void confidenceFirst(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+    @ProbabilisticTest
+    void sampleSizeFirst() {
+        // Fixed sample budget of 100. Confidence stays at the
+        // empirical criterion's default (0.95). The threshold the
+        // verdict tests against is the resolved baseline's
+        // observed rate.
+        Punit.testing(this::baseline)
+                .samples(100)
+                .criterion(BernoulliPassRate.empirical())
+                .assertPasses();
     }
 
-    /**
-     * Approach 3: Threshold-First.
-     *
-     * <p>"I know the pass rate must be at least 90%. Run 100 samples to verify."
-     *
-     * <p>This approach is ideal when:
-     * <ul>
-     *   <li>You have a known threshold from SLA or policy</li>
-     *   <li>You want to verify conformance with that threshold</li>
-     *   <li>Statistical confidence is informational, not the primary driver</li>
-     * </ul>
-     *
-     * @param useCase the use case instance
-     * @param instruction the instruction to process
-     */
+    @ProbabilisticTest
+    void confidenceFirst() {
+        // PowerAnalysis computes the minimum sample count required
+        // to detect a 5%-point degradation against the baseline
+        // rate at 95% confidence and 80% power. The test then runs
+        // at that count.
+        int n = PowerAnalysis.sampleSize(BASELINE_DIR, this::baseline, 0.05, 0.80);
 
-    @ProbabilisticTest(
-            useCase = ShoppingBasketUseCase.class,
-            samples = 100,
-            minPassRate = 0.90
-    )
-    @InputSource("standardInstructions")
-    void thresholdFirst(
-            ShoppingBasketUseCase useCase,
-            String instruction
-    ) {
-        useCase.translateInstruction(instruction).assertContract();
+        Punit.testing(this::baseline)
+                .samples(n)
+                .criterion(BernoulliPassRate.empirical().atConfidence(0.95))
+                .assertPasses();
     }
 
-    static Stream<String> standardInstructions() {
-        return Stream.of(
-                "Add 2 apples",
-                "Remove the milk",
-                "Add 1 loaf of bread",
-                "Add 3 oranges and 2 bananas",
-                "Clear the basket"
-        );
+    @ProbabilisticTest
+    void thresholdFirst() {
+        // Externally-dictated threshold (SLA). No baseline involved
+        // — the verdict is the deterministic observed >= threshold
+        // comparison; the threshold's provenance is stamped onto
+        // the result for audit.
+        Punit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+                .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
+                .assertPasses();
     }
 }
