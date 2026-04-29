@@ -21,7 +21,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.ValidationR
  * Typed-API translation of natural-language shopping instructions
  * into structured actions via an LLM.
  *
- * <p>The factor record {@link Config} carries the LLM model,
+ * <p>The factor record {@link LlmTuning} carries the LLM model,
  * sampling temperature, and system prompt — the parameters an
  * experiment varies. The input type is the natural-language
  * instruction. The success-output type is the validated
@@ -54,7 +54,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.ValidationR
  * factory.
  */
 public final class ShoppingBasketUseCase
-        implements UseCase<ShoppingBasketUseCase.Config, String, ValidationResult> {
+        implements UseCase<ShoppingBasketUseCase.LlmTuning, String, ValidationResult> {
 
     public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final double DEFAULT_TEMPERATURE = 0.3;
@@ -88,51 +88,51 @@ public final class ShoppingBasketUseCase
 
     /**
      * The factor record. Tests vary configuration by passing a
-     * different {@code Config} instance to {@code Punit.testing(...)}
+     * different {@code LlmTuning} instance to {@code Punit.testing(...)}
      * or {@code Punit.measuring(...)}; baselines are partitioned by
      * the resulting factors fingerprint.
      */
-    public record Config(String model, double temperature, String systemPrompt) {
+    public record LlmTuning(String model, double temperature, String systemPrompt) {
 
-        public static final Config DEFAULT = new Config(
+        public static final LlmTuning DEFAULT = new LlmTuning(
                 DEFAULT_MODEL, DEFAULT_TEMPERATURE, DEFAULT_SYSTEM_PROMPT);
 
-        public Config withModel(String model) {
-            return new Config(model, this.temperature, this.systemPrompt);
+        public LlmTuning withModel(String model) {
+            return new LlmTuning(model, this.temperature, this.systemPrompt);
         }
 
-        public Config withTemperature(double temperature) {
-            return new Config(this.model, temperature, this.systemPrompt);
+        public LlmTuning withTemperature(double temperature) {
+            return new LlmTuning(this.model, temperature, this.systemPrompt);
         }
     }
 
     private final ChatLlm llm;
-    private final Config config;
+    private final LlmTuning tuning;
 
-    public ShoppingBasketUseCase(ChatLlm llm, Config config) {
+    public ShoppingBasketUseCase(ChatLlm llm, LlmTuning tuning) {
         this.llm = llm;
-        this.config = config;
+        this.tuning = tuning;
     }
 
     /**
      * Builds a {@link Sampling} configured to construct this use case
      * via {@link ChatLlmProvider#resolve()}. The triple
-     * {@code <Config, String, ValidationResult>} is baked in here so
+     * {@code <LlmTuning, String, ValidationResult>} is baked in here so
      * test methods don't need to spell it out.
      *
      * <p>For tests that need to inject a custom {@link ChatLlm}
      * (mocked LLMs in offline runs, alternative providers), use
      * {@link #samplingWith(ChatLlm, List, int)} instead.
      */
-    public static Sampling<Config, String, ValidationResult> sampling(
+    public static Sampling<LlmTuning, String, ValidationResult> sampling(
             List<String> inputs, int samples) {
         return samplingWith(ChatLlmProvider.resolve(), inputs, samples);
     }
 
-    public static Sampling<Config, String, ValidationResult> samplingWith(
+    public static Sampling<LlmTuning, String, ValidationResult> samplingWith(
             ChatLlm llm, List<String> inputs, int samples) {
         return Sampling.of(
-                cfg -> new ShoppingBasketUseCase(llm, cfg),
+                tuning -> new ShoppingBasketUseCase(llm, tuning),
                 samples, inputs);
     }
 
@@ -151,8 +151,8 @@ public final class ShoppingBasketUseCase
     @Override
     public Map<String, Supplier<String>> customCovariateResolvers() {
         return Map.of(
-                "llm_model", () -> config.model(),
-                "temperature", () -> Double.toString(config.temperature()));
+                "llm_model", () -> tuning.model(),
+                "temperature", () -> Double.toString(tuning.temperature()));
     }
 
     @Override
@@ -160,8 +160,8 @@ public final class ShoppingBasketUseCase
         ChatResponse response;
         try {
             response = llm.chatWithMetadata(
-                    config.systemPrompt(), instruction,
-                    config.model(), config.temperature());
+                    tuning.systemPrompt(), instruction,
+                    tuning.model(), tuning.temperature());
         } catch (RuntimeException e) {
             // Network / API failures are surface-level errors that
             // belong on the Outcome channel — they're an expected
