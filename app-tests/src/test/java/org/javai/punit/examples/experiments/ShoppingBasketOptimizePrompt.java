@@ -1,9 +1,12 @@
 package org.javai.punit.examples.experiments;
 
 import java.util.List;
+import java.util.Map;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.typed.spec.FactorsStepper;
+import org.javai.punit.api.typed.spec.FailureCount;
+import org.javai.punit.api.typed.spec.FailureExemplar;
 import org.javai.punit.api.typed.spec.Scorer;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
@@ -79,9 +82,12 @@ public class ShoppingBasketOptimizePrompt {
                     %s
 
                     Success rate on the translation task: %.2f
-
+                    %s
                     Suggest an improved version.
-                    """.formatted(last.factors().systemPrompt(), last.score());
+                    """.formatted(
+                            last.factors().systemPrompt(),
+                            last.score(),
+                            renderFailureSection(last.failuresByPostcondition()));
             String suggested = metaLlm.chat(
                     META_SYSTEM_PROMPT,
                     userMessage,
@@ -89,6 +95,41 @@ public class ShoppingBasketOptimizePrompt {
                     META_LLM_TEMPERATURE);
             return current.systemPrompt(suggested);
         };
+    }
+
+    /**
+     * Format the per-postcondition failure histogram as a "most
+     * common failure" section the meta-LLM can act on. Empty when
+     * no postconditions failed (the contract held on every successful
+     * sample). Lists the most-common clause first; for each clause
+     * shows count + up to two input/reason exemplars.
+     */
+    private static String renderFailureSection(Map<String, FailureCount> byClause) {
+        if (byClause.isEmpty()) {
+            return "";
+        }
+        // Sort clauses by descending count for "most common first".
+        var ordered = byClause.entrySet().stream()
+                .sorted((a, b) -> Integer.compare(b.getValue().count(), a.getValue().count()))
+                .toList();
+
+        StringBuilder sb = new StringBuilder("\nFailure breakdown:\n");
+        for (var entry : ordered) {
+            String clause = entry.getKey();
+            FailureCount bucket = entry.getValue();
+            sb.append("- \"").append(clause).append("\" failed ")
+              .append(bucket.count()).append(" times.");
+            if (!bucket.exemplars().isEmpty()) {
+                sb.append(" Examples:");
+                for (FailureExemplar ex : bucket.exemplars().subList(
+                        0, Math.min(2, bucket.exemplars().size()))) {
+                    sb.append("\n    - input \"").append(ex.input())
+                      .append("\" → ").append(ex.reason());
+                }
+            }
+            sb.append('\n');
+        }
+        return sb.toString();
     }
 
     @Experiment
