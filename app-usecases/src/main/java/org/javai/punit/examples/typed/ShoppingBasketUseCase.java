@@ -120,6 +120,66 @@ public final class ShoppingBasketUseCase
     }
 
     /**
+     * Declares the contract — what counts as a valid LLM response.
+     * Two clauses: a leaf check that the response has content, and
+     * a {@code deriving} step that parses the JSON and runs a
+     * nested clause against the parsed value. The framework
+     * evaluates each clause per sample and surfaces the per-clause
+     * failures in {@code SampleSummary.failuresByPostcondition()}.
+     */
+    @Override
+    public void postconditions(ContractBuilder<String> b) {
+        b.ensure("Response not empty", ShoppingBasketUseCase::checkResponseNotEmpty);
+        b.deriving("Valid JSON",
+                ShoppingActionValidator::parse,
+                sub -> sub.ensure("All actions valid for context",
+                        ShoppingBasketUseCase::checkActionsValidForContext));
+    }
+
+    private static Outcome<Void> checkResponseNotEmpty(String response) {
+        return (response == null || response.isBlank())
+                ? Outcome.fail("empty-response", "LLM returned no content")
+                : Outcome.ok();
+    }
+
+    private static Outcome<Void> checkActionsValidForContext(BasketTranslation translation) {
+        for (ShoppingAction action : translation.actions()) {
+            if (!action.context().isValidAction(action.name())) {
+                return Outcome.fail(
+                        "invalid-action",
+                        "Invalid action '%s' for context %s"
+                                .formatted(action.name(), action.context()));
+            }
+        }
+        return Outcome.ok();
+    }
+
+    /**
+     * Declares the factors that influence outcomes — here the LLM
+     * model and the sampling temperature. Resolved values stamp the
+     * baseline's identity so a test under one configuration never
+     * silently matches a baseline measured under another.
+     */
+    @Override
+    public List<Covariate> covariates() {
+        return List.of(
+                Covariate.custom("llm_model", CovariateCategory.CONFIGURATION),
+                Covariate.custom("temperature", CovariateCategory.CONFIGURATION));
+    }
+
+    /**
+     * Resolves each custom covariate at run time by reading from
+     * the use case's tuning. Called once per run; the resolved
+     * value flows into the baseline's identity.
+     */
+    @Override
+    public Map<String, Supplier<String>> customCovariateResolvers() {
+        return Map.of(
+                "llm_model", () -> tuning.model(),
+                "temperature", () -> Double.toString(tuning.temperature()));
+    }
+
+    /**
      * Surfaces the constructor-injected pacing so different test
      * setups can exercise the same use case under different
      * rate-limit and concurrency shapes.
@@ -188,66 +248,6 @@ public final class ShoppingBasketUseCase
     }
 
     /**
-     * Declares the contract — what counts as a valid LLM response.
-     * Two clauses: a leaf check that the response has content, and
-     * a {@code deriving} step that parses the JSON and runs a
-     * nested clause against the parsed value. The framework
-     * evaluates each clause per sample and surfaces the per-clause
-     * failures in {@code SampleSummary.failuresByPostcondition()}.
-     */
-    @Override
-    public void postconditions(ContractBuilder<String> b) {
-        b.ensure("Response not empty", ShoppingBasketUseCase::checkResponseNotEmpty);
-        b.deriving("Valid JSON",
-                ShoppingActionValidator::parse,
-                sub -> sub.ensure("All actions valid for context",
-                        ShoppingBasketUseCase::checkActionsValidForContext));
-    }
-
-    private static Outcome<Void> checkResponseNotEmpty(String response) {
-        return (response == null || response.isBlank())
-                ? Outcome.fail("empty-response", "LLM returned no content")
-                : Outcome.ok();
-    }
-
-    private static Outcome<Void> checkActionsValidForContext(BasketTranslation translation) {
-        for (ShoppingAction action : translation.actions()) {
-            if (!action.context().isValidAction(action.name())) {
-                return Outcome.fail(
-                        "invalid-action",
-                        "Invalid action '%s' for context %s"
-                                .formatted(action.name(), action.context()));
-            }
-        }
-        return Outcome.ok();
-    }
-
-    /**
-     * Declares the factors that influence outcomes — here the LLM
-     * model and the sampling temperature. Resolved values stamp the
-     * baseline's identity so a test under one configuration never
-     * silently matches a baseline measured under another.
-     */
-    @Override
-    public List<Covariate> covariates() {
-        return List.of(
-                Covariate.custom("llm_model", CovariateCategory.CONFIGURATION),
-                Covariate.custom("temperature", CovariateCategory.CONFIGURATION));
-    }
-
-    /**
-     * Resolves each custom covariate at run time by reading from
-     * the use case's tuning. Called once per run; the resolved
-     * value flows into the baseline's identity.
-     */
-    @Override
-    public Map<String, Supplier<String>> customCovariateResolvers() {
-        return Map.of(
-                "llm_model", () -> tuning.model(),
-                "temperature", () -> Double.toString(tuning.temperature()));
-    }
-
-    /**
      * The service call. Hits the LLM, records token cost via the
      * tracker, returns the raw response wrapped in {@link Outcome#ok}.
      * The catch clause is narrow: {@link ChatLlmException} models the
@@ -266,7 +266,8 @@ public final class ShoppingBasketUseCase
         try {
             ChatResponse response = llm.chatWithMetadata(
                     tuning.systemPrompt(), instruction,
-                    tuning.model(), tuning.temperature());
+                    tuning.model(), tuning.temperature()
+            );
             tracker.recordTokens(response.totalTokens());
             return Outcome.ok(response.content());
         } catch (ChatLlmException e) {
