@@ -25,10 +25,17 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  *
  * <p>The factor record {@link LlmTuning} carries the LLM model,
  * sampling temperature, and system prompt. The input type is the
- * natural-language instruction; the success-output type is the
- * validated {@link BasketTranslation}. A sample fails when the LLM
- * response is unparseable, deserialises to unknown actions, or
- * carries an action whose name is invalid for its declared context.
+ * natural-language instruction; the output type is the LLM's raw
+ * response string. The contract — declared via
+ * {@link #postconditions(ContractBuilder) postconditions} — judges
+ * the response: a non-empty body clause, then a {@code deriving}
+ * step that parses the JSON into a {@link BasketTranslation} and
+ * (on successful parse) checks every action's name is valid for
+ * its declared context. The histogram on
+ * {@code SampleSummary.failuresByPostcondition()} surfaces each
+ * failure mode separately, so the optimize meta-prompt can see
+ * "Valid JSON failed 8 times" vs "All actions valid failed 3 times"
+ * rather than collapsing both to "the use case failed."
  *
  * <p>{@code llm_model} and {@code temperature} are declared as
  * {@link CovariateCategory#CONFIGURATION} covariates. The framework
@@ -42,7 +49,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  * factory through {@link #samplingWith(ChatLlm, List, int)}.
  */
 public final class ShoppingBasketUseCase
-        implements UseCase<ShoppingBasketUseCase.LlmTuning, String, BasketTranslation> {
+        implements UseCase<ShoppingBasketUseCase.LlmTuning, String, String> {
 
     public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final double DEFAULT_TEMPERATURE = 0.3;
@@ -123,12 +130,12 @@ public final class ShoppingBasketUseCase
      * inject a different {@link ChatLlm}, use
      * {@link #samplingWith(ChatLlm, List, int)} instead.
      */
-    public static Sampling<LlmTuning, String, BasketTranslation> sampling(
+    public static Sampling<LlmTuning, String, String> sampling(
             List<String> inputs, int samples) {
         return samplingWith(ChatLlmProvider.resolve(), inputs, samples);
     }
 
-    public static Sampling<LlmTuning, String, BasketTranslation> samplingWith(
+    public static Sampling<LlmTuning, String, String> samplingWith(
             ChatLlm llm, List<String> inputs, int samples) {
         return Sampling.of(
                 tuning -> new ShoppingBasketUseCase(llm, tuning),
@@ -139,7 +146,7 @@ public final class ShoppingBasketUseCase
      * Sampling whose constructed use case respects the supplied
      * {@link Pacing}.
      */
-    public static Sampling<LlmTuning, String, BasketTranslation> samplingPaced(
+    public static Sampling<LlmTuning, String, String> samplingPaced(
             Pacing pacing, List<String> inputs, int samples) {
         return Sampling.of(
                 tuning -> new ShoppingBasketUseCase(
@@ -154,9 +161,9 @@ public final class ShoppingBasketUseCase
      * Sampling.Builder ready for {@code .timeBudget(...)},
      * {@code .tokenBudget(...)}, etc., terminated with {@code .build()}.
      */
-    public static Sampling.Builder<LlmTuning, String, BasketTranslation> samplingBuilder(
+    public static Sampling.Builder<LlmTuning, String, String> samplingBuilder(
             List<String> inputs, int samples) {
-        return Sampling.<LlmTuning, String, BasketTranslation>builder()
+        return Sampling.<LlmTuning, String, String>builder()
                 .useCaseFactory(tuning -> new ShoppingBasketUseCase(
                         ChatLlmProvider.resolve(), tuning))
                 .inputs(inputs)
@@ -169,18 +176,30 @@ public final class ShoppingBasketUseCase
     }
 
     @Override
-    public void postconditions(ContractBuilder<BasketTranslation> b) {
-        b.ensure("All actions valid for context", t -> {
-            for (ShoppingAction action : t.actions()) {
-                if (!action.context().isValidAction(action.name())) {
-                    return Outcome.fail(
-                            "invalid-action",
-                            "Invalid action '%s' for context %s"
-                                    .formatted(action.name(), action.context()));
-                }
+    public void postconditions(ContractBuilder<String> b) {
+        b.ensure("Response not empty", ShoppingBasketUseCase::checkResponseNotEmpty);
+        b.deriving("Valid JSON",
+                ShoppingActionValidator::parse,
+                sub -> sub.ensure("All actions valid for context",
+                        ShoppingBasketUseCase::checkActionsValidForContext));
+    }
+
+    private static Outcome<Void> checkResponseNotEmpty(String response) {
+        return (response == null || response.isBlank())
+                ? Outcome.fail("empty-response", "LLM returned no content")
+                : Outcome.ok();
+    }
+
+    private static Outcome<Void> checkActionsValidForContext(BasketTranslation translation) {
+        for (ShoppingAction action : translation.actions()) {
+            if (!action.context().isValidAction(action.name())) {
+                return Outcome.fail(
+                        "invalid-action",
+                        "Invalid action '%s' for context %s"
+                                .formatted(action.name(), action.context()));
             }
-            return Outcome.ok();
-        });
+        }
+        return Outcome.ok();
     }
 
     @Override
@@ -198,25 +217,15 @@ public final class ShoppingBasketUseCase
     }
 
     @Override
-    public Outcome<BasketTranslation> invoke(String instruction, TokenTracker tracker) {
-        ChatResponse response;
+    public Outcome<String> invoke(String instruction, TokenTracker tracker) {
         try {
-            response = llm.chatWithMetadata(
+            ChatResponse response = llm.chatWithMetadata(
                     tuning.systemPrompt(), instruction,
                     tuning.model(), tuning.temperature());
+            tracker.recordTokens(response.totalTokens());
+            return Outcome.ok(response.content());
         } catch (RuntimeException e) {
             return Outcome.fail("llm-error", e.getMessage());
         }
-        tracker.recordTokens(response.totalTokens());
-        if (response.content() == null || response.content().isBlank()) {
-            return Outcome.fail("empty-response", "LLM returned no content");
-        }
-        Outcome<BasketTranslation> validated = ShoppingActionValidator.validate(response);
-        if (validated instanceof Outcome.Fail<BasketTranslation> failure) {
-            return Outcome.fail(
-                    failure.failure().id().name(),
-                    failure.failure().message());
-        }
-        return Outcome.ok(validated.getOrThrow());
     }
 }
