@@ -18,9 +18,17 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  *
  * <p>The factor record {@link Tier} carries the operating tier the
  * gateway is invoked under. The input type is a {@link Charge}
- * record bundling card token and amount; the success-output type
- * is the gateway's {@link PaymentResult}, and a sample fails when
- * {@code result.success()} is {@code false}.
+ * record bundling card token and amount; the output type is the
+ * gateway's {@link PaymentResult}. The contract has a single
+ * postcondition — "transaction succeeds" — so a sample's failure
+ * mode is attributed to a named clause in the verdict's failure
+ * histogram, rather than to an undifferentiated count.
+ *
+ * <p>Note the split: {@code invoke} is kept primitive — it calls
+ * the gateway and returns the result, with the only invoke-level
+ * failure being a {@code RuntimeException} thrown from the gateway
+ * itself ({@code "gateway-error"}). The judgement on the returned
+ * result lives in {@code postconditions(...)}.
  *
  * <p>Per-sample duration is captured automatically by the engine on
  * every {@link UseCaseOutcome}. For SLA-style latency assertions
@@ -67,7 +75,11 @@ public final class PaymentGatewayUseCase
     }
 
     @Override
-    public void postconditions(ContractBuilder<PaymentResult> b) { /* none */ }
+    public void postconditions(ContractBuilder<PaymentResult> b) {
+        b.ensure("transaction succeeds", r -> r.success()
+                ? Outcome.ok()
+                : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
+    }
 
     @Override
     public int warmup() {
@@ -78,18 +90,11 @@ public final class PaymentGatewayUseCase
 
     @Override
     public Outcome<PaymentResult> invoke(Charge charge, TokenTracker tracker) {
-        PaymentResult result;
         try {
-            result = gateway.charge(charge.cardToken(), charge.amountCents());
+            return Outcome.ok(gateway.charge(charge.cardToken(), charge.amountCents()));
         } catch (RuntimeException e) {
             return Outcome.fail("gateway-error", e.getMessage());
         }
-        if (!result.success()) {
-            return Outcome.fail(
-                    "transaction-failed",
-                    "errorCode=" + result.errorCode());
-        }
-        return Outcome.ok(result);
     }
 
     /**
