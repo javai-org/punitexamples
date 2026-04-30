@@ -38,7 +38,21 @@ public class ShoppingActionValidator {
      * @return an outcome containing the validation result, or a failure with details
      */
     public static Outcome<BasketTranslation> validate(ChatResponse response) {
-        String json = response.content();
+        return parse(response.content());
+    }
+
+    /**
+     * Parses and validates a JSON string as shopping actions. Used by
+     * the typed pipeline's contract clause when the use case's output
+     * type is the raw LLM response — the contract's {@code deriving}
+     * step delegates to this method.
+     *
+     * <p>Expects the wrapped format: {@code {"actions": [{"context": "SHOP", ...}, ...]}}
+     *
+     * @param json the JSON content to parse
+     * @return an outcome containing the validation result, or a failure with details
+     */
+    public static Outcome<BasketTranslation> parse(String json) {
         if (json == null || json.isBlank()) {
             return Outcome.fail("validation", "Response content is null or blank");
         }
