@@ -6,10 +6,11 @@ import java.util.function.Supplier;
 
 import org.javai.outcome.Outcome;
 import org.javai.punit.api.CovariateCategory;
+import org.javai.punit.api.typed.ContractBuilder;
 import org.javai.punit.api.typed.Pacing;
 import org.javai.punit.api.typed.Sampling;
+import org.javai.punit.api.typed.TokenTracker;
 import org.javai.punit.api.typed.UseCase;
-import org.javai.punit.api.typed.UseCaseOutcome;
 import org.javai.punit.api.typed.covariate.Covariate;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
@@ -168,6 +169,9 @@ public final class ShoppingBasketUseCase
     }
 
     @Override
+    public void postconditions(ContractBuilder<BasketTranslation> b) { /* none */ }
+
+    @Override
     public List<Covariate> covariates() {
         return List.of(
                 Covariate.custom("llm_model", CovariateCategory.CONFIGURATION),
@@ -182,39 +186,34 @@ public final class ShoppingBasketUseCase
     }
 
     @Override
-    public UseCaseOutcome<BasketTranslation> apply(String instruction) {
+    public Outcome<BasketTranslation> invoke(String instruction, TokenTracker tracker) {
         ChatResponse response;
         try {
             response = llm.chatWithMetadata(
                     tuning.systemPrompt(), instruction,
                     tuning.model(), tuning.temperature());
         } catch (RuntimeException e) {
-            return UseCaseOutcome.<BasketTranslation>fail(
-                    "llm-error", e.getMessage())
-                    .withTokens(0);
+            return Outcome.fail("llm-error", e.getMessage());
         }
+        tracker.recordTokens(response.totalTokens());
         if (response.content() == null || response.content().isBlank()) {
-            return UseCaseOutcome.<BasketTranslation>fail(
-                    "empty-response", "LLM returned no content")
-                    .withTokens(response.totalTokens());
+            return Outcome.fail("empty-response", "LLM returned no content");
         }
         Outcome<BasketTranslation> validated = ShoppingActionValidator.validate(response);
         if (validated instanceof Outcome.Fail<BasketTranslation> failure) {
-            return UseCaseOutcome.<BasketTranslation>fail(
+            return Outcome.fail(
                     failure.failure().id().name(),
-                    failure.failure().message())
-                    .withTokens(response.totalTokens());
+                    failure.failure().message());
         }
         BasketTranslation result = validated.getOrThrow();
         for (ShoppingAction action : result.actions()) {
             if (!action.context().isValidAction(action.name())) {
-                return UseCaseOutcome.<BasketTranslation>fail(
+                return Outcome.fail(
                         "invalid-action",
                         "Invalid action '%s' for context %s"
-                                .formatted(action.name(), action.context()))
-                        .withTokens(response.totalTokens());
+                                .formatted(action.name(), action.context()));
             }
         }
-        return UseCaseOutcome.ok(result).withTokens(response.totalTokens());
+        return Outcome.ok(result);
     }
 }
