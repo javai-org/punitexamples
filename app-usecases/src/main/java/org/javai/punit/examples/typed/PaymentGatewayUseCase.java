@@ -24,11 +24,13 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * mode is attributed to a named clause in the verdict's failure
  * histogram, rather than to an undifferentiated count.
  *
- * <p>Note the split: {@code invoke} is kept primitive — it calls
- * the gateway and returns the result, with the only invoke-level
- * failure being a {@code RuntimeException} thrown from the gateway
- * itself ({@code "gateway-error"}). The judgement on the returned
- * result lives in {@code postconditions(...)}.
+ * <p>Note the split: {@code invoke} is primitive — it calls the
+ * gateway and returns the result. The {@link PaymentGateway}
+ * contract surfaces transactional failures as
+ * {@code PaymentResult.success() == false}, never as a thrown
+ * exception, so {@code invoke} doesn't need a try/catch. The
+ * judgement on the returned result lives in
+ * {@code postconditions(...)}.
  *
  * <p>Per-sample duration is captured automatically by the engine on
  * every {@link UseCaseOutcome}. For SLA-style latency assertions
@@ -90,11 +92,7 @@ public final class PaymentGatewayUseCase
 
     @Override
     public Outcome<PaymentResult> invoke(Charge charge, TokenTracker tracker) {
-        try {
-            return Outcome.ok(gateway.charge(charge.cardToken(), charge.amountCents()));
-        } catch (RuntimeException e) {
-            return Outcome.fail("gateway-error", e.getMessage());
-        }
+        return Outcome.ok(gateway.charge(charge.cardToken(), charge.amountCents()));
     }
 
     /**
