@@ -100,12 +100,14 @@ public final class MockChatLlm implements ChatLlm {
     }
 
     @Override
-    public String chat(String systemMessage, String userMessage, String model, double temperature) {
+    public String chat(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException {
         return chatWithMetadata(systemMessage, userMessage, model, temperature).content();
     }
 
     @Override
-    public ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature) {
+    public ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException {
         // Note: model parameter is accepted for interface compatibility but ignored.
         // Mock behavior is determined solely by temperature and prompt content.
         // Analyze what the prompt specifies - this determines response quality

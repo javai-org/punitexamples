@@ -9,6 +9,7 @@ import org.javai.punit.api.typed.spec.FailureCount;
 import org.javai.punit.api.typed.spec.FailureExemplar;
 import org.javai.punit.api.typed.spec.Scorer;
 import org.javai.punit.examples.app.llm.ChatLlm;
+import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
@@ -88,11 +89,19 @@ public class ShoppingBasketOptimizePrompt {
                             last.factors().systemPrompt(),
                             last.score(),
                             renderFailureSection(last.failuresByPostcondition()));
-            String suggested = metaLlm.chat(
-                    META_SYSTEM_PROMPT,
-                    userMessage,
-                    META_LLM_MODEL,
-                    META_LLM_TEMPERATURE);
+            String suggested;
+            try {
+                suggested = metaLlm.chat(
+                        META_SYSTEM_PROMPT,
+                        userMessage,
+                        META_LLM_MODEL,
+                        META_LLM_TEMPERATURE);
+            } catch (ChatLlmException e) {
+                // FactorsStepper is non-throwing; if the meta-LLM is
+                // unreachable the optimize experiment cannot progress.
+                // Bubble as runtime so the experiment surfaces the cause.
+                throw new RuntimeException("Meta-LLM call failed: " + e.getMessage(), e);
+            }
             return current.systemPrompt(suggested);
         };
     }

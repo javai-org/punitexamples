@@ -27,8 +27,9 @@ import org.javai.outcome.retry.RetryPolicy;
  * Use {@link #supportsModel(String)} to check if a model name is supported.
  *
  * <h2>Error Handling</h2>
- * <p>Throws {@link LlmApiException} for API errors. Transient errors (429, 5xx, timeouts)
- * are automatically retried up to 3 times with exponential backoff.
+ * <p>Throws checked {@link ChatLlmException} for API errors that survive retries.
+ * Transient errors (429, 5xx, timeouts) are automatically retried up to 3 times
+ * with exponential backoff before the exception is thrown.
  *
  * <h2>Cost Tracking</h2>
  * <p>Logs estimated costs at FINE level after each successful call.
@@ -101,12 +102,14 @@ public final class OpenAiChatLlm implements ChatLlm {
     }
 
     @Override
-    public String chat(String systemMessage, String userMessage, String model, double temperature) {
+    public String chat(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException {
         return chatWithMetadata(systemMessage, userMessage, model, temperature).content();
     }
 
     @Override
-    public ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature) {
+    public ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException {
         HttpRequest request = buildRequest(systemMessage, userMessage, model, temperature);
 
         Outcome<ChatResponse> result = retrier.execute(
@@ -115,7 +118,7 @@ public final class OpenAiChatLlm implements ChatLlm {
 
         return switch (result) {
             case Outcome.Ok<ChatResponse> ok -> ok.value();
-            case Outcome.Fail<ChatResponse> fail -> throw new LlmApiException(
+            case Outcome.Fail<ChatResponse> fail -> throw new ChatLlmException(
                     "OpenAI API call failed: " + fail.failure().message(),
                     fail.failure().exception().orElse(null)
             );
