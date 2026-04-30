@@ -49,7 +49,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("gpt-4o-mini can complete a simple chat")
-        void gpt4oMiniCanCompleteSimpleChat() {
+        void gpt4oMiniCanCompleteSimpleChat() throws ChatLlmException {
             ChatResponse response = llm.chatWithMetadata(
                     "You are a helpful assistant. Respond with just 'Hello!' and nothing else.",
                     "Say hello",
@@ -65,7 +65,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("gpt-4o can complete a simple chat")
-        void gpt4oCanCompleteSimpleChat() {
+        void gpt4oCanCompleteSimpleChat() throws ChatLlmException {
             ChatResponse response = llm.chatWithMetadata(
                     "You are a helpful assistant. Respond with just 'Hello!' and nothing else.",
                     "Say hello",
@@ -81,7 +81,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("can generate JSON output")
-        void canGenerateJsonOutput() {
+        void canGenerateJsonOutput() throws ChatLlmException {
             String response = llm.chat(
                     """
                     You are a JSON generator. Output ONLY valid JSON, no markdown.
@@ -114,7 +114,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("claude-haiku-4-5 can complete a simple chat")
-        void claudeHaikuCanCompleteSimpleChat() {
+        void claudeHaikuCanCompleteSimpleChat() throws ChatLlmException {
             ChatResponse response = llm.chatWithMetadata(
                     "You are a helpful assistant. Respond with just 'Hello!' and nothing else.",
                     "Say hello",
@@ -130,7 +130,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("claude-sonnet-4-5 can complete a simple chat")
-        void claudeSonnetCanCompleteSimpleChat() {
+        void claudeSonnetCanCompleteSimpleChat() throws ChatLlmException {
             ChatResponse response = llm.chatWithMetadata(
                     "You are a helpful assistant. Respond with just 'Hello!' and nothing else.",
                     "Say hello",
@@ -146,7 +146,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("can generate JSON output")
-        void canGenerateJsonOutput() {
+        void canGenerateJsonOutput() throws ChatLlmException {
             String response = llm.chat(
                     """
                     You are a JSON generator. Output ONLY valid JSON, no markdown.
@@ -180,7 +180,7 @@ class RealLlmIntegrationTest {
 
         @Test
         @DisplayName("RoutingChatLlm routes to correct provider")
-        void routingChatLlmRoutesToCorrectProvider() {
+        void routingChatLlmRoutesToCorrectProvider() throws ChatLlmException {
             ChatLlm router = new RoutingChatLlm();
 
             // Test OpenAI routing if key available

@@ -13,6 +13,7 @@ import org.javai.punit.api.typed.TokenTracker;
 import org.javai.punit.api.typed.UseCase;
 import org.javai.punit.api.typed.covariate.Covariate;
 import org.javai.punit.examples.app.llm.ChatLlm;
+import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.app.llm.ChatResponse;
 import org.javai.punit.examples.app.shopping.ShoppingAction;
@@ -249,11 +250,16 @@ public final class ShoppingBasketUseCase
     /**
      * The service call. Hits the LLM, records token cost via the
      * tracker, returns the raw response wrapped in {@link Outcome#ok}.
-     * Transport-level failures (LLM client exceptions) return
-     * {@link Outcome#fail} with the symbolic name {@code "llm-error"}
-     * and the exception message; the contract — declared in
-     * {@link #postconditions(ContractBuilder) postconditions} —
-     * judges the response shape.
+     * The catch clause is narrow: {@link ChatLlmException} models the
+     * LLM client's anticipated transport-level failures (HTTP errors,
+     * timeouts, malformed responses) — those are translated to
+     * {@link Outcome#fail} under the symbolic name {@code "llm-error"}
+     * so the engine counts them as sample failures. Anything else the
+     * client might throw (an unchecked exception from a logic bug,
+     * misconfiguration) is left to bubble — that is a defect, and the
+     * run should abort so the author can fix it. The contract —
+     * declared in {@link #postconditions(ContractBuilder) postconditions} —
+     * judges the returned response shape.
      */
     @Override
     public Outcome<String> invoke(String instruction, TokenTracker tracker) {
@@ -263,7 +269,7 @@ public final class ShoppingBasketUseCase
                     tuning.model(), tuning.temperature());
             tracker.recordTokens(response.totalTokens());
             return Outcome.ok(response.content());
-        } catch (RuntimeException e) {
+        } catch (ChatLlmException e) {
             return Outcome.fail("llm-error", e.getMessage());
         }
     }

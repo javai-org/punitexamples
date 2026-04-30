@@ -41,12 +41,14 @@ final class RoutingChatLlm implements ChatLlm {
     }
 
     @Override
-    public String chat(String systemMessage, String userMessage, String model, double temperature) {
+    public String chat(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException {
         return chatWithMetadata(systemMessage, userMessage, model, temperature).content();
     }
 
     @Override
-    public ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature) {
+    public ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException {
         ChatLlm provider = resolveProvider(model);
         ChatResponse response = provider.chatWithMetadata(systemMessage, userMessage, model, temperature);
         totalTokensUsed += response.totalTokens();

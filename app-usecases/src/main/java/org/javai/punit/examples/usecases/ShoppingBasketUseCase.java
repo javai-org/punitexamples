@@ -12,6 +12,7 @@ import org.javai.punit.contract.ServiceContract;
 import org.javai.punit.contract.UseCaseOutcome;
 import org.javai.punit.contract.match.JsonMatcher;
 import org.javai.punit.examples.app.llm.ChatLlm;
+import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.app.llm.ChatResponse;
 import org.javai.punit.examples.app.shopping.ShoppingAction;
@@ -266,11 +267,21 @@ public class ShoppingBasketUseCase {
     }
 
     private ChatResponse executeTranslation(ServiceInput input) {
-        return llm.chatWithMetadata(
-                input.systemPrompt(),
-                input.instruction(),
-                input.model(),
-                input.temperature()
-        );
+        try {
+            return llm.chatWithMetadata(
+                    input.systemPrompt(),
+                    input.instruction(),
+                    input.model(),
+                    input.temperature()
+            );
+        } catch (ChatLlmException e) {
+            // Legacy ServiceContract.execute(...) takes a non-throwing
+            // Function<I, R>, so this boundary cannot propagate a checked
+            // exception. Rewrap with the cause attached; the legacy
+            // framework's exception-handling treats this as a sample
+            // failure. The typed-API path (typed.ShoppingBasketUseCase)
+            // catches ChatLlmException directly and returns Outcome.fail.
+            throw new RuntimeException("LLM call failed: " + e.getMessage(), e);
+        }
     }
 }

@@ -47,8 +47,10 @@ public interface ChatLlm {
      * @param model the model identifier (e.g., "gpt-4o-mini", "claude-haiku-4-5-20251001")
      * @param temperature controls randomness (0.0 = deterministic, 1.0 = creative)
      * @return the LLM's response as a string
+     * @throws ChatLlmException if the LLM call fails for an anticipated transport-level reason
      */
-    String chat(String systemMessage, String userMessage, String model, double temperature);
+    String chat(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException;
 
     /**
      * Sends a chat request and returns both the response and metadata.
@@ -67,8 +69,10 @@ public interface ChatLlm {
      * @param model the model identifier (e.g., "gpt-4o-mini", "claude-haiku-4-5-20251001")
      * @param temperature controls randomness (0.0 = deterministic, 1.0 = creative)
      * @return the response with metadata including token usage
+     * @throws ChatLlmException if the LLM call fails for an anticipated transport-level reason
      */
-    ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature);
+    ChatResponse chatWithMetadata(String systemMessage, String userMessage, String model, double temperature)
+            throws ChatLlmException;
 
     /**
      * Returns the total number of tokens used across all calls since the last reset.
