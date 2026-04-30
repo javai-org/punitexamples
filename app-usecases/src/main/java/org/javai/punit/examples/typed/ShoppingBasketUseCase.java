@@ -169,7 +169,19 @@ public final class ShoppingBasketUseCase
     }
 
     @Override
-    public void postconditions(ContractBuilder<BasketTranslation> b) { /* none */ }
+    public void postconditions(ContractBuilder<BasketTranslation> b) {
+        b.ensure("All actions valid for context", t -> {
+            for (ShoppingAction action : t.actions()) {
+                if (!action.context().isValidAction(action.name())) {
+                    return Outcome.fail(
+                            "invalid-action",
+                            "Invalid action '%s' for context %s"
+                                    .formatted(action.name(), action.context()));
+                }
+            }
+            return Outcome.ok();
+        });
+    }
 
     @Override
     public List<Covariate> covariates() {
@@ -205,15 +217,6 @@ public final class ShoppingBasketUseCase
                     failure.failure().id().name(),
                     failure.failure().message());
         }
-        BasketTranslation result = validated.getOrThrow();
-        for (ShoppingAction action : result.actions()) {
-            if (!action.context().isValidAction(action.name())) {
-                return Outcome.fail(
-                        "invalid-action",
-                        "Invalid action '%s' for context %s"
-                                .formatted(action.name(), action.context()));
-            }
-        }
-        return Outcome.ok(result);
+        return Outcome.ok(validated.getOrThrow());
     }
 }
