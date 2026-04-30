@@ -2,9 +2,11 @@ package org.javai.punit.examples.typed;
 
 import java.util.List;
 
+import org.javai.outcome.Outcome;
+import org.javai.punit.api.typed.ContractBuilder;
 import org.javai.punit.api.typed.Sampling;
+import org.javai.punit.api.typed.TokenTracker;
 import org.javai.punit.api.typed.UseCase;
-import org.javai.punit.api.typed.UseCaseOutcome;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
@@ -65,6 +67,9 @@ public final class PaymentGatewayUseCase
     }
 
     @Override
+    public void postconditions(ContractBuilder<PaymentResult> b) { /* none */ }
+
+    @Override
     public int warmup() {
         // Discard the first three responses to cover cold-start and
         // connection-pool warmup.
@@ -72,19 +77,19 @@ public final class PaymentGatewayUseCase
     }
 
     @Override
-    public UseCaseOutcome<PaymentResult> apply(Charge charge) {
+    public Outcome<PaymentResult> invoke(Charge charge, TokenTracker tracker) {
         PaymentResult result;
         try {
             result = gateway.charge(charge.cardToken(), charge.amountCents());
         } catch (RuntimeException e) {
-            return UseCaseOutcome.fail("gateway-error", e.getMessage());
+            return Outcome.fail("gateway-error", e.getMessage());
         }
         if (!result.success()) {
-            return UseCaseOutcome.fail(
+            return Outcome.fail(
                     "transaction-failed",
                     "errorCode=" + result.errorCode());
         }
-        return UseCaseOutcome.ok(result);
+        return Outcome.ok(result);
     }
 
     /**

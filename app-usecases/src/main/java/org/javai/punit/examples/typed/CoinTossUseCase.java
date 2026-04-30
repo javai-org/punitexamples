@@ -2,9 +2,11 @@ package org.javai.punit.examples.typed;
 
 import java.util.List;
 
+import org.javai.outcome.Outcome;
+import org.javai.punit.api.typed.ContractBuilder;
 import org.javai.punit.api.typed.Sampling;
+import org.javai.punit.api.typed.TokenTracker;
 import org.javai.punit.api.typed.UseCase;
-import org.javai.punit.api.typed.UseCaseOutcome;
 
 /**
  * A deterministic stand-in for a probabilistic service: returns
@@ -54,10 +56,13 @@ public final class CoinTossUseCase implements UseCase<CoinTossUseCase.Bias, Inte
     }
 
     @Override
-    public UseCaseOutcome<String> apply(Integer input) {
+    public void postconditions(ContractBuilder<String> b) { /* none */ }
+
+    @Override
+    public Outcome<String> invoke(Integer input, TokenTracker tracker) {
         boolean heads = (input % 100) < threshold;
         return heads
-                ? UseCaseOutcome.ok("heads")
-                : UseCaseOutcome.fail("tails", "expected heads, got tails for input " + input);
+                ? Outcome.ok("heads")
+                : Outcome.fail("tails", "expected heads, got tails for input " + input);
     }
 }
