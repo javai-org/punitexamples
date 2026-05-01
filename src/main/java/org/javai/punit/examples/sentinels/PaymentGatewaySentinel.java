@@ -8,7 +8,6 @@ import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.app.payment.PaymentResult;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
-import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Tier;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -48,8 +47,8 @@ public class PaymentGatewaySentinel {
 
     @ProbabilisticTest
     void paymentMeetsContractualSla() {
-        PUnit.<Tier, Charge, PaymentResult>testing(
-                        PaymentGatewayUseCase.sampling(CHARGES, 50), Tier.DEFAULT)
+        PUnit.<Void, Charge, PaymentResult>testing(
+                        PaymentGatewayUseCase.sampling(CHARGES, 50), null)
                 .criterion(BernoulliPassRate.meeting(SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .contractRef("Acme Payment SLA v3.2 §4.1")
                 .assertPasses();

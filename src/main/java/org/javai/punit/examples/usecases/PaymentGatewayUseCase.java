@@ -17,13 +17,13 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * probabilistic testing: thresholds come from contractual agreements
  * rather than empirical baselines.
  *
- * <p>The factor record {@link Tier} carries the operating tier the
- * gateway is invoked under. The input type is a {@link Charge}
- * record bundling card token and amount; the output type is the
- * gateway's {@link PaymentResult}. The contract has a single
- * postcondition — "transaction succeeds" — so a sample's failure
- * mode is attributed to a named clause in the verdict's failure
- * histogram, rather than to an undifferentiated count.
+ * <p>This use case has no varying factors, so {@code FT} is
+ * {@link Void} — the Java-idiomatic "no value" type. The input is
+ * a {@link Charge} record bundling card token and amount; the
+ * output is the gateway's {@link PaymentResult}. The contract has a
+ * single postcondition — "transaction succeeds" — so a sample's
+ * failure mode is attributed to a named clause in the verdict's
+ * failure histogram, rather than to an undifferentiated count.
  *
  * <p>Note the split: {@code invoke} is primitive — it calls the
  * gateway and returns the result. The {@link PaymentGateway}
@@ -41,19 +41,7 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * {@code .criterion(...)}.
  */
 public final class PaymentGatewayUseCase
-        implements UseCase<PaymentGatewayUseCase.Tier, PaymentGatewayUseCase.Charge, PaymentResult> {
-
-    /**
-     * The factor record: the SLA tier under which the gateway is
-     * being verified. Different tiers may have different target pass
-     * rates and latency limits, and a baseline measured under one
-     * tier is not the right reference for a test running under
-     * another.
-     */
-    public record Tier(String name) {
-
-        public static final Tier DEFAULT = new Tier("standard");
-    }
+        implements UseCase<Void, PaymentGatewayUseCase.Charge, PaymentResult> {
 
     /** The per-sample input: a card token plus amount in cents. */
     public record Charge(String cardToken, long amountCents) { }
@@ -61,15 +49,13 @@ public final class PaymentGatewayUseCase
     private static final int WARMUP_INVOCATIONS = 3;
 
     private final PaymentGateway gateway;
-    private final Tier tier;
 
-    public PaymentGatewayUseCase(Tier tier) {
-        this(MockPaymentGateway.instance(), tier);
+    public PaymentGatewayUseCase() {
+        this(MockPaymentGateway.instance());
     }
 
-    public PaymentGatewayUseCase(PaymentGateway gateway, Tier tier) {
+    public PaymentGatewayUseCase(PaymentGateway gateway) {
         this.gateway = gateway;
-        this.tier = tier;
     }
 
     @Override
@@ -102,8 +88,8 @@ public final class PaymentGatewayUseCase
      * different gateway implementation supply their own factory
      * closure via {@link Sampling#builder()}.
      */
-    public static Sampling<Tier, Charge, PaymentResult> sampling(
+    public static Sampling<Void, Charge, PaymentResult> sampling(
             List<Charge> charges, int samples) {
-        return Sampling.of(PaymentGatewayUseCase::new, samples, charges);
+        return Sampling.of(v -> new PaymentGatewayUseCase(), samples, charges);
     }
 }
