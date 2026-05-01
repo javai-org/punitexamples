@@ -17,8 +17,6 @@ pluginManagement {
 
 rootProject.name = "punitexamples"
 
-include("app", "app-usecases", "app-tests")
-
 // Use local punit when available (sibling folder), Maven Central otherwise
 val punitDir = file("../punit")
 if (punitDir.isDirectory) {

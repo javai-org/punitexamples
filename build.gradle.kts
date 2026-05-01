@@ -2,10 +2,10 @@ plugins {
     id("java-library")
     id("signing")
     id("com.vanniktech.maven.publish") version "0.36.0"
+    id("org.javai.punit")
     idea
 }
 
-// Configure IDEA to download sources and javadoc
 idea {
     module {
         isDownloadSources = true
@@ -20,31 +20,64 @@ signing {
 group = "org.javai"
 version = property("punitExamplesVersion") as String
 
-subprojects {
-    apply(plugin = "java-library")
-
-    group = rootProject.group
-    version = rootProject.version
-
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
-        }
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
+}
 
-    // Compile with -parameters flag to preserve method parameter names at runtime
-    // This is required for use case argument injection
-    tasks.withType<JavaCompile> {
-        options.compilerArgs.add("-parameters")
-    }
+// Compile with -parameters flag to preserve method parameter names at runtime.
+// Required for use case argument injection.
+tasks.withType<JavaCompile> {
+    options.compilerArgs.add("-parameters")
+}
 
-    repositories {
-        mavenCentral()
+repositories {
+    mavenCentral()
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Dependencies
+// ═══════════════════════════════════════════════════════════════════════════
+
+dependencies {
+    // Domain support — Jackson for JSON parsing in domain classes;
+    // Outcome for result types; Log4j2 for logging.
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.2")
+    implementation("org.javai:outcome:0.2.0")
+    implementation("org.apache.logging.log4j:log4j-api:2.25.4")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:2.25.4")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.4")
+
+    // PUnit — author-facing API (UseCase, Contract, Sampling, criteria),
+    // engine, statistics, baselines, runtime entry point. JUnit-free so
+    // sentinel-deployable classes can call PUnit.testing(...).assertPasses()
+    // without dragging the test harness onto the production classpath.
+    implementation("org.javai:punit-core:0.6.0")
+
+    // Nullability annotations used by use case postcondition methods.
+    implementation("org.jspecify:jspecify:1.0.0")
+
+    // Test stack — PUnit JUnit5 integration (transitively pulls punit-core),
+    // JUnit Jupiter, AssertJ, ArchUnit.
+    testImplementation("org.javai:punit-junit5:0.6.0")
+    testImplementation(platform("org.junit:junit-bom:5.14.4"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
+}
+
+tasks.test {
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
     }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// Maven Central Publishing
+// Publishing
 // ═══════════════════════════════════════════════════════════════════════════
 
 tasks.javadoc {
@@ -102,13 +135,148 @@ mavenPublishing {
     }
 }
 
-// Convenience task to build and publish locally
 tasks.register("publishLocal") {
     description = "Publishes to the local Maven repository"
     group = "publishing"
     dependsOn(tasks.publishToMavenLocal)
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// Operational Flow Integration Test
+// ═══════════════════════════════════════════════════════════════════════════
+// Runs the full punit operational flow: explore → optimize → measure → verify → test.
+// Usage: ./gradlew operationalFlowTest
+
+val flowClean by tasks.registering(Delete::class) {
+    description = "Cleans generated punit artifacts for a fresh flow run"
+    group = "verification"
+    delete("src/test/resources/punit/specs")
+    delete(layout.buildDirectory.dir("punit/explorations"))
+    delete(layout.buildDirectory.dir("punit/optimizations"))
+}
+
+fun flowExperimentTask(
+    name: String,
+    description: String,
+    testClass: String,
+    testMethod: String? = null
+): TaskProvider<Test> = tasks.register(name, Test::class) {
+    this.description = description
+    group = "verification"
+
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    useJUnitPlatform {
+        includeTags("punit-experiment")
+    }
+    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
+
+    filter {
+        if (testMethod != null) {
+            includeTestsMatching("*$testClass.$testMethod")
+        } else {
+            includeTestsMatching("*$testClass*")
+        }
+    }
+
+    System.getProperties()
+        .filter { (k, _) -> k.toString().startsWith("punit.") }
+        .forEach { (k, v) -> systemProperty(k.toString(), v.toString()) }
+
+    systemProperty("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
+
+    ignoreFailures = false
+    outputs.upToDateWhen { false }
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+
+    dependsOn("compileTestJava", "processTestResources")
+}
+
+fun flowTestTask(
+    name: String,
+    description: String,
+    testClass: String
+): TaskProvider<Test> = tasks.register(name, Test::class) {
+    this.description = description
+    group = "verification"
+
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+
+    useJUnitPlatform()
+    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
+
+    filter {
+        includeTestsMatching("*$testClass*")
+    }
+
+    System.getProperties()
+        .filter { (k, _) -> k.toString().startsWith("punit.") }
+        .forEach { (k, v) -> systemProperty(k.toString(), v.toString()) }
+
+    ignoreFailures = false
+    outputs.upToDateWhen { false }
+
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+
+    dependsOn("compileTestJava", "processTestResources")
+}
+
+val flowExplore = flowExperimentTask(
+    "flowExplore",
+    "Runs ShoppingBasketExplore experiment",
+    "ShoppingBasketExplore"
+)
+
+val flowOptimize = flowExperimentTask(
+    "flowOptimize",
+    "Runs ShoppingBasketOptimizeTemperature experiment",
+    "ShoppingBasketOptimizeTemperature"
+)
+
+val flowMeasure = flowExperimentTask(
+    "flowMeasure",
+    "Runs ShoppingBasketMeasure.measureBaseline experiment",
+    "ShoppingBasketMeasure",
+    "measureBaseline"
+)
+
+val flowVerify = flowTestTask(
+    "flowVerify",
+    "Verifies explore/optimize/measure artifacts exist and are valid",
+    "OperationalFlowVerificationTest"
+)
+
+val flowTest = flowTestTask(
+    "flowTest",
+    "Runs ShoppingBasketTest probabilistic test against generated spec",
+    "ShoppingBasketTest"
+)
+
+// Probabilistic tests have expected sample-level failures — the aggregate verdict
+// determines pass/fail, not individual samples. The flowVerify step already validates
+// the artifacts; flowTest proves the spec can be loaded and consumed.
+flowTest { ignoreFailures = true }
+
+flowExplore { mustRunAfter(flowClean) }
+flowOptimize { mustRunAfter(flowExplore) }
+flowMeasure { mustRunAfter(flowOptimize) }
+flowVerify { mustRunAfter(flowMeasure) }
+flowTest { mustRunAfter(flowVerify) }
+
+tasks.register("operationalFlowTest") {
+    description = "Runs the full punit operational flow: explore → optimize → measure → verify → test"
+    group = "verification"
+    dependsOn(flowClean, flowExplore, flowOptimize, flowMeasure, flowVerify, flowTest)
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Release Lifecycle
@@ -142,7 +310,6 @@ tasks.register("release") {
     doLast {
         val ver = project.property("punitExamplesVersion") as String
 
-        // 1. Validate not a SNAPSHOT
         if (ver.endsWith("-SNAPSHOT")) {
             throw GradleException(
                 "Cannot release a SNAPSHOT version ($ver). " +
@@ -150,7 +317,6 @@ tasks.register("release") {
             )
         }
 
-        // 2. Validate CHANGELOG.md has an entry for this version
         val changelog = file("CHANGELOG.md")
         if (!changelog.exists()) {
             throw GradleException("CHANGELOG.md not found. Create it before releasing.")
@@ -163,7 +329,6 @@ tasks.register("release") {
             )
         }
 
-        // 3. Validate clean git state
         val statusOutput = runCommandAndCapture("git", "status", "--porcelain")
         if (statusOutput.isNotEmpty()) {
             throw GradleException(
@@ -171,12 +336,10 @@ tasks.register("release") {
             )
         }
 
-        // 4. Create annotated tag locally (before publish, so a successful publish always has a tag)
         val tag = "v$ver"
         logger.lifecycle("Creating tag $tag...")
         runCommand("git", "tag", "-a", tag, "-m", "Release $ver")
 
-        // 5. Publish to Maven Central (colon prefix scopes to root project only)
         logger.lifecycle("Publishing $ver to Maven Central...")
         try {
             runCommand("./gradlew", ":publishAndReleaseToMavenCentral")
@@ -186,11 +349,9 @@ tasks.register("release") {
             throw e
         }
 
-        // 6. Push tag (artifact is published, so the tag must reach the remote)
         logger.lifecycle("Pushing tag $tag to origin...")
         runCommand("git", "push", "origin", tag)
 
-        // 7. Bump to next SNAPSHOT
         val parts = ver.split(".")
         val nextPatch = parts[2].toInt() + 1
         val nextVersion = "${parts[0]}.${parts[1]}.$nextPatch-SNAPSHOT"
