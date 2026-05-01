@@ -13,7 +13,7 @@ import org.javai.punit.runtime.PUnit;
  * Demonstrates exception-handling policies in probabilistic
  * testing.
  *
- * <p>The typed pipeline reserves <em>thrown exceptions</em> from
+ * <p>The framework reserves <em>thrown exceptions</em> from
  * {@code UseCase.apply()} for genuine defects — programming
  * mistakes, misconfiguration, catastrophe. Anticipated failures
  * (contract violations, validation errors, service-returned error

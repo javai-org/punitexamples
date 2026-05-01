@@ -12,9 +12,9 @@ import org.javai.punit.examples.usecases.CoinTossUseCase;
 import org.javai.punit.runtime.PUnit;
 
 /**
- * Worked example for typed-compositional authoring under JUnit
- * against {@link CoinTossUseCase}, a deterministic configurable
- * use case. Demonstrates three authoring shapes:
+ * Worked example for compositional authoring under JUnit against
+ * {@link CoinTossUseCase}, a deterministic configurable use case.
+ * Demonstrates three authoring shapes:
  *
  * <ol>
  *   <li>{@code @Experiment} measure — produces a baseline file at

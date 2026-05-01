@@ -9,9 +9,9 @@ import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
- * Core probabilistic test for the typed
- * {@link ShoppingBasketUseCase}, demonstrating the empirical-pair
- * pattern with a real LLM-backed use case: a measure run records
+ * Core probabilistic test for {@link ShoppingBasketUseCase},
+ * demonstrating the empirical-pair pattern with a real LLM-backed
+ * use case: a measure run records
  * the LLM's observed pass rate under a configuration, and this
  * test verifies a future run under the same configuration still
  * meets the recorded baseline. The empirical

@@ -12,9 +12,9 @@ import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
 
 /**
- * Typed-API payment-gateway use case demonstrating the SLA approach
- * to probabilistic testing: thresholds come from contractual
- * agreements rather than empirical baselines.
+ * Payment-gateway use case demonstrating the SLA approach to
+ * probabilistic testing: thresholds come from contractual agreements
+ * rather than empirical baselines.
  *
  * <p>The factor record {@link Tier} carries the operating tier the
  * gateway is invoked under. The input type is a {@link Charge}

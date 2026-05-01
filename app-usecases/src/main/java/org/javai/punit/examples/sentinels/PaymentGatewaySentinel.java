@@ -15,18 +15,15 @@ import org.javai.punit.runtime.PUnit;
  * Sentinel-deployable reliability check for the payment-gateway use
  * case.
  *
- * <p>This class is the typed-redesign counterpart to the legacy
- * {@code PaymentGatewayReliability} that was retired in
- * {@code DIR-PUNIT-S8 §Phase A}. The threshold here is contractual
- * (an SLA) rather than empirical, so there is no measure / baseline
- * step — the test asserts directly against the SLA threshold.
+ * <p>The threshold here is contractual (an SLA) rather than
+ * empirical, so there is no measure / baseline step — the test
+ * asserts directly against the SLA threshold.
  *
  * <h2>Sentinel deployment</h2>
  *
  * <p>See {@link ShoppingBasketSentinel} for the {@code createSentinel}
  * Gradle workflow. The same fat JAR can bundle both classes; each is
- * registered automatically by virtue of declaring typed-pipeline
- * annotated methods.
+ * registered automatically by virtue of declaring annotated methods.
  *
  * <h2>Why no @Experiment method here</h2>
  *
