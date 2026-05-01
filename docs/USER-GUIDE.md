@@ -1,6 +1,6 @@
 # PUnit Examples — User Guide
 
-This project contains worked examples of [PUnit](https://github.com/javai-org/punit) experiments and probabilistic tests. It is not a replacement for PUnit's own user guide — refer to that for full documentation of the framework's capabilities. This guide describes the example application, explains how to run the experiments and tests, and covers LLM configuration.
+This project contains worked examples of [PUnit](https://github.com/javai-org/punit) experiments and probabilistic tests. It is not a replacement for [PUnit's own user guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md) — refer to that for full documentation of the framework's capabilities, in particular [Part 3: The Use Case](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case), which documents the contract-first authoring style every example here uses (`UseCase` interface; `invoke(I, TokenTracker)` for the service call; `postconditions(ContractBuilder<O>)` for the acceptance contract). This guide describes the example application, explains how to run the experiments and tests, and covers LLM configuration.
 
 ## The example application
 
@@ -69,7 +69,7 @@ Before committing to a model or temperature, explore how different configuration
 ./gradlew exp -Prun=ShoppingBasketExplore
 ```
 
-Results are written to `src/test/resources/punit/explorations/`.
+Results are written to `build/punit/explorations/`.
 
 ### Measure — establish a baseline
 
@@ -93,7 +93,7 @@ The optimization experiments iteratively refine parameters:
 ./gradlew exp -Prun=ShoppingBasketOptimizePrompt
 ```
 
-Results are written to `src/test/resources/punit/optimizations/`.
+Results are written to `build/punit/optimizations/`.
 
 ### Running a specific experiment method
 
@@ -198,5 +198,5 @@ For the payment gateway, no baseline is needed — the SLA threshold is specifie
 
 ## Further reading
 
-- [PUnit User Guide](https://github.com/javai-org/punit) — full framework documentation
+- [PUnit User Guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md) — full framework documentation
 - [Verdict Catalog](VERDICT-CATALOG.md) — examples of every PUnit verdict archetype
