@@ -8,29 +8,30 @@ stage of the testing lifecycle.
 
 For framework concepts and configuration details see the
 [PUnit User Guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md).
-The use cases under `app-usecases/` are written in the contract-first style
-documented in
+The use cases here are written in the contract-first style documented in
 [Part 3: The Use Case](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case).
 
 ## Project structure
 
-The project is organised into three modules that mirror how a real application
-would separate concerns:
+A standard single-module Gradle / Maven layout — no special wiring is required to use PUnit:
 
 ```
-app/              Domain classes — shopping actions, LLM integrations, payment gateway.
-                  No testing dependencies.
+src/main/java/org/javai/punit/examples/
+  app/         Domain classes — shopping actions, LLM integrations, payment gateway.
+  usecases/    Use case definitions (the contract-first authoring surface).
+  sentinels/   Sentinel-deployable reliability classes.
 
-app-usecases/     Use case definitions and Sentinel-deployable reliability classes.
-                  Depends on punit-core but not JUnit.
+src/test/java/org/javai/punit/examples/
+  app/                     Unit tests for the domain code.
+  experiments/             EXPLORE, MEASURE, OPTIMIZE experiments.
+  probabilistictests/      Probabilistic tests of the use cases.
+  integration/             Operational-flow integration tests.
+  architecture/            ArchUnit rules.
 
-app-tests/        Probabilistic tests, experiments, and integration tests.
-                  Depends on punit-junit5.
+src/test/resources/        Test fixtures + committed baseline specs.
 ```
 
-This separation exists because sentinel specs (`app-usecases`) need to be
-deployable without pulling in a test framework. The same reliability spec that
-runs in CI can be consumed by an automation agent in production.
+The use cases and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 9: The Sentinel](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-9-the-sentinel) in the user guide). The test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
 
 ## Use cases
 
@@ -98,11 +99,11 @@ Measure experiments produce YAML spec files containing empirical baselines
 (observed pass rate, confidence interval, latency distribution). In a real
 project these specs are committed and consumed by probabilistic tests in CI.
 
-In this project the generated specs under `app-tests/src/test/resources/punit/specs/`
+In this project the generated specs under `src/test/resources/punit/specs/`
 are gitignored because they regenerate frequently during development. Committed
-reference copies are in `specs-reference/` — see the
-[README](app-tests/src/test/resources/punit/specs/README.md) in that directory
-for details.
+reference copies are in `src/test/resources/punit/specs-reference/` — see the
+[README](src/test/resources/punit/specs/README.md) in that directory for
+details.
 
 ## PUnit dependency
 

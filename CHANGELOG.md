@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Changed
+- **Collapsed to a single Gradle module.** The previous three-module split (`app/` + `app-usecases/` + `app-tests/`) mirrored punit's internal multi-module layout for no real benefit; a developer reading the examples ought to see a normal `src/main/java` + `src/test/java` project, not a multi-module Gradle setup. Domain code, use cases, and sentinels now live under `src/main/java/org/javai/punit/examples/{app,usecases,sentinels}/`; tests under `src/test/java/...`. Sentinel-deployability is preserved by scoping the test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) to `testImplementation`. No package renames; no source-code changes.
 - Updated optimize experiments (`ShoppingBasketOptimizePrompt`, `ShoppingBasketOptimizeTemperature`) to the renamed `initialFactor` attribute on `@OptimizeExperiment`. Tracks punit's first experiment DX refactor PR (`refactor/experiment-dx` on `javai-org/punit`), which renamed `initialControlFactorSource` → `initialFactor` and removed the inline `initialControlFactorValue` attribute.
 
 ## [0.4.0] - 2026-04-17
