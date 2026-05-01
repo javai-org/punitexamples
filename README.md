@@ -6,8 +6,11 @@ realistic use cases — an LLM-powered shopping assistant and a payment gateway
 with SLA requirements — and shows how to apply statistical rigour at every
 stage of the testing lifecycle.
 
-For framework concepts, annotations, and configuration details see the
+For framework concepts and configuration details see the
 [PUnit User Guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md).
+The use cases under `app-usecases/` are written in the contract-first style
+documented in
+[Part 3: The Use Case](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case).
 
 ## Project structure
 
@@ -18,7 +21,7 @@ would separate concerns:
 app/              Domain classes — shopping actions, LLM integrations, payment gateway.
                   No testing dependencies.
 
-app-usecases/     Use case definitions and @Sentinel reliability specs.
+app-usecases/     Use case definitions and Sentinel-deployable reliability classes.
                   Depends on punit-core but not JUnit.
 
 app-tests/        Probabilistic tests, experiments, and integration tests.
@@ -39,8 +42,8 @@ response is non-blank, parses as valid JSON, and contains only actions
 appropriate to a shopping context.
 
 This use case demonstrates covariates (model, temperature, time of day),
-input sources (method-based and file-based), budget management (token tracking),
-exception handling modes, and pacing constraints.
+input cycling, budget management (token tracking), exception handling modes,
+and pacing constraints.
 
 ### Payment gateway
 
