@@ -7,7 +7,7 @@ import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 import org.junit.jupiter.api.Disabled;
 
 /**

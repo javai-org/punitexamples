@@ -13,7 +13,7 @@ import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 
 /**
  * OPTIMIZE experiment that uses a meta-LLM as a prompt engineer to

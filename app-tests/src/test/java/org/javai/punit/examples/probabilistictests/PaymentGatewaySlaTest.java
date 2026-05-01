@@ -9,7 +9,7 @@ import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.PaymentGatewayUseCase;
 import org.javai.punit.examples.typed.PaymentGatewayUseCase.Charge;
 import org.javai.punit.examples.typed.PaymentGatewayUseCase.Tier;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 
 /**
  * Probabilistic tests for payment-gateway reliability against a

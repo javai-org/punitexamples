@@ -5,7 +5,7 @@ import java.util.List;
 import org.javai.punit.api.Experiment;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 
 /**
  * EXPLORE experiment comparing LLM model configurations across the

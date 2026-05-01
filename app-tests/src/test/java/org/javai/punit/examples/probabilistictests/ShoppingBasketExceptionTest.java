@@ -7,7 +7,7 @@ import org.javai.punit.api.typed.spec.ExceptionPolicy;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 
 /**
  * Demonstrates exception-handling policies in probabilistic
