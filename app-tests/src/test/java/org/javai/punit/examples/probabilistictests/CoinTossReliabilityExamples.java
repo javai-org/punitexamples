@@ -1,13 +1,14 @@
-package org.javai.punit.examples.typed;
+package org.javai.punit.examples.probabilistictests;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.examples.usecases.CoinTossUseCase;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
-import org.javai.punit.examples.typed.CoinTossUseCase;
+import org.javai.punit.examples.usecases.CoinTossUseCase;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -69,7 +70,7 @@ public class CoinTossReliabilityExamples {
      * {@link PUnit#testing(java.util.function.Supplier)}. Same
      * sampling and factors as {@link #measureBaseline()}.
      */
-    private org.javai.punit.api.typed.spec.Experiment baseline() {
+    private org.javai.punit.api.spec.Experiment baseline() {
         return PUnit.measuring(CoinTossUseCase.sampling(CYCLE_1_TO_100, 1000), BIAS_94)
                 .experimentId("baseline-v1")
                 .build();
