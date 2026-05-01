@@ -7,6 +7,7 @@ import org.javai.punit.api.ContractBuilder;
 import org.javai.punit.api.Sampling;
 import org.javai.punit.api.TokenTracker;
 import org.javai.punit.api.UseCase;
+import org.javai.punit.api.UseCaseOutcome;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
