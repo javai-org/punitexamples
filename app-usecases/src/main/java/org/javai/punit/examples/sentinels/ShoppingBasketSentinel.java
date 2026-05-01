@@ -13,11 +13,9 @@ import org.javai.punit.runtime.PUnit;
  * Sentinel-deployable reliability checks for the shopping-basket use
  * case.
  *
- * <p>This class is the typed-redesign counterpart to the legacy
- * {@code ShoppingBasketReliability} that was retired in
- * {@code DIR-PUNIT-S8 §Phase A}. Two methods, both runnable under
- * JUnit (as part of the test suite) and under the Sentinel binary
- * (as a production-monitoring artefact):
+ * <p>Two methods, both runnable under JUnit (as part of the test
+ * suite) and under the Sentinel binary (as a production-monitoring
+ * artefact):
  *
  * <ul>
  *   <li>{@link #shoppingBaseline()} — an {@code @Experiment} that
@@ -35,7 +33,7 @@ import org.javai.punit.runtime.PUnit;
  *
  * <p>To package this class as a Sentinel binary, apply the punit
  * Gradle plugin and run the {@code createSentinel} task. The plugin
- * scans compiled classes for any class declaring a typed
+ * scans compiled classes for any class declaring a
  * {@code @ProbabilisticTest} or {@code @Experiment} method (no
  * class-level marker required) and writes the FQNs into the JAR's
  * {@code META-INF/punit/sentinel-classes} manifest:
@@ -59,14 +57,11 @@ import org.javai.punit.runtime.PUnit;
  * <h2>Dual consumption</h2>
  *
  * <p>The same class is also picked up by JUnit during ordinary
- * development runs ({@code ./gradlew test}) — the typed
+ * development runs ({@code ./gradlew test}) — the
  * {@code @ProbabilisticTest} and {@code @Experiment} annotations are
  * meta-annotated {@code @Test} so JUnit Jupiter discovers them
  * directly. No second annotation, no JUnit-flavoured variant, no
  * separate test wrapper.
- *
- * <p>See {@code inventory/catalog/sentinel/SN05-dual-consumption}
- * in the orchestrator repo for the dual-consumption contract.
  */
 public class ShoppingBasketSentinel {
 

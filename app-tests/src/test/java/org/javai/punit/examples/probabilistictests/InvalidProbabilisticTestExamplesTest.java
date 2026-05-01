@@ -248,12 +248,10 @@ class InvalidProbabilisticTestExamplesTest {
      * matching baseline has been recorded yet.</p>
      * <p><b>Why invalid (sort of):</b> This is the canonical
      * <em>workflow</em> mistake — attempting verification before the
-     * measure step has produced a baseline. Unlike the resolver in the
-     * pre-typed pipeline (which rejected baseline-required configurations
-     * at config time), the typed pipeline doesn't reject pre-flight: it
-     * runs to completion and the criterion reports INCONCLUSIVE at
-     * evaluate time with the message "no matching baseline was resolvable
-     * for empirical threshold."</p>
+     * measure step has produced a baseline. The framework does not
+     * reject pre-flight: it runs to completion and the criterion
+     * reports INCONCLUSIVE at evaluate time with the message "no
+     * matching baseline was resolvable for empirical threshold."</p>
      *
      * <p><b>Caught by:</b> {@code BernoulliPassRate.evaluate} returns a
      * {@code Verdict.INCONCLUSIVE} {@code CriterionResult}; the test

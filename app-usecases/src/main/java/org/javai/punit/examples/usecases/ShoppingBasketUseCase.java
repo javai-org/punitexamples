@@ -21,8 +21,8 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator;
 import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTranslation;
 
 /**
- * Typed-API translation of natural-language shopping instructions
- * into structured actions via an LLM.
+ * Translation of natural-language shopping instructions into
+ * structured actions via an LLM.
  *
  * <p>The factor record {@link LlmTuning} carries the LLM model,
  * sampling temperature, and system prompt. The input type is the

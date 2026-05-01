@@ -1,5 +1,5 @@
 /**
- * Probabilistic test examples for the typed PUnit authoring surface.
+ * Probabilistic test examples.
  *
  * <ul>
  *   <li>{@link org.javai.punit.examples.probabilistictests.ShoppingBasketTest}

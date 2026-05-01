@@ -22,7 +22,7 @@ import org.javai.punit.power.PowerAnalysis;
  *
  * <p>Use when compute or token budget is the binding constraint
  * and you want the most rigorous threshold within that budget. The
- * typed pipeline's {@code BernoulliPassRate.empirical()} criterion
+ * framework's {@code BernoulliPassRate.empirical()} criterion
  * does this natively — the threshold is the resolved baseline's
  * observed pass rate, and the verdict comes from the Wilson-score
  * lower bound on the test's observed rate at the configured
@@ -35,7 +35,7 @@ import org.javai.punit.power.PowerAnalysis;
  *
  * <p>Use when statistical power is the binding constraint —
  * typically SLA monitoring where you must reliably detect
- * regressions of a specific size. The typed pipeline's
+ * regressions of a specific size. The framework's
  * {@link PowerAnalysis#sampleSize(java.util.function.Supplier, double, double)
  * PowerAnalysis.sampleSize} computes the required sample count
  * from the baseline rate plus the (MDE, power) pair; the test
@@ -48,7 +48,7 @@ import org.javai.punit.power.PowerAnalysis;
  *
  * <p>Use when the threshold is dictated externally — an SLA, a
  * regulatory requirement, a policy commitment — and the test's job
- * is to verify conformance. The typed pipeline's
+ * is to verify conformance. The framework's
  * {@code BernoulliPassRate.meeting(threshold, origin)} factory is
  * the contractual path: a deterministic
  * {@code observed >= threshold} comparison, with the threshold's
