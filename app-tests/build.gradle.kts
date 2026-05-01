@@ -1,6 +1,5 @@
 plugins {
     id("org.javai.punit")
-    kotlin("jvm") version "2.3.21"
 }
 
 dependencies {
@@ -19,9 +18,6 @@ dependencies {
 
     // ArchUnit
     testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
-
-    // Log4j2 core - needed by CatalogueMarkdownAppender for verdict catalog generation
-    testImplementation("org.apache.logging.log4j:log4j-core:2.25.4")
 }
 
 tasks.test {
@@ -29,80 +25,6 @@ tasks.test {
         events("passed", "skipped", "failed")
         showStandardStreams = true
     }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Scripts source set (Kotlin) — verdict catalog generation
-// ═══════════════════════════════════════════════════════════════════════════
-
-val scripts by sourceSets.creating {
-    kotlin.srcDir("src/scripts/kotlin")
-}
-
-dependencies {
-    "scriptsImplementation"(kotlin("stdlib"))
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-// Verdict Catalog Generation
-// ═══════════════════════════════════════════════════════════════════════════
-
-val verdictCatalogueSummary by tasks.registering(Test::class) {
-    description = "Generates SUMMARY verdict catalogue (build/verdict-catalogue-SUMMARY.md)"
-    group = "documentation"
-
-    testClassesDirs = sourceSets.test.get().output.classesDirs
-    classpath = sourceSets.test.get().runtimeClasspath
-
-    useJUnitPlatform()
-    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
-
-    // Probabilistic tests are expected to have sample-level failures — the verdict
-    // is determined by the aggregate pass rate, not individual samples.
-    ignoreFailures = true
-
-    systemProperty("punit.stats.detailLevel", "SUMMARY")
-    systemProperty("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
-
-    filter {
-        includeTestsMatching("*VerdictCatalogueTest*")
-    }
-
-    dependsOn("compileTestJava", "processTestResources")
-}
-
-val verdictCatalogueVerbose by tasks.registering(Test::class) {
-    description = "Generates VERBOSE verdict catalogue (build/verdict-catalogue-VERBOSE.md)"
-    group = "documentation"
-
-    testClassesDirs = sourceSets.test.get().output.classesDirs
-    classpath = sourceSets.test.get().runtimeClasspath
-
-    useJUnitPlatform()
-    systemProperty("junit.jupiter.extensions.autodetection.enabled", "true")
-
-    // Probabilistic tests are expected to have sample-level failures — the verdict
-    // is determined by the aggregate pass rate, not individual samples.
-    ignoreFailures = true
-
-    systemProperty("punit.stats.detailLevel", "VERBOSE")
-    systemProperty("junit.jupiter.conditions.deactivate", "org.junit.*DisabledCondition")
-
-    filter {
-        includeTestsMatching("*VerdictCatalogueTest*")
-    }
-
-    dependsOn("compileTestJava", "processTestResources")
-}
-
-val generateVerdictCatalog by tasks.registering(JavaExec::class) {
-    description = "Generates docs/VERDICT-CATALOG.md from SUMMARY and VERBOSE catalogues"
-    group = "documentation"
-
-    classpath = scripts.runtimeClasspath
-    mainClass.set("org.javai.punit.examples.scripts.GenerateVerdictCatalogKt")
-
-    dependsOn(verdictCatalogueSummary, verdictCatalogueVerbose)
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

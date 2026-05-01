@@ -1,12 +1,12 @@
-package org.javai.punit.examples.typed;
+package org.javai.punit.examples.usecases;
 
 import java.util.List;
 
 import org.javai.outcome.Outcome;
-import org.javai.punit.api.typed.ContractBuilder;
-import org.javai.punit.api.typed.Sampling;
-import org.javai.punit.api.typed.TokenTracker;
-import org.javai.punit.api.typed.UseCase;
+import org.javai.punit.api.ContractBuilder;
+import org.javai.punit.api.Sampling;
+import org.javai.punit.api.TokenTracker;
+import org.javai.punit.api.UseCase;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
@@ -35,7 +35,7 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * <p>Per-sample duration is captured automatically by the engine on
  * every {@link UseCaseOutcome}. For SLA-style latency assertions
  * ("99% of charges under 1 second"), tests pair the empirical pass-rate
- * criterion with a {@link org.javai.punit.api.typed.spec.PercentileLatency
+ * criterion with a {@link org.javai.punit.api.spec.PercentileLatency
  * PercentileLatency} criterion via {@code .reportOnly(...)} or
  * {@code .criterion(...)}.
  */

@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.javai.punit.api.Experiment;
-import org.javai.punit.api.typed.spec.FactorsStepper;
-import org.javai.punit.api.typed.spec.FailureCount;
-import org.javai.punit.api.typed.spec.FailureExemplar;
-import org.javai.punit.api.typed.spec.Scorer;
+import org.javai.punit.api.spec.FactorsStepper;
+import org.javai.punit.api.spec.FailureCount;
+import org.javai.punit.api.spec.FailureExemplar;
+import org.javai.punit.api.spec.Scorer;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**

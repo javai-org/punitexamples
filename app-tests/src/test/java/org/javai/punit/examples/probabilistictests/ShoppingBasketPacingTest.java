@@ -3,10 +3,10 @@ package org.javai.punit.examples.probabilistictests;
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.api.typed.Pacing;
+import org.javai.punit.api.Pacing;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**

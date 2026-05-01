@@ -3,10 +3,10 @@ package org.javai.punit.examples.experiments;
 import java.util.List;
 
 import org.javai.punit.api.Experiment;
-import org.javai.punit.api.typed.spec.FactorsStepper;
-import org.javai.punit.api.typed.spec.Scorer;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.api.spec.FactorsStepper;
+import org.javai.punit.api.spec.Scorer;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**

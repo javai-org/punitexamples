@@ -1,12 +1,12 @@
-package org.javai.punit.examples.typed;
+package org.javai.punit.examples.usecases;
 
 import java.util.List;
 
 import org.javai.outcome.Outcome;
-import org.javai.punit.api.typed.ContractBuilder;
-import org.javai.punit.api.typed.Sampling;
-import org.javai.punit.api.typed.TokenTracker;
-import org.javai.punit.api.typed.UseCase;
+import org.javai.punit.api.ContractBuilder;
+import org.javai.punit.api.Sampling;
+import org.javai.punit.api.TokenTracker;
+import org.javai.punit.api.UseCase;
 
 /**
  * A deterministic stand-in for a probabilistic service: returns

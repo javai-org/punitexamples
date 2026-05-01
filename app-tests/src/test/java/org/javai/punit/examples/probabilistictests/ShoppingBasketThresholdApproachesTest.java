@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.api.typed.spec.Experiment;
+import org.javai.punit.api.spec.Experiment;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 import org.javai.punit.power.PowerAnalysis;
 

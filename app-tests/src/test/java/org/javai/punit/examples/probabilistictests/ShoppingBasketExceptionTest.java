@@ -3,10 +3,10 @@ package org.javai.punit.examples.probabilistictests;
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.api.typed.spec.ExceptionPolicy;
+import org.javai.punit.api.spec.ExceptionPolicy;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase;
-import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
+import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -19,7 +19,7 @@ import org.javai.punit.runtime.PUnit;
  * (contract violations, validation errors, service-returned error
  * codes) travel through {@code UseCaseOutcome.fail(...)} as data,
  * never as exceptions. See
- * {@link org.javai.punit.api.typed.UseCaseOutcome}.
+ * {@link org.javai.punit.api.UseCaseOutcome}.
  *
  * <p>That said, real-world use cases occasionally throw despite
  * the convention — flaky network, third-party libraries that

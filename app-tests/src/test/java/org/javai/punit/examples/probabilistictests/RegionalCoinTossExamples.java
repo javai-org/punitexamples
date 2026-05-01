@@ -1,10 +1,11 @@
-package org.javai.punit.examples.typed;
+package org.javai.punit.examples.probabilistictests;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.examples.usecases.RegionalCoinTossUseCase;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.runtime.PUnit;

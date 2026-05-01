@@ -6,9 +6,9 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.app.payment.PaymentResult;
-import org.javai.punit.examples.typed.PaymentGatewayUseCase;
-import org.javai.punit.examples.typed.PaymentGatewayUseCase.Charge;
-import org.javai.punit.examples.typed.PaymentGatewayUseCase.Tier;
+import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
+import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
+import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Tier;
 import org.javai.punit.runtime.PUnit;
 
 /**
