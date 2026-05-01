@@ -8,7 +8,7 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.BernoulliPassRate;
 import org.javai.punit.examples.typed.CoinTossUseCase;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 
 /**
  * Worked example for typed-compositional authoring under JUnit

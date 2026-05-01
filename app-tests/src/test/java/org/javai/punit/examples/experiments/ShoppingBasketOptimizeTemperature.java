@@ -7,7 +7,7 @@ import org.javai.punit.api.typed.spec.FactorsStepper;
 import org.javai.punit.api.typed.spec.Scorer;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase;
 import org.javai.punit.examples.typed.ShoppingBasketUseCase.LlmTuning;
-import org.javai.punit.junit5.PUnit;
+import org.javai.punit.runtime.PUnit;
 
 /**
  * OPTIMIZE experiment demonstrating temperature's effect on

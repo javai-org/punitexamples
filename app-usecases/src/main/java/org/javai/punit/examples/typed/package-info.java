@@ -3,7 +3,7 @@
  * authoring API
  * ({@link org.javai.punit.api.ProbabilisticTest @ProbabilisticTest}
  * + {@link org.javai.punit.api.Experiment @Experiment} +
- * {@link org.javai.punit.junit5.PUnit PUnit} factories).
+ * {@link org.javai.punit.runtime.PUnit PUnit} factories).
  *
  * <p>{@link CoinTossUseCase} and {@link RegionalCoinTossUseCase}
  * are deterministic stand-ins that let the worked examples
