@@ -7,7 +7,7 @@ import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.examples.usecases.RegionalCoinTossUseCase;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -86,8 +86,8 @@ public class RegionalCoinTossExamples {
         PUnit.testing(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 50), BIAS_94)
                 // Explicit witness needed when chaining .atConfidence:
                 // the chain breaks target-type inference and empirical()
-                // would otherwise resolve to BernoulliPassRate<Object>.
-                .criterion(BernoulliPassRate.<String>empirical()
+                // would otherwise resolve to PassRate<Object>.
+                .criterion(PassRate.<String>empirical()
                         .atConfidence(0.50))
                 .assertPasses();
     }
@@ -97,7 +97,7 @@ public class RegionalCoinTossExamples {
         // Contractual: threshold is an external SLA. Covariates play
         // no role — the same threshold applies regardless of region.
         PUnit.testing(RegionalCoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
-                .criterion(BernoulliPassRate.meeting(
+                .criterion(PassRate.meeting(
                         0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }

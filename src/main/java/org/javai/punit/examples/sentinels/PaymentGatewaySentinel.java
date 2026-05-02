@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.app.payment.PaymentResult;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
@@ -28,7 +28,7 @@ import org.javai.punit.runtime.PUnit;
  *
  * <p>An SLA-driven probabilistic test gates on a threshold expressed
  * in the contract — there is no "baseline" to measure or pair against.
- * The {@code BernoulliPassRate.meeting(threshold, ThresholdOrigin.SLA)}
+ * The {@code PassRate.meeting(threshold, ThresholdOrigin.SLA)}
  * criterion compares observed pass rate against the SLA target
  * directly. Empirical thresholds (with an accompanying
  * {@code @Experiment} measure step) are demonstrated in
@@ -49,7 +49,7 @@ public class PaymentGatewaySentinel {
     void paymentMeetsContractualSla() {
         PUnit.<Void, Charge, PaymentResult>testing(
                         PaymentGatewayUseCase.sampling(CHARGES, 50), null)
-                .criterion(BernoulliPassRate.meeting(SLA_PASS_RATE, ThresholdOrigin.SLA))
+                .criterion(PassRate.meeting(SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .contractRef("Acme Payment SLA v3.2 §4.1")
                 .assertPasses();
     }

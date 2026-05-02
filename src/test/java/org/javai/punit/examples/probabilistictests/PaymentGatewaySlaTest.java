@@ -5,7 +5,7 @@ import java.util.List;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.app.payment.PaymentResult;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
@@ -51,7 +51,7 @@ public class PaymentGatewaySlaTest {
         // The default intent (VERIFICATION) is implicit.
         PUnit.<Void, Charge, PaymentResult>testing(
                         PaymentGatewayUseCase.sampling(CHARGES, 268), null)
-                .criterion(BernoulliPassRate.meeting(0.99, ThresholdOrigin.SLO))
+                .criterion(PassRate.meeting(0.99, ThresholdOrigin.SLO))
                 .assertPasses();
     }
 
@@ -65,7 +65,7 @@ public class PaymentGatewaySlaTest {
         PUnit.<Void, Charge, PaymentResult>testing(
                         PaymentGatewayUseCase.sampling(CHARGES, 50), null)
                 .intent(TestIntent.SMOKE)
-                .criterion(BernoulliPassRate.meeting(0.9999, ThresholdOrigin.SLA))
+                .criterion(PassRate.meeting(0.9999, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 }

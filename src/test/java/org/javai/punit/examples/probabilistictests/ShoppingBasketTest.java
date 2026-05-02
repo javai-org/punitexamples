@@ -3,7 +3,7 @@ package org.javai.punit.examples.probabilistictests;
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -15,7 +15,7 @@ import org.javai.punit.runtime.PUnit;
  * the LLM's observed pass rate under a configuration, and this
  * test verifies a future run under the same configuration still
  * meets the recorded baseline. The empirical
- * {@link BernoulliPassRate} criterion passes when the Wilson-score
+ * {@link PassRate} criterion passes when the Wilson-score
  * lower bound on observed success rate clears the recorded baseline.
  *
  * <h2>Setup</h2>
@@ -48,14 +48,14 @@ public class ShoppingBasketTest {
     @ProbabilisticTest
     void testInstructionTranslation() {
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
     @ProbabilisticTest
     void testControlledInstruction() {
         PUnit.testing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 100), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

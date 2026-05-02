@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -16,7 +16,7 @@ import org.javai.punit.runtime.PUnit;
  *
  * <p>Every {@code CriterionResult} carries a human-readable
  * explanation string and a structured {@code detail()} map. For
- * empirical {@link BernoulliPassRate} runs the explanation reads
+ * empirical {@link PassRate} runs the explanation reads
  * for example
  * <pre>{@code observed=0.94 (Wilson-95% lower=0.93) vs threshold=0.85 (origin=EMPIRICAL) over 100 samples}</pre>
  * — the figures that drove the verdict. When no baseline matches
@@ -38,7 +38,7 @@ public class ShoppingBasketDiagnosticsTest {
         // baseline; verdict driven by the Wilson-score lower bound
         // on the observed rate clearing the baseline rate.
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -49,7 +49,7 @@ public class ShoppingBasketDiagnosticsTest {
         // n=100 can be definitively PASS or FAIL at n=200 — same
         // criterion explanation shape, tighter numbers.
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 200), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -61,7 +61,7 @@ public class ShoppingBasketDiagnosticsTest {
         // diagnostic message reports the observed rate, the SLA
         // threshold, and the sample count.
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.meeting(0.85, ThresholdOrigin.SLA))
+                .criterion(PassRate.meeting(0.85, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 }

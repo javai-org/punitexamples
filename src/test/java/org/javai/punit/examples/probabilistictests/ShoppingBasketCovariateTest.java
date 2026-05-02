@@ -3,7 +3,7 @@ package org.javai.punit.examples.probabilistictests;
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -40,7 +40,7 @@ public class ShoppingBasketCovariateTest {
         // the baseline this test consults is the one measured under
         // the same configuration.
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -52,7 +52,7 @@ public class ShoppingBasketCovariateTest {
         LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), gpt4Turbo)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -64,7 +64,7 @@ public class ShoppingBasketCovariateTest {
         LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), lowTemp)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -75,7 +75,7 @@ public class ShoppingBasketCovariateTest {
         LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 50), highTemp)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

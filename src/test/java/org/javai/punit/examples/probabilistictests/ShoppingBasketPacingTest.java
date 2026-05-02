@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.Pacing;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -48,7 +48,7 @@ public class ShoppingBasketPacingTest {
         Pacing pacing = Pacing.builder().maxRequestsPerSecond(5).build();
 
         PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -60,7 +60,7 @@ public class ShoppingBasketPacingTest {
         Pacing pacing = Pacing.builder().maxRequestsPerMinute(60).build();
 
         PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -73,7 +73,7 @@ public class ShoppingBasketPacingTest {
         Pacing pacing = Pacing.builder().minMillisPerSample(200).build();
 
         PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -89,7 +89,7 @@ public class ShoppingBasketPacingTest {
                 .build();
 
         PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

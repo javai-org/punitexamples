@@ -5,10 +5,9 @@ import java.util.stream.IntStream;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.CoinTossUseCase;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
-import org.javai.punit.examples.usecases.CoinTossUseCase;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -56,10 +55,10 @@ import org.javai.punit.runtime.PUnit;
  */
 public class CoinTossReliabilityExamples {
 
-    private static final CoinTossUseCase.Bias BIAS_94 = new CoinTossUseCase.Bias(94);
+    private static final CoinTossUseCase.CoinBias BIAS_94 = new CoinTossUseCase.CoinBias(94);
 
     /**
-     * Inputs cycling 1..100. With {@link CoinTossUseCase.Bias#threshold}
+     * Inputs cycling 1..100. With {@link CoinTossUseCase.CoinBias#threshold}
      * set to 94, exactly 94 of every 100 inputs satisfy the contract.
      */
     private static final java.util.List<Integer> CYCLE_1_TO_100 =
@@ -98,7 +97,7 @@ public class CoinTossReliabilityExamples {
         // and the contractual path uses observed >= threshold (no Wilson
         // wrap), so 0.94 ≥ 0.90 → PASS straightforwardly.
         PUnit.testing(CoinTossUseCase.sampling(CYCLE_1_TO_100, 200), BIAS_94)
-                .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
+                .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 
@@ -116,7 +115,7 @@ public class CoinTossReliabilityExamples {
         // backing.
         PUnit.testing(this::baseline)
                 .samples(50)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

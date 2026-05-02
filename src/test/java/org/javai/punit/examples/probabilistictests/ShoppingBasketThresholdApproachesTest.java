@@ -5,7 +5,7 @@ import java.util.List;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.spec.Experiment;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -22,7 +22,7 @@ import org.javai.punit.power.PowerAnalysis;
  *
  * <p>Use when compute or token budget is the binding constraint
  * and you want the most rigorous threshold within that budget. The
- * framework's {@code BernoulliPassRate.empirical()} criterion
+ * framework's {@code PassRate.empirical()} criterion
  * does this natively — the threshold is the resolved baseline's
  * observed pass rate, and the verdict comes from the Wilson-score
  * lower bound on the test's observed rate at the configured
@@ -49,7 +49,7 @@ import org.javai.punit.power.PowerAnalysis;
  * <p>Use when the threshold is dictated externally — an SLA, a
  * regulatory requirement, a policy commitment — and the test's job
  * is to verify conformance. The framework's
- * {@code BernoulliPassRate.meeting(threshold, origin)} factory is
+ * {@code PassRate.meeting(threshold, origin)} factory is
  * the contractual path: a deterministic
  * {@code observed >= threshold} comparison, with the threshold's
  * provenance ({@link ThresholdOrigin#SLA SLA},
@@ -85,7 +85,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // observed rate.
         PUnit.testing(this::baseline)
                 .samples(100)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -110,7 +110,7 @@ public class ShoppingBasketThresholdApproachesTest {
 
         PUnit.testing(this::baseline)
                 .samples(n)
-                .criterion(BernoulliPassRate.empirical().atConfidence(0.95))
+                .criterion(PassRate.empirical().atConfidence(0.95))
                 .assertPasses();
     }
 
@@ -121,7 +121,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // comparison; the threshold's provenance is stamped onto
         // the result for audit.
         PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.meeting(0.90, ThresholdOrigin.SLA))
+                .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 }

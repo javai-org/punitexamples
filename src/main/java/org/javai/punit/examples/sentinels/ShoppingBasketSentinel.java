@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -25,7 +25,7 @@ import org.javai.punit.runtime.PUnit;
  *       <em>before</em> the verification test runs in production.</li>
  *   <li>{@link #shoppingMeetsBaseline()} — a {@code @ProbabilisticTest}
  *       that compares a fresh sample against the recorded baseline
- *       using {@link BernoulliPassRate#empirical()}. Run this on a
+ *       using {@link PassRate#empirical()}. Run this on a
  *       schedule via the Sentinel binary to detect regression.</li>
  * </ul>
  *
@@ -81,7 +81,7 @@ public class ShoppingBasketSentinel {
     @ProbabilisticTest
     void shoppingMeetsBaseline() {
         PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 50), LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

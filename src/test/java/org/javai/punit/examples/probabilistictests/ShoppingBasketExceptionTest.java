@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.ExceptionPolicy;
-import org.javai.punit.engine.criteria.BernoulliPassRate;
+import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -63,7 +63,7 @@ public class ShoppingBasketExceptionTest {
                         .onException(ExceptionPolicy.ABORT_TEST)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -80,7 +80,7 @@ public class ShoppingBasketExceptionTest {
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -97,7 +97,7 @@ public class ShoppingBasketExceptionTest {
                         .maxExampleFailures(3)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(BernoulliPassRate.empirical())
+                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }
