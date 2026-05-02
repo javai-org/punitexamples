@@ -10,12 +10,17 @@ import java.util.Random;
  * testing capabilities.
  *
  * <h2>Temperature-Based Reliability</h2>
- * <p>Temperature controls the reliability of responses:
+ * <p>Temperature controls the reliability of responses. Approximate
+ * joint failure rates over the shopping-basket structured-output
+ * prompts:
  * <ul>
- *   <li>{@code 0.0} - ~99% valid responses (highly deterministic)</li>
- *   <li>{@code 0.5} - ~90% valid responses (balanced)</li>
- *   <li>{@code 1.0} - ~70% valid responses (creative but error-prone)</li>
+ *   <li>{@code 0.0} - ~100% valid (deterministic; no deviation paths fire)</li>
+ *   <li>{@code 0.3} - ~99% valid (~1% failures, dominated by wrong-schema)</li>
+ *   <li>{@code 0.5} - ~96% valid (~3-4% failures)</li>
+ *   <li>{@code 1.0} - ~85% valid (~15% failures, mix of all modes)</li>
  * </ul>
+ * <p>Per-aspect deviation chance is {@code temperature² * 0.1}; the
+ * joint rate above accounts for the ~five independent paths compounding.
  *
  * <h2>Failure Modes</h2>
  * <p>When failures occur, they manifest as realistic LLM errors:
@@ -199,25 +204,29 @@ public final class MockChatLlm implements ChatLlm {
     /**
      * Generates a response based on what the prompt specifies and the temperature.
      *
-     * <p>Temperature affects the likelihood of deviation from the prompt's instructions:
+     * <p>Temperature affects the likelihood of deviation from the prompt's instructions.
+     * The per-aspect deviation chance is {@code temperature² * 0.1}, so:
      * <ul>
-     *   <li>{@code 0.0}: Follows prompt faithfully (deterministic)</li>
-     *   <li>{@code 0.5}: Occasional deviations (~25% chance per aspect)</li>
-     *   <li>{@code 1.0}: Frequent deviations (~50% chance per aspect)</li>
+     *   <li>{@code 0.0}: Follows prompt faithfully (0% per-aspect deviation)</li>
+     *   <li>{@code 0.3}: ~1% per aspect, ~3% joint failure rate</li>
+     *   <li>{@code 0.5}: ~2.5% per aspect, ~10% joint failure rate</li>
+     *   <li>{@code 1.0}: 10% per aspect, ~30% joint failure rate</li>
      * </ul>
      *
      * <p>This models real LLM behavior where higher temperature increases creativity
      * but also increases the chance of not following structured output requirements.
      */
     private String generateResponse(String userMessage, PromptRequirements req, double temperature) {
-        // Temperature determines deviation probability for each aspect
-        // At temp=0: 0% deviation, at temp=1: 50% deviation
-        double deviationChance = temperature * 0.5;
+        // Per-aspect deviation probability, calibrated so the joint
+        // failure rate over the ~four independent deviation paths
+        // tracks the class docstring: ~3% at temp=0.3, ~10% at temp=0.5,
+        // ~30% at temp=1.0.
+        double deviationChance = temperature * temperature * 0.1;
 
         StringBuilder response = new StringBuilder();
 
         // If prompt doesn't require JSON-only, might add prose (temperature-dependent)
-        boolean addProse = !req.requiresJsonOnly && random.nextDouble() < (0.3 + deviationChance);
+        boolean addProse = !req.requiresJsonOnly && random.nextDouble() < deviationChance;
         if (addProse) {
             response.append("I'd be happy to help! Here's the JSON:\n\n");
         }
@@ -238,10 +247,16 @@ public final class MockChatLlm implements ChatLlm {
         boolean deviateSchema = random.nextDouble() < deviationChance;
 
         if (deviateSchema) {
-            // Generate wrong schema (missing actions wrapper or wrong structure)
+            // Generate wrong schema (missing actions wrapper or wrong structure).
+            // Quote the quantity correctly so a String value (e.g. "two") still
+            // produces parseable JSON — the failure should be a downstream
+            // type/schema mismatch, not a JSON-parse error.
+            String quantityJson = quantityValue instanceof Number
+                    ? quantityValue.toString()
+                    : "\"" + quantityValue + "\"";
             response.append(String.format("{\"operations\": [{\"action\": \"%s\", ", actionValue));
             response.append(String.format("\"item\": \"%s\", ", item));
-            response.append(String.format("\"quantity\": %s}]}", quantityValue));
+            response.append(String.format("\"quantity\": %s}]}", quantityJson));
         } else {
             // Generate correct ShoppingResponse schema with actions wrapper
             response.append("{\"actions\": [{\"context\": \"SHOP\", ");
@@ -252,9 +267,9 @@ public final class MockChatLlm implements ChatLlm {
             response.append("]}]}");
         }
 
-        // Additional chance of malformed JSON at high temperature
+        // Additional chance the response is not parseable as bare JSON
         if (random.nextDouble() < deviationChance * 0.3) {
-            return corruptJson(response.toString());
+            return unparseableResponse(response.toString(), userMessage);
         }
 
         return response.toString();
@@ -282,12 +297,20 @@ public final class MockChatLlm implements ChatLlm {
         };
     }
 
-    private String corruptJson(String json) {
-        int corruption = random.nextInt(3);
-        return switch (corruption) {
-            case 0 -> json.substring(0, json.length() - 2);  // Truncate
-            case 1 -> json.replace(":", " ");                // Remove colons
-            default -> json.replace("\"", "'");              // Wrong quotes
+    /**
+     * Wraps or replaces the JSON in a way that a strict JSON parser
+     * will reject, modelling failure modes a real LLM exhibits when
+     * it does not faithfully follow a JSON-only instruction:
+     * markdown code fences, trailing prose, or an apologetic refusal.
+     */
+    private String unparseableResponse(String json, String userMessage) {
+        int mode = random.nextInt(3);
+        return switch (mode) {
+            case 0 -> "```json\n" + json + "\n```";
+            case 1 -> "Sure thing! The JSON for your request is:\n\n" + json;
+            default -> "I'm sorry, but I can't complete that request as stated. "
+                    + "Could you clarify what you'd like to do with \""
+                    + userMessage + "\"?";
         };
     }
 

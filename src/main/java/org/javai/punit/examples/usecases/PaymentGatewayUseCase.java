@@ -65,6 +65,7 @@ public final class PaymentGatewayUseCase
 
     @Override
     public void postconditions(ContractBuilder<PaymentResult> b) {
+        // A very simple contract for the payment gateway. Either the payment succeeds or it doesn't.
         b.ensure("transaction succeeds", r -> r.success()
                 ? Outcome.ok()
                 : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
@@ -72,8 +73,12 @@ public final class PaymentGatewayUseCase
 
     @Override
     public int warmup() {
-        // Discard the first three responses to cover cold-start and
-        // connection-pool warmup.
+        // Cold-start, connection-pool fill, and unwarmed caches inflate the
+        // latency of the first few invocations; discarding them keeps those
+        // outliers out of percentile latency measurements (e.g. P99). The
+        // same discard preserves the i.i.d. assumption behind the Bernoulli
+        // pass-rate criterion — cold-call failures are not identically
+        // distributed with steady-state ones.
         return WARMUP_INVOCATIONS;
     }
 
@@ -88,8 +93,7 @@ public final class PaymentGatewayUseCase
      * different gateway implementation supply their own factory
      * closure via {@link Sampling#builder()}.
      */
-    public static Sampling<Void, Charge, PaymentResult> sampling(
-            List<Charge> charges, int samples) {
+    public static Sampling<Void, Charge, PaymentResult> sampling(List<Charge> charges, int samples) {
         return Sampling.of(v -> new PaymentGatewayUseCase(), samples, charges);
     }
 }

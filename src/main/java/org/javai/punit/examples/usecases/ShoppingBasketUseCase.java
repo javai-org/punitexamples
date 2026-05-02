@@ -17,6 +17,7 @@ import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
 import org.javai.punit.examples.app.llm.ChatResponse;
 import org.javai.punit.examples.app.shopping.ShoppingAction;
+import org.javai.punit.examples.app.shopping.ShoppingActionParameter;
 import org.javai.punit.examples.app.shopping.ShoppingActionValidator;
 import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTranslation;
 
@@ -32,11 +33,11 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  * the response: a non-empty body clause, then a {@code deriving}
  * step that parses the JSON into a {@link BasketTranslation} and
  * (on successful parse) checks every action's name is valid for
- * its declared context. The histogram on
+ * its declared context and that any {@code quantity} parameter is
+ * a positive integer. The histogram on
  * {@code SampleSummary.failuresByPostcondition()} surfaces each
- * failure mode separately, so the optimize meta-prompt can see
- * "Valid JSON failed 8 times" vs "All actions valid failed 3 times"
- * rather than collapsing both to "the use case failed."
+ * failure mode separately, so experiments can see a breakdown
+ * of which clause of the contract failed.
  *
  * <p>{@code llm_model} and {@code temperature} are declared as
  * {@link CovariateCategory#CONFIGURATION} covariates. The framework
@@ -75,6 +76,7 @@ public final class ShoppingBasketUseCase
 
             Valid actions for SHOP context: "add", "remove", "clear"
             For "clear" actions, parameters may be empty.
+            Quantities must be positive integers (>= 1).
 
             Examples:
             - "Add 2 apples" -> {"actions": [{"context": "SHOP", "name": "add", "parameters": [{"name": "item", "value": "apples"}, {"name": "quantity", "value": "2"}]}]}
@@ -133,7 +135,9 @@ public final class ShoppingBasketUseCase
         b.deriving("Valid JSON",
                 ShoppingActionValidator::parse,
                 sub -> sub.ensure("All actions valid for context",
-                        ShoppingBasketUseCase::checkActionsValidForContext));
+                                ShoppingBasketUseCase::checkActionsValidForContext)
+                        .ensure("Quantities are positive integers",
+                                ShoppingBasketUseCase::checkQuantitiesArePositiveIntegers));
     }
 
     private static Outcome<Void> checkResponseNotEmpty(String response) {
@@ -154,10 +158,34 @@ public final class ShoppingBasketUseCase
         return Outcome.ok();
     }
 
+    private static Outcome<Void> checkQuantitiesArePositiveIntegers(BasketTranslation translation) {
+        for (ShoppingAction action : translation.actions()) {
+            for (ShoppingActionParameter param : action.parameters()) {
+                if (!"quantity".equals(param.name())) {
+                    continue;
+                }
+                int quantity;
+                try {
+                    quantity = param.valueAsInt();
+                } catch (NumberFormatException e) {
+                    return Outcome.fail(
+                            "non-integer-quantity",
+                            "Quantity '%s' is not an integer".formatted(param.value()));
+                }
+                if (quantity < 1) {
+                    return Outcome.fail(
+                            "non-positive-quantity",
+                            "Quantity %d is not a positive integer".formatted(quantity));
+                }
+            }
+        }
+        return Outcome.ok();
+    }
+
     /**
      * Declares the factors that influence outcomes — here the LLM
      * model and the sampling temperature. Resolved values stamp the
-     * baseline's identity so a test under one configuration never
+     * baseline's identity, so a test under one configuration never
      * silently matches a baseline measured under another.
      */
     @Override
@@ -175,7 +203,7 @@ public final class ShoppingBasketUseCase
     @Override
     public Map<String, Supplier<String>> customCovariateResolvers() {
         return Map.of(
-                "llm_model", () -> tuning.model(),
+                "llm_model", tuning::model,
                 "temperature", () -> Double.toString(tuning.temperature()));
     }
 
@@ -238,8 +266,8 @@ public final class ShoppingBasketUseCase
 
     /**
      * Stable identifier used in baseline filenames and reports.
-     * The default would already produce {@code "shopping-basket"};
-     * pinning it explicitly insulates the baseline-file identity
+     * The default would otherwise be this usecase's class name.
+     * Pinning it explicitly insulates the baseline-file identity
      * from any future class-name refactor.
      */
     @Override
