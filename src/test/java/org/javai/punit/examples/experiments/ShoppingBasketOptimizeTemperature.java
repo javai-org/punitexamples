@@ -37,7 +37,7 @@ public class ShoppingBasketOptimizeTemperature {
     private static final List<String> SINGLE_INSTRUCTION =
             List.of("Add 2 apples and remove the bread");
 
-    private static final Scorer SUCCESS_RATE = summary -> summary.total() == 0
+    private static final Scorer PASS_RATE_SCORE = summary -> summary.total() == 0
             ? 0.0
             : (double) summary.successes() / (double) summary.total();
 
@@ -58,7 +58,7 @@ public class ShoppingBasketOptimizeTemperature {
         PUnit.optimizing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 20))
                 .initialFactors(LlmTuning.DEFAULT.temperature(1.0))
                 .stepper(COOL_DOWN)
-                .maximize(SUCCESS_RATE)
+                .maximize(PASS_RATE_SCORE)
                 .maxIterations(11)         // covers 1.0, 0.9, …, 0.0
                 .noImprovementWindow(20)   // disable early termination
                 .experimentId("temperature-optimization-v1")

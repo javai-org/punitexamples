@@ -67,7 +67,7 @@ public class ShoppingBasketOptimizePrompt {
             a JSON list of shopping basket operations.
             """;
 
-    private static final Scorer SUCCESS_RATE = summary -> summary.total() == 0
+    private static final Scorer PASS_RATE_SCORE = summary -> summary.total() == 0
             ? 0.0
             : (double) summary.successes() / (double) summary.total();
 
@@ -146,7 +146,7 @@ public class ShoppingBasketOptimizePrompt {
         PUnit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
                 .initialFactors(LlmTuning.DEFAULT.systemPrompt(INITIAL_PROMPT))
                 .stepper(promptEngineerStepper())
-                .maximize(SUCCESS_RATE)
+                .maximize(PASS_RATE_SCORE)
                 .maxIterations(5)
                 .noImprovementWindow(2)
                 .experimentId("prompt-optimization-v1")

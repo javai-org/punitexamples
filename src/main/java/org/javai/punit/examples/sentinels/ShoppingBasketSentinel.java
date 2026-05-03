@@ -20,14 +20,23 @@ import org.javai.punit.runtime.PUnit;
  * <ul>
  *   <li>{@link #shoppingBaseline()} — an {@code @Experiment} that
  *       records the LLM's observed pass rate as a covariate-keyed
- *       baseline. Run this in a controlled environment (typically a
- *       development workstation or a dedicated measure pipeline)
- *       <em>before</em> the verification test runs in production.</li>
+ *       baseline. Run this in the same target environment as the
+ *       verification, or in a deliberately equivalent calibration
+ *       environment, <em>before</em> the verification test runs.
+ *       Capturing the baseline anywhere else risks measuring noise
+ *       that the production system will not exhibit — defeating the
+ *       purpose of the empirical comparison.</li>
  *   <li>{@link #shoppingMeetsBaseline()} — a {@code @ProbabilisticTest}
  *       that compares a fresh sample against the recorded baseline
  *       using {@link PassRate#empirical()}. Run this on a
  *       schedule via the Sentinel binary to detect regression.</li>
  * </ul>
+ *
+ * <p>Both methods reference {@link ShoppingBasketUseCase}, whose
+ * {@code id()} anchors the baseline filename and covariate
+ * fingerprint. The sentinel itself carries no identity concerns:
+ * the experiment and the test share a single use case definition,
+ * so they cannot drift onto different baseline artefacts.
  *
  * <h2>Sentinel deployment</h2>
  *
@@ -65,6 +74,17 @@ import org.javai.punit.runtime.PUnit;
  */
 public class ShoppingBasketSentinel {
 
+    /**
+     * The asymmetry is intentional. The baseline is captured once
+     * with high statistical power, so the recorded pass rate is a
+     * tight estimate; the verification test then runs cheaply and
+     * frequently against that baseline. Equal sample counts on
+     * both sides would flatten this distinction and burn budget
+     * that calibration deserves more than routine verification does.
+     */
+    private static final int BASELINE_SAMPLES = 1000;
+    private static final int VERIFICATION_SAMPLES = 50;
+
     private static final List<String> INSTRUCTIONS = List.of(
             "Add 2 apples",
             "Remove the milk",
@@ -74,13 +94,13 @@ public class ShoppingBasketSentinel {
 
     @Experiment
     void shoppingBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketUseCase.sampling(INSTRUCTIONS, BASELINE_SAMPLES), LlmTuning.DEFAULT)
                 .run();
     }
 
     @ProbabilisticTest
     void shoppingMeetsBaseline() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, VERIFICATION_SAMPLES), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
