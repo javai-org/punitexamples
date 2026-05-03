@@ -60,7 +60,7 @@ public class ShoppingBasketOptimizeTemperature {
                 .stepper(COOL_DOWN)
                 .maximize(PASS_RATE_SCORE)
                 .maxIterations(11)         // covers 1.0, 0.9, …, 0.0
-                .noImprovementWindow(20)   // disable early termination
+                .disableEarlyTermination()
                 .experimentId("temperature-optimization-v1")
                 .run();
     }
