@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.spec.FactorsStepper;
+import org.javai.punit.api.spec.NextFactor;
 import org.javai.punit.api.spec.Scorer;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
@@ -44,13 +45,13 @@ public class ShoppingBasketOptimizeTemperature {
     private static final FactorsStepper<LlmTuning> COOL_DOWN = (current, history) -> {
         double next = current.temperature() - STEP;
         if (next < TEMPERATURE_FLOOR) {
-            return null;
+            return NextFactor.stop();
         }
         // Round to one decimal place — IEEE-754 subtraction would
         // otherwise leave the experiment id with values like
         // 0.30000000000000004 in baselines and reports.
         double rounded = Math.round(next * 10.0) / 10.0;
-        return current.temperature(rounded);
+        return NextFactor.next(current.temperature(rounded));
     };
 
     @Experiment

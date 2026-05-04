@@ -7,6 +7,7 @@ import org.javai.punit.api.Experiment;
 import org.javai.punit.api.spec.FactorsStepper;
 import org.javai.punit.api.spec.FailureCount;
 import org.javai.punit.api.spec.FailureExemplar;
+import org.javai.punit.api.spec.NextFactor;
 import org.javai.punit.api.spec.Scorer;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmException;
@@ -75,7 +76,7 @@ public class ShoppingBasketOptimizePrompt {
         ChatLlm metaLlm = ChatLlmProvider.resolve();
         return (current, history) -> {
             if (history.isEmpty()) {
-                return null;
+                return NextFactor.stop();
             }
             FactorsStepper.IterationResult<LlmTuning> last = history.getLast();
             String userMessage = """
@@ -102,7 +103,7 @@ public class ShoppingBasketOptimizePrompt {
                 // Bubble as runtime so the experiment surfaces the cause.
                 throw new RuntimeException("Meta-LLM call failed: " + e.getMessage(), e);
             }
-            return current.systemPrompt(suggested);
+            return NextFactor.next(current.systemPrompt(suggested));
         };
     }
 
