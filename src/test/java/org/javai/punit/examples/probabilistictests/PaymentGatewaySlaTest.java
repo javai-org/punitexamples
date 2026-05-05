@@ -6,7 +6,6 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.PassRate;
-import org.javai.punit.examples.app.payment.PaymentResult;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
 import org.javai.punit.runtime.PUnit;
@@ -49,8 +48,7 @@ public class PaymentGatewaySlaTest {
         // grade claim against a 99% target at default 95% confidence
         // — the framework's pre-flight feasibility gate is satisfied.
         // The default intent (VERIFICATION) is implicit.
-        PUnit.<Void, Charge, PaymentResult>testing(
-                        PaymentGatewayUseCase.sampling(CHARGES, 268), null)
+        PUnit.testing(PaymentGatewayUseCase.sampling(CHARGES, 268))
                 .criterion(PassRate.meeting(0.99, ThresholdOrigin.SLO))
                 .assertPasses();
     }
@@ -62,8 +60,7 @@ public class PaymentGatewaySlaTest {
         // undersized; treat this as a sentinel, not a verification
         // claim." The framework records the sizing gap on the
         // verdict (the pre-flight gate is bypassed in SMOKE mode).
-        PUnit.<Void, Charge, PaymentResult>testing(
-                        PaymentGatewayUseCase.sampling(CHARGES, 50), null)
+        PUnit.testing(PaymentGatewayUseCase.sampling(CHARGES, 50))
                 .intent(TestIntent.SMOKE)
                 .criterion(PassRate.meeting(0.9999, ThresholdOrigin.SLA))
                 .assertPasses();

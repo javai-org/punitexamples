@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.javai.outcome.Outcome;
 import org.javai.punit.api.ContractBuilder;
+import org.javai.punit.api.NoFactors;
 import org.javai.punit.api.Sampling;
 import org.javai.punit.api.TokenTracker;
 import org.javai.punit.api.UseCase;
@@ -18,9 +19,11 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * rather than empirical baselines.
  *
  * <p>This use case has no varying factors, so {@code FT} is
- * {@link Void} — the Java-idiomatic "no value" type. The input is
- * a {@link Charge} record bundling card token and amount; the
- * output is the gateway's {@link PaymentResult}. The contract has a
+ * {@link NoFactors} — punit's empty factor record, paired with the
+ * no-arg {@code PUnit.testing(sampling)} / {@code PUnit.measuring(sampling)}
+ * overloads at the call site. The input is a {@link Charge} record
+ * bundling card token and amount; the output is the gateway's
+ * {@link PaymentResult}. The contract has a
  * single postcondition — "transaction succeeds" — so a sample's
  * failure mode is attributed to a named clause in the verdict's
  * failure histogram, rather than to an undifferentiated count.
@@ -41,7 +44,7 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * {@code .criterion(...)}.
  */
 public final class PaymentGatewayUseCase
-        implements UseCase<Void, PaymentGatewayUseCase.Charge, PaymentResult> {
+        implements UseCase<NoFactors, PaymentGatewayUseCase.Charge, PaymentResult> {
 
     /** The per-sample input: a card token plus amount in cents. */
     public record Charge(String cardToken, long amountCents) { }
@@ -93,7 +96,7 @@ public final class PaymentGatewayUseCase
      * different gateway implementation supply their own factory
      * closure via {@link Sampling#builder()}.
      */
-    public static Sampling<Void, Charge, PaymentResult> sampling(List<Charge> charges, int samples) {
-        return Sampling.of(v -> new PaymentGatewayUseCase(), samples, charges);
+    public static Sampling<NoFactors, Charge, PaymentResult> sampling(List<Charge> charges, int samples) {
+        return Sampling.of(nf -> new PaymentGatewayUseCase(), samples, charges);
     }
 }

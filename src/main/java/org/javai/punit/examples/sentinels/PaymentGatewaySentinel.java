@@ -5,7 +5,6 @@ import java.util.List;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.PassRate;
-import org.javai.punit.examples.app.payment.PaymentResult;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
 import org.javai.punit.runtime.PUnit;
@@ -47,8 +46,7 @@ public class PaymentGatewaySentinel {
 
     @ProbabilisticTest
     void paymentMeetsContractualSla() {
-        PUnit.<Void, Charge, PaymentResult>testing(
-                        PaymentGatewayUseCase.sampling(CHARGES, 50), null)
+        PUnit.testing(PaymentGatewayUseCase.sampling(CHARGES, 50))
                 .criterion(PassRate.meeting(SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .contractRef("Acme Payment SLA v3.2 §4.1")
                 .assertPasses();
