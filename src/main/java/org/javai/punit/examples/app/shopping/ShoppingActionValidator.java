@@ -57,9 +57,11 @@ public class ShoppingActionValidator {
             return Outcome.fail("validation", "Response content is null or blank");
         }
 
+        String content = stripCodeFence(json);
+
         JsonNode root;
         try {
-            root = MAPPER.readTree(json);
+            root = MAPPER.readTree(content);
         } catch (JsonProcessingException e) {
             return Outcome.fail("validation", "Invalid JSON: " + e.getMessage());
         }
@@ -74,6 +76,19 @@ public class ShoppingActionValidator {
         }
 
         return parseActionArray(actionsNode);
+    }
+
+    /**
+     * Strips a markdown code fence wrapper if the response is
+     * enclosed in one (``` … ``` or ```json … ```). Many LLMs ignore
+     * "JSON only" instructions and gate their output behind a fence;
+     * stripping it here keeps the validator focused on schema
+     * violations rather than presentation.
+     */
+    private static String stripCodeFence(String json) {
+        return json.trim()
+                .replaceFirst("^```\\w*\\s*", "")
+                .replaceFirst("\\s*```$", "");
     }
 
     private static Outcome<BasketTranslation> parseActionArray(JsonNode arrayNode) {
