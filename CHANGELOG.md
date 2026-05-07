@@ -7,9 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0-alpha] - 2026-05-07
+
+> **🧪 Experimental release.** Tracks the experimental [punit 0.7.0-alpha](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha---2026-05-07) typed-builder API. Pin to this exact version if you depend on its surface today; v0.x means breaking changes are still possible.
+
 ### Changed
-- **Collapsed to a single Gradle module.** The previous three-module split (`app/` + `app-usecases/` + `app-tests/`) mirrored punit's internal multi-module layout for no real benefit; a developer reading the examples ought to see a normal `src/main/java` + `src/test/java` project, not a multi-module Gradle setup. Domain code, use cases, and sentinels now live under `src/main/java/org/javai/punit/examples/{app,usecases,sentinels}/`; tests under `src/test/java/...`. Sentinel-deployability is preserved by scoping the test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) to `testImplementation`. No package renames; no source-code changes.
-- Updated optimize experiments (`ShoppingBasketOptimizePrompt`, `ShoppingBasketOptimizeTemperature`) to the renamed `initialFactor` attribute on `@OptimizeExperiment`. Tracks punit's first experiment DX refactor PR (`refactor/experiment-dx` on `javai-org/punit`), which renamed `initialControlFactorSource` → `initialFactor` and removed the inline `initialControlFactorValue` attribute.
+- **Upgraded PUnit dependency from 0.6.0 to 0.7.0-alpha.** The 0.7 line replaces the annotation-driven authoring style of 0.6.x with a typed, builder-based one. See punit's [MIGRATION-0.6-to-0.7.md](https://github.com/javai-org/punit/blob/main/docs/MIGRATION-0.6-to-0.7.md). Every use case, experiment, and probabilistic test in this project has been migrated.
+- **Use cases are typed `UseCase<FT, I, O>` implementations.** `ShoppingBasketUseCase` and `PaymentGatewayUseCase` now implement the typed interface; metadata (`description`, `warmup`, `pacing`, `covariates`, `customCovariateResolvers`) is expressed as method overrides. The factor record is passed at construction time, preserving immutability. `ShoppingBasketUseCase.O` is `String`; its `Contract` is folded into the use case and uses `deriving(...)` to combine parsing and validation in one expression. `PaymentGatewayUseCase` declares `NoFactors` since it has no tunable factors. The legacy `@UseCase` annotation, parameter-level annotations (`@Factor`, `@FactorSource`, `@Input`, `@InputSource`, `@Config`, `@ConfigSource`, `@ControlFactor`, `@DayGroup`, `@RegionGroup`, `@Latency`, `@ExperimentDesign`, `@ExperimentGoal`), and the reflection-based factor accessors (`@FactorSetter`, `@FactorGetter`) are gone — see punit 0.7.0-alpha.
+- **Probabilistic tests use `PUnit.testing(...)`.** `@ProbabilisticTest` survives only as a bare marker; configuration moves into the body via the typed builder. Migrated tests: `ShoppingBasketTest`, `ShoppingBasketBudgetTest`, `ShoppingBasketCovariateTest`, `ShoppingBasketDiagnosticsTest`, `ShoppingBasketExceptionTest`, `ShoppingBasketPacingTest`, `ShoppingBasketThresholdApproachesTest`, `SlaTest`, `InvalidProbabilisticTestExamplesTest`.
+- **Experiments use the unified `@Experiment` marker plus `PUnit.measuring(...)` / `.exploring(...)` / `.optimizing(...)`.** Migrated: `ShoppingBasketMeasure`, `ShoppingBasketExplore`, `ShoppingBasketOptimizePrompt`, `ShoppingBasketOptimizeTemperature`. The three legacy experiment annotations (`@MeasureExperiment`, `@ExploreExperiment`, `@OptimizeExperiment`) are gone.
+- **Covariate redesign adopted.** Covariate examples now consume the sealed `Covariate` hierarchy (`DayOfWeekCovariate`, `RegionCovariate`, `TimeOfDayCovariate`, `Covariate.custom(...)`) declared on `UseCase.covariates()`, with `customCovariateResolvers()` supplying the project-defined resolver. The `@Covariate`, `@CovariateSource`, `@DayGroup`, `@RegionGroup` annotations are gone.
+- **Sentinel reliability examples** rebuilt against the typed surface. `@Sentinel` annotation removed — `punit-sentinel` scans typed `UseCase` implementations directly. `CoinTossReliabilityExamples` added as a worked example.
+- **Optimize experiments use `FactorsStepper` returning `NextFactor`** (sealed `Continue` / `Stop`). `PromptEngineerStepper` extracted as a reusable component; `ShoppingBasketOptimizePrompt` now models a realistic LLM-as-prompt-engineer iteration loop instead of a scripted prompt progression. `ShoppingBasketOptimizeTemperature` calls `disableEarlyTermination()` on the optimize builder.
+- **Config record renames.** Shopping-basket factor record `Config` → `LlmTuning`; `Config.defaults()` → `Config.DEFAULT`. The `with` prefix is dropped from `LlmTuning` builder methods. `ShoppingActionValidator.ValidationResult` → `BasketTranslation`.
+- **Statistic rename.** `BernoulliPassRate` → `PassRate` throughout (matches punit).
+- **`Punit` → `PUnit`** to match the brand convention.
+- **Contract postcondition shape.** Postconditions now consume `ContractBuilder<O>` and are evaluated against `UseCaseOutcome`; success checks moved out of `invoke(...)` and into postconditions where they belong (`PaymentGatewayUseCase`).
+- **Anticipated transport failures travel as `ChatLlmException`** — a checked exception declared on `ChatLlm` — rather than wrapped runtime exceptions. Aligns with the project's Outcome/exception convention: thrown exceptions signal defects, not anticipated failure modes.
+- **Collapsed to a single Gradle module.** The previous three-module split (`app/` + `app-usecases/` + `app-tests/`) mirrored punit's internal multi-module layout for no real benefit; a developer reading the examples ought to see a normal `src/main/java` + `src/test/java` project, not a multi-module Gradle setup. Domain code, use cases, and sentinels now live under `src/main/java/org/javai/punit/examples/{app,usecases,sentinels}/`; tests under `src/test/java/...`. Sentinel-deployability is preserved by scoping the test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) to `testImplementation`. No package renames.
+- **Single input source per use case.** `ShoppingBasketUseCase` exposes one canonical input source consumed by both `ShoppingBasketMeasure` and `ShoppingBasketTest`, ensuring the measure baseline and the probabilistic test draw from the same population.
+- **Drop punit-runtime dependency.** Runtime entry point now ships in `punit-core`; the `punit-runtime` declaration is removed.
+- **EXPLORE retuned for meaningful model comparison.** Sample sizes and instruction set adjusted so model differences are statistically resolvable.
+
+### Added
+- `disableEarlyTermination()` use in the temperature optimisation example, demonstrating the explicit opt-out for the optimize surface.
+- Markdown code-fence stripping before parsing LLM JSON responses, for robustness against models that wrap JSON in fenced blocks.
+- `PaymentGatewayUseCase` warmup retained from 0.4.0 and adapted to the typed surface.
+
+### Removed
+- Legacy use cases, sentinel specs, and JUnit wrappers from the pre-typed era.
+- Verdict catalogue test (deferred — port pending in a follow-up).
+- `Tier` from `PaymentGatewayUseCase` (no factor variation needed; `NoFactors` suffices).
+- `BASELINE_DIR` constant — `PowerAnalysis` no-Path overload (punit#85) supersedes it.
+
+### Fixed
+- `PaymentGatewayUseCase.invoke` no longer wraps the call in a dead `try/catch`; checked exceptions now propagate per the Outcome convention.
 
 ## [0.4.0] - 2026-04-17
 
@@ -86,7 +118,8 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha...HEAD
+[0.5.0-alpha]: https://github.com/javai-org/punitexamples/compare/v0.4.0...v0.5.0-alpha
 [0.4.0]: https://github.com/javai-org/punitexamples/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/javai-org/punitexamples/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/javai-org/punitexamples/compare/v0.2.0...v0.3.0
