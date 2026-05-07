@@ -303,6 +303,40 @@ fun runCommandAndCapture(vararg args: String): String {
     return output.trim()
 }
 
+// Derives the next SNAPSHOT version after a release.
+// - "0.5.1"        -> "0.5.2-SNAPSHOT"
+// - "0.5.0-alpha"  -> "0.5.0-alpha2-SNAPSHOT"
+// - "0.5.0-alpha2" -> "0.5.0-alpha3-SNAPSHOT"
+// - "0.5.0-rc1"    -> "0.5.0-rc2-SNAPSHOT"
+fun nextSnapshotVersion(ver: String): String {
+    val parts = ver.split(".")
+    if (parts.size != 3) {
+        throw GradleException("Cannot derive next SNAPSHOT from $ver: expected MAJOR.MINOR.PATCH form")
+    }
+    val major = parts[0]
+    val minor = parts[1]
+    val patchComponent = parts[2]
+
+    if (patchComponent.all { it.isDigit() }) {
+        val nextPatch = patchComponent.toInt() + 1
+        return "$major.$minor.$nextPatch-SNAPSHOT"
+    }
+
+    val dashIdx = patchComponent.indexOf('-')
+    if (dashIdx < 0) {
+        throw GradleException("Cannot derive next SNAPSHOT from $ver: unsupported patch component '$patchComponent'")
+    }
+    val patchNumber = patchComponent.substring(0, dashIdx)
+    val qualifier = patchComponent.substring(dashIdx + 1)
+    val qualifierName = qualifier.takeWhile { it.isLetter() }
+    val qualifierNum = qualifier.drop(qualifierName.length)
+    if (qualifierName.isEmpty()) {
+        throw GradleException("Cannot derive next SNAPSHOT from $ver: missing qualifier name in '$patchComponent'")
+    }
+    val nextQualifierNum = if (qualifierNum.isEmpty()) 2 else qualifierNum.toInt() + 1
+    return "$major.$minor.$patchNumber-$qualifierName$nextQualifierNum-SNAPSHOT"
+}
+
 tasks.register("release") {
     description = "Validates, publishes to Maven Central, tags the release, and bumps to next SNAPSHOT"
     group = "publishing"
@@ -352,9 +386,7 @@ tasks.register("release") {
         logger.lifecycle("Pushing tag $tag to origin...")
         runCommand("git", "push", "origin", tag)
 
-        val parts = ver.split(".")
-        val nextPatch = parts[2].toInt() + 1
-        val nextVersion = "${parts[0]}.${parts[1]}.$nextPatch-SNAPSHOT"
+        val nextVersion = nextSnapshotVersion(ver)
         logger.lifecycle("Bumping version to $nextVersion...")
 
         val rootProps = file("gradle.properties")
