@@ -4,14 +4,9 @@
  * + {@link org.javai.punit.api.Experiment @Experiment} +
  * {@link org.javai.punit.runtime.PUnit PUnit} factories).
  *
- * <p>{@link org.javai.punit.examples.usecases.CoinTossUseCase} and
- * {@link org.javai.punit.examples.usecases.RegionalCoinTossUseCase}
- * are deterministic stand-ins that let the worked examples
- * demonstrate the full measure / test / empirical-pair pattern
- * without external dependencies. {@link
- * org.javai.punit.examples.usecases.ShoppingBasketUseCase} and
+ * <p>{@link org.javai.punit.examples.usecases.ShoppingBasketUseCase}
+ * is the LLM-backed use case used by the realistic examples;
  * {@link org.javai.punit.examples.usecases.PaymentGatewayUseCase}
- * are the LLM- and gateway-backed
- * use cases used by the realistic examples.
+ * is the gateway-backed counterpart.
  */
 package org.javai.punit.examples.usecases;

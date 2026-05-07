@@ -2,6 +2,7 @@ package org.javai.punit.examples.app.llm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +16,20 @@ class ChatLlmProviderTest {
         System.clearProperty("punit.llm.mode");
     }
 
+    /**
+     * Skip the test when the {@code PUNIT_LLM_MODE} environment
+     * variable is set. The "default mode" assertions can only be
+     * validated when neither the system property nor the env var is
+     * present; the system property is cleared in {@link #clearSystemProperties()},
+     * but env vars cannot be mutated from Java without a third-party
+     * library, so a developer who has exported {@code PUNIT_LLM_MODE=real}
+     * for experiment runs would see these tests fail misleadingly.
+     */
+    private static void assumeNoModeEnvVar() {
+        assumeTrue(System.getenv("PUNIT_LLM_MODE") == null,
+                "PUNIT_LLM_MODE env var is set; cannot validate default-mode behaviour");
+    }
+
     @Nested
     @DisplayName("resolve()")
     class Resolve {
@@ -22,6 +37,7 @@ class ChatLlmProviderTest {
         @Test
         @DisplayName("returns MockChatLlm by default")
         void returnsMockChatLlmByDefault() {
+            assumeNoModeEnvVar();
             ChatLlm llm = ChatLlmProvider.resolve();
 
             assertThat(llm).isInstanceOf(MockChatLlm.class);
@@ -76,6 +92,7 @@ class ChatLlmProviderTest {
         @Test
         @DisplayName("returns 'mock' by default")
         void returnsMockByDefault() {
+            assumeNoModeEnvVar();
             assertThat(ChatLlmProvider.resolvedMode()).isEqualTo("mock");
         }
 
@@ -95,6 +112,7 @@ class ChatLlmProviderTest {
         @Test
         @DisplayName("returns false by default")
         void returnsFalseByDefault() {
+            assumeNoModeEnvVar();
             assertThat(ChatLlmProvider.isRealMode()).isFalse();
         }
 
@@ -122,6 +140,7 @@ class ChatLlmProviderTest {
         @Test
         @DisplayName("returns true by default")
         void returnsTrueByDefault() {
+            assumeNoModeEnvVar();
             assertThat(ChatLlmProvider.isMockMode()).isTrue();
         }
 

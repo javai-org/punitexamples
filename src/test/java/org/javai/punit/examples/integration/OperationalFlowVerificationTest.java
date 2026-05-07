@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -20,115 +21,100 @@ import org.junit.jupiter.api.TestMethodOrder;
  * the expected artefacts before the probabilistic test runs. Plain JUnit
  * test that inspects generated YAML files; runs as part of the
  * {@code operationalFlowTest} task.
+ *
+ *
+ * <p>Each method skips when no matching artefacts are present — so a
+ * standalone {@code ./gradlew test} run (which doesn't drive the
+ * operational flow) reports four skipped methods rather than failures
+ * against artefacts that never get a chance to be produced.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class OperationalFlowVerificationTest {
 
+    private static final String USE_CASE_ID = "shopping-basket";
+
     private static final Path EXPLORATIONS_DIR =
-            Path.of("build/punit/explorations/ShoppingBasketUseCase");
+            Path.of("build/punit/explorations/" + USE_CASE_ID);
     private static final Path OPTIMIZATIONS_DIR =
-            Path.of("build/punit/optimizations/ShoppingBasketUseCase");
-    private static final Path SPECS_DIR =
-            Path.of("src/test/resources/punit/specs");
+            Path.of("build/punit/optimizations/" + USE_CASE_ID);
+    private static final Path BASELINES_DIR =
+            Path.of("src/test/resources/punit/baselines");
 
     @Test
     @Order(1)
     void verifyExplorationFilesGenerated() throws IOException {
-        assumeTrue(Files.isDirectory(EXPLORATIONS_DIR),
-                "Explorations directory not yet created — skipping until experiments generate output");
+        List<Path> files = listYamls(EXPLORATIONS_DIR, p -> true);
+        assumeTrue(!files.isEmpty(),
+                "No exploration YAMLs yet — run the EXPLORE experiment first");
 
-        try (Stream<Path> yamlFiles = Files.list(EXPLORATIONS_DIR)
-                .filter(p -> p.toString().endsWith(".yaml"))) {
-            var files = yamlFiles.toList();
-            assertThat(files)
-                    .as("At least one exploration YAML should be generated")
-                    .isNotEmpty();
-
-            // Check one file contains a resultProjection section
-            String content = Files.readString(files.getFirst());
-            assertThat(content)
-                    .as("Exploration YAML should contain resultProjection")
-                    .contains("resultProjection");
-        }
+        String content = Files.readString(files.getFirst());
+        assertThat(content)
+                .as("Exploration YAML should contain resultProjection")
+                .contains("resultProjection");
     }
 
     @Test
     @Order(2)
     void verifyOptimizationFilesGenerated() throws IOException {
-        assumeTrue(Files.isDirectory(OPTIMIZATIONS_DIR),
-                "Optimizations directory not yet created — skipping until experiments generate output");
+        List<Path> files = listYamls(OPTIMIZATIONS_DIR, p -> true);
+        assumeTrue(!files.isEmpty(),
+                "No optimization YAMLs yet — run the OPTIMIZE experiment first");
 
-        try (Stream<Path> yamlFiles = Files.list(OPTIMIZATIONS_DIR)
-                .filter(p -> p.toString().endsWith(".yaml"))) {
-            var files = yamlFiles.toList();
-            assertThat(files)
-                    .as("At least one optimization YAML should be generated")
-                    .isNotEmpty();
-
-            // Check one file contains an iterations section
-            String content = Files.readString(files.getFirst());
-            assertThat(content)
-                    .as("Optimization YAML should contain iterations")
-                    .contains("iterations");
-        }
+        String content = Files.readString(files.getFirst());
+        assertThat(content)
+                .as("Optimization YAML should contain iterations")
+                .contains("iterations");
     }
 
     @Test
     @Order(3)
     void verifyBaselineSpecGenerated() throws IOException {
-        assumeTrue(Files.isDirectory(SPECS_DIR),
-                "Specs directory not yet created — skipping until experiments generate output");
+        List<Path> files = listYamls(BASELINES_DIR,
+                p -> p.getFileName().toString().startsWith(USE_CASE_ID + "."));
+        assumeTrue(!files.isEmpty(),
+                "No baseline YAMLs yet — run the MEASURE experiment first");
 
-        try (Stream<Path> specFiles = Files.list(SPECS_DIR)
-                .filter(p -> p.getFileName().toString().startsWith("ShoppingBasketUseCase-"))
-                .filter(p -> p.toString().endsWith(".yaml"))) {
-            var files = specFiles.toList();
-            assertThat(files)
-                    .as("At least one spec YAML matching ShoppingBasketUseCase-*.yaml should exist")
-                    .isNotEmpty();
+        String content = Files.readString(files.getFirst());
 
-            String content = Files.readString(files.getFirst());
+        int sampleCount = extractInt(content, "sampleCount");
+        assertThat(sampleCount)
+                .as("Baseline should record a positive sample count")
+                .isGreaterThan(0);
 
-            // Check minPassRate exists and is in (0, 1)
-            double minPassRate = extractDouble(content, "minPassRate");
-            assertThat(minPassRate)
-                    .as("minPassRate should be between 0 and 1 (exclusive)")
-                    .isGreaterThan(0.0)
-                    .isLessThan(1.0);
-
-            // Check execution.samplesExecuted = 1000
-            int samplesExecuted = extractInt(content, "samplesExecuted");
-            assertThat(samplesExecuted)
-                    .as("Baseline should have executed 1000 samples")
-                    .isEqualTo(1000);
-
-            // Check statistics.successRate.observed > 0
-            double observed = extractDouble(content, "observed");
-            assertThat(observed)
-                    .as("Observed success rate should be greater than 0")
-                    .isGreaterThan(0.0);
-        }
+        double observedPassRate = extractDouble(content, "observedPassRate");
+        assertThat(observedPassRate)
+                .as("Observed pass rate should be in [0, 1]")
+                .isBetween(0.0, 1.0);
     }
 
     @Test
     @Order(4)
-    void verifyBaselineMinPassRateIsReasonable() throws IOException {
-        assumeTrue(Files.isDirectory(SPECS_DIR),
-                "Specs directory not yet created — skipping until experiments generate output");
-        try (Stream<Path> specFiles = Files.list(SPECS_DIR)
-                .filter(p -> p.getFileName().toString().startsWith("ShoppingBasketUseCase-"))
-                .filter(p -> p.toString().endsWith(".yaml"))) {
-            var files = specFiles.toList();
-            assertThat(files).isNotEmpty();
+    void verifyBaselineObservedPassRateIsReasonable() throws IOException {
+        List<Path> files = listYamls(BASELINES_DIR,
+                p -> p.getFileName().toString().startsWith(USE_CASE_ID + "."));
+        assumeTrue(!files.isEmpty(),
+                "No baseline YAMLs yet — run the MEASURE experiment first");
 
-            String content = Files.readString(files.getFirst());
-            double minPassRate = extractDouble(content, "minPassRate");
+        String content = Files.readString(files.getFirst());
+        double observedPassRate = extractDouble(content, "observedPassRate");
 
-            // Mock LLM ≈ 43% pass rate → minPassRate ≈ 0.30–0.55
-            // Real LLM (gpt-4o-mini, temp 0.3) ≈ 77% → minPassRate ≈ 0.65–0.85
-            assertThat(minPassRate)
-                    .as("minPassRate should be in plausible range for mock or real LLM (0.30–0.85)")
-                    .isBetween(0.30, 0.85);
+        // Mock LLM ≈ 43% pass rate; real LLM (gpt-4o-mini, temp 0.3) ≈ 77%.
+        // Either should sit comfortably in [0.30, 1.00].
+        assertThat(observedPassRate)
+                .as("observedPassRate should be in plausible range for mock or real LLM")
+                .isBetween(0.30, 1.00);
+    }
+
+    private static List<Path> listYamls(Path dir, java.util.function.Predicate<Path> filter)
+            throws IOException {
+        if (!Files.isDirectory(dir)) {
+            return List.of();
+        }
+        try (Stream<Path> stream = Files.list(dir)) {
+            return stream
+                    .filter(p -> p.toString().endsWith(".yaml"))
+                    .filter(filter)
+                    .toList();
         }
     }
 

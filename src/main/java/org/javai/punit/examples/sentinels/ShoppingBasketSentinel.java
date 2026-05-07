@@ -1,7 +1,5 @@
 package org.javai.punit.examples.sentinels;
 
-import java.util.List;
-
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.engine.criteria.PassRate;
@@ -85,22 +83,15 @@ public class ShoppingBasketSentinel {
     private static final int BASELINE_SAMPLES = 1000;
     private static final int VERIFICATION_SAMPLES = 50;
 
-    private static final List<String> INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
-
     @Experiment
     void shoppingBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(INSTRUCTIONS, BASELINE_SAMPLES), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketUseCase.sampling(BASELINE_SAMPLES), LlmTuning.DEFAULT)
                 .run();
     }
 
     @ProbabilisticTest
     void shoppingMeetsBaseline() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, VERIFICATION_SAMPLES), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(VERIFICATION_SAMPLES), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

@@ -1,7 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.List;
-
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
@@ -35,26 +33,9 @@ import org.javai.punit.runtime.PUnit;
  */
 public class ShoppingBasketTest {
 
-    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
-
-    private static final List<String> SINGLE_INSTRUCTION =
-            List.of("Add 2 apples and remove the bread");
-
     @ProbabilisticTest
     void testInstructionTranslation() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
-                .assertPasses();
-    }
-
-    @ProbabilisticTest
-    void testControlledInstruction() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

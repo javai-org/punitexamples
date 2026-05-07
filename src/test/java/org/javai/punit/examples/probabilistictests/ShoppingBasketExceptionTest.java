@@ -1,7 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.List;
-
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.ExceptionPolicy;
 import org.javai.punit.engine.criteria.PassRate;
@@ -46,20 +44,13 @@ import org.javai.punit.runtime.PUnit;
  */
 public class ShoppingBasketExceptionTest {
 
-    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
-
     @ProbabilisticTest
     void abortTestPolicyStopsOnFirstDefect() {
         // Default policy. Any thrown exception from apply() bubbles
         // out of the engine and aborts the run. The engine never
         // gets a chance to render a verdict.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                ShoppingBasketUseCase.samplingBuilder(100)
                         .onException(ExceptionPolicy.ABORT_TEST)
                         .build(),
                 LlmTuning.DEFAULT)
@@ -76,7 +67,7 @@ public class ShoppingBasketExceptionTest {
         // "reliability" you're measuring rather than a signal that
         // the test setup is broken.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                ShoppingBasketUseCase.samplingBuilder(100)
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .build(),
                 LlmTuning.DEFAULT)
@@ -92,7 +83,7 @@ public class ShoppingBasketExceptionTest {
         // over every sample; only the per-failure detail kept for
         // post-run inspection is bounded. Default is 10.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                ShoppingBasketUseCase.samplingBuilder(100)
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .maxExampleFailures(3)
                         .build(),

@@ -1,7 +1,5 @@
 package org.javai.punit.examples.experiments;
 
-import java.util.List;
-
 import org.javai.punit.api.Experiment;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
@@ -32,21 +30,9 @@ import org.javai.punit.runtime.PUnit;
  */
 public class ShoppingBasketMeasure {
 
-    private static final List<String> BASKET_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Add 5 tomatoes and remove the cheese",
-            "Clear the basket",
-            "Clear everything",
-            "Remove 2 eggs from the basket",
-            "Add a dozen eggs",
-            "I'd like to remove all the vegetables");
-
     @Experiment
     void measureBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .run();
     }

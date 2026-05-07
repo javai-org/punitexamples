@@ -51,6 +51,20 @@ public final class PaymentGatewayUseCase
 
     private static final int WARMUP_INVOCATIONS = 3;
 
+    /**
+     * Canonical input list shared by every probabilistic test for
+     * this use case (and any future measure experiment that pairs
+     * with one). Centralising the list here closes the
+     * inputs-identity drift vector that produces silent INCONCLUSIVE
+     * verdicts when measure-side and test-side input lists diverge.
+     */
+    private static final List<Charge> CHARGES = List.of(
+            new Charge("tok_visa_4242", 1999L),
+            new Charge("tok_mastercard_5555", 2499L),
+            new Charge("tok_amex_3782", 3499L),
+            new Charge("tok_discover_6011", 999L),
+            new Charge("tok_visa_4000", 5999L));
+
     private final PaymentGateway gateway;
 
     public PaymentGatewayUseCase() {
@@ -91,10 +105,21 @@ public final class PaymentGatewayUseCase
     }
 
     /**
-     * Builds a {@link Sampling} configured with the
-     * {@link MockPaymentGateway} singleton. Tests that need a
-     * different gateway implementation supply their own factory
-     * closure via {@link Sampling#builder()}.
+     * Canonical-inputs factory: builds a {@link Sampling} over
+     * {@link #CHARGES} configured with the {@link MockPaymentGateway}
+     * singleton. This is the factory probabilistic tests should use —
+     * a single shared input source means every paired measure ↔ test
+     * comparison's inputs-identity matches by construction.
+     */
+    public static Sampling<NoFactors, Charge, PaymentResult> sampling(int samples) {
+        return sampling(CHARGES, samples);
+    }
+
+    /**
+     * Custom-inputs overload for experiments that legitimately need
+     * a different charge list (typically EXPLORE / OPTIMIZE shapes).
+     * Tests that need a different gateway implementation supply their
+     * own factory closure via {@link Sampling#builder()}.
      */
     public static Sampling<NoFactors, Charge, PaymentResult> sampling(List<Charge> charges, int samples) {
         return Sampling.of(nf -> new PaymentGatewayUseCase(), samples, charges);

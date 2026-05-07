@@ -4,8 +4,7 @@
  * <ul>
  *   <li>{@code experiments/} — MEASURE, EXPLORE, and OPTIMIZE experiment examples.</li>
  *   <li>{@code probabilistictests/} — probabilistic tests covering threshold
- *       approaches, covariates, budgets, pacing, exception handling, and the
- *       deterministic CoinToss / RegionalCoinToss walkthroughs.</li>
+ *       approaches, covariates, budgets, pacing, and exception handling.</li>
  *   <li>{@code integration/} — end-to-end operational-flow checks.</li>
  * </ul>
  *

@@ -55,6 +55,32 @@ public final class ShoppingBasketUseCase
 
     public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final double DEFAULT_TEMPERATURE = 0.3;
+
+    /**
+     * Canonical input list shared by the measure experiment and every
+     * probabilistic test for this use case. Keeping the list here —
+     * not in any single test or experiment class — closes the drift
+     * vector that produces silent INCONCLUSIVE / SKIPPED verdicts when
+     * the measure-side and test-side {@code inputsIdentity} hashes
+     * don't match.
+     *
+     * <p>EXPLORE and OPTIMIZE experiments may legitimately need their
+     * own input lists (sweeping over different scenarios is the point);
+     * those use the list-taking factory overloads
+     * ({@link #sampling(List, int)} etc.) directly.
+     */
+    private static final List<String> BASKET_INSTRUCTIONS = List.of(
+            "Add 2 apples",
+            "Remove the milk",
+            "Add 1 loaf of bread",
+            "Add 3 oranges and 2 bananas",
+            "Add 5 tomatoes and remove the cheese",
+            "Clear the basket",
+            "Clear everything",
+            "Remove 2 eggs from the basket",
+            "Add a dozen eggs",
+            "I'd like to remove all the vegetables");
+
     public static final String DEFAULT_SYSTEM_PROMPT = """
             You are a shopping assistant that converts natural language instructions into JSON actions.
 
@@ -155,7 +181,7 @@ public final class ShoppingBasketUseCase
                                 .formatted(action.name(), action.context()));
             }
         }
-        return Outcome.ok();
+        return Outcome.fail("TEMPORARY", "NOPE");
     }
 
     private static Outcome<Void> checkQuantitiesArePositiveIntegers(BasketTranslation translation) {
@@ -218,15 +244,31 @@ public final class ShoppingBasketUseCase
     }
 
     /**
-     * Builds a {@link Sampling} configured to construct this use case
-     * with a {@link ChatLlm} resolved via
-     * {@link ChatLlmProvider#resolve()}. For tests that need to
-     * inject a different {@link ChatLlm}, use
-     * {@link #samplingWith(ChatLlm, List, int)} instead.
+     * Canonical-inputs factory: builds a {@link Sampling} over
+     * {@link #BASKET_INSTRUCTIONS} with the {@link ChatLlm} resolved
+     * via {@link ChatLlmProvider#resolve()}. This is the factory
+     * MEASURE experiments and probabilistic tests should use — sharing
+     * one input source on both sides makes the empirical-pair's
+     * inputs-identity match structural rather than coincidental.
+     */
+    public static Sampling<LlmTuning, String, String> sampling(int samples) {
+        return sampling(BASKET_INSTRUCTIONS, samples);
+    }
+
+    /**
+     * Custom-inputs overload for EXPLORE and OPTIMIZE experiments that
+     * legitimately sweep over different input lists. Probabilistic
+     * tests should not call this overload; use {@link #sampling(int)}.
      */
     public static Sampling<LlmTuning, String, String> sampling(
             List<String> inputs, int samples) {
         return samplingWith(ChatLlmProvider.resolve(), inputs, samples);
+    }
+
+    /** Canonical-inputs variant of {@link #samplingWith(ChatLlm, List, int)}. */
+    public static Sampling<LlmTuning, String, String> samplingWith(
+            ChatLlm llm, int samples) {
+        return samplingWith(llm, BASKET_INSTRUCTIONS, samples);
     }
 
     public static Sampling<LlmTuning, String, String> samplingWith(
@@ -234,6 +276,12 @@ public final class ShoppingBasketUseCase
         return Sampling.of(
                 tuning -> new ShoppingBasketUseCase(llm, tuning),
                 samples, inputs);
+    }
+
+    /** Canonical-inputs variant of {@link #samplingPaced(Pacing, List, int)}. */
+    public static Sampling<LlmTuning, String, String> samplingPaced(
+            Pacing pacing, int samples) {
+        return samplingPaced(pacing, BASKET_INSTRUCTIONS, samples);
     }
 
     /**
@@ -248,10 +296,15 @@ public final class ShoppingBasketUseCase
                 samples, inputs);
     }
 
+    /** Canonical-inputs variant of {@link #samplingBuilder(List, int)}. */
+    public static Sampling.Builder<LlmTuning, String, String> samplingBuilder(int samples) {
+        return samplingBuilder(BASKET_INSTRUCTIONS, samples);
+    }
+
     /**
      * Builder form for tests that need to configure budgets, exception
      * policy, or other Sampling knobs not exposed on the simpler
-     * {@link #sampling(List, int)} factory. Returns a partially-built
+     * {@link #sampling(int)} factory. Returns a partially-built
      * Sampling.Builder ready for {@code .timeBudget(...)},
      * {@code .tokenBudget(...)}, etc., terminated with {@code .build()}.
      */

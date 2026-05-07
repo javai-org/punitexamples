@@ -1,7 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.List;
-
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.spec.Experiment;
@@ -58,13 +56,6 @@ import org.javai.punit.power.PowerAnalysis;
  */
 public class ShoppingBasketThresholdApproachesTest {
 
-    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
-
     /**
      * The baseline measure-experiment the empirical and
      * confidence-first tests below resolve through. A single
@@ -72,7 +63,7 @@ public class ShoppingBasketThresholdApproachesTest {
      * select the same baseline file at test time.
      */
     private Experiment baseline() {
-        return PUnit.measuring(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 1000), LlmTuning.DEFAULT)
+        return PUnit.measuring(ShoppingBasketUseCase.sampling(1000), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .build();
     }
@@ -120,7 +111,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // — the verdict is the deterministic observed >= threshold
         // comparison; the threshold's provenance is stamped onto
         // the result for audit.
-        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
                 .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }

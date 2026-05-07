@@ -1,7 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.List;
-
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.Pacing;
 import org.javai.punit.engine.criteria.PassRate;
@@ -28,18 +26,11 @@ import org.javai.punit.runtime.PUnit;
  *
  * <p>Pacing is a property of the use case (it belongs to the
  * service under test, not to a particular test). The
- * {@link ShoppingBasketUseCase#samplingPaced(Pacing, List, int)
+ * {@link ShoppingBasketUseCase#samplingPaced(Pacing, int)
  * samplingPaced} factory threads the pacing through for the
  * demonstrations below.
  */
 public class ShoppingBasketPacingTest {
-
-    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
 
     @ProbabilisticTest
     void runsAtRequestsPerSecondLimit() {
@@ -47,7 +38,7 @@ public class ShoppingBasketPacingTest {
         // documents a per-second burst limit.
         Pacing pacing = Pacing.builder().maxRequestsPerSecond(5).build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, 50), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -59,7 +50,7 @@ public class ShoppingBasketPacingTest {
         // and Anthropic free / lower tiers).
         Pacing pacing = Pacing.builder().maxRequestsPerMinute(60).build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, 50), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -72,7 +63,7 @@ public class ShoppingBasketPacingTest {
         // room between requests.
         Pacing pacing = Pacing.builder().minMillisPerSample(200).build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, 50), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -88,7 +79,7 @@ public class ShoppingBasketPacingTest {
                 .maxRequestsPerMinute(120)
                 .build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, STANDARD_INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, 50), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

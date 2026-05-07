@@ -1,7 +1,6 @@
 package org.javai.punit.examples.probabilistictests;
 
 import java.time.Duration;
-import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.BudgetExhaustionPolicy;
@@ -34,20 +33,13 @@ import org.javai.punit.runtime.PUnit;
  */
 public class ShoppingBasketBudgetTest {
 
-    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
-
     @ProbabilisticTest
     void timeBudgetFailsRunOnExhaustion() {
         // 10-second cap; budget exhaustion fails the run rather than
         // emitting a verdict on incomplete data. Use this when the
         // statistical claim requires the full sample set.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                ShoppingBasketUseCase.samplingBuilder(100)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.FAIL)
                         .build(),
@@ -63,7 +55,7 @@ public class ShoppingBasketBudgetTest {
         // this when partial information is better than none — but be
         // aware the verdict may not be statistically significant.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                ShoppingBasketUseCase.samplingBuilder(100)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),
@@ -78,7 +70,7 @@ public class ShoppingBasketBudgetTest {
         // onto each UseCaseOutcome via .withTokens(...), so the engine
         // sees real usage per sample.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(STANDARD_INSTRUCTIONS, 100)
+                ShoppingBasketUseCase.samplingBuilder(100)
                         .tokenBudget(10_000L)
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),

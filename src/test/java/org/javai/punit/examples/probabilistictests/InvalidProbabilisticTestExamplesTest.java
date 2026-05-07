@@ -258,9 +258,7 @@ class InvalidProbabilisticTestExamplesTest {
      * surfaces as a JUnit <em>aborted</em> result, not a failure.</p>
      * <p><b>Fix:</b> Run the measure phase first
      * ({@code PUnit.measuring(sampling, factors).run()}) so a baseline
-     * exists, then run the verification test. See the empirical-pair
-     * pattern in {@link CoinTossReliabilityExamples} for the canonical
-     * workflow.</p>
+     * exists, then run the verification test.</p>
      */
     @ProbabilisticTest
     void empiricalCriterion_noBaselineProducesInconclusive() {

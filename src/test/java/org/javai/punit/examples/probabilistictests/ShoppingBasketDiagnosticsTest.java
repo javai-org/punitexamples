@@ -1,7 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import java.util.List;
-
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.engine.criteria.PassRate;
@@ -25,19 +23,12 @@ import org.javai.punit.runtime.PUnit;
  */
 public class ShoppingBasketDiagnosticsTest {
 
-    private static final List<String> STANDARD_INSTRUCTIONS = List.of(
-            "Add 2 apples",
-            "Remove the milk",
-            "Add 1 loaf of bread",
-            "Add 3 oranges and 2 bananas",
-            "Clear the basket");
-
     @ProbabilisticTest
     void empiricalAtModerateSampleCount() {
         // Empirical criterion: threshold derived from the resolved
         // baseline; verdict driven by the Wilson-score lower bound
         // on the observed rate clearing the baseline rate.
-        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -48,7 +39,7 @@ public class ShoppingBasketDiagnosticsTest {
         // around the observed rate. A run that's borderline at
         // n=100 can be definitively PASS or FAIL at n=200 — same
         // criterion explanation shape, tighter numbers.
-        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 200), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(200), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -60,7 +51,7 @@ public class ShoppingBasketDiagnosticsTest {
         // observed >= threshold (no Wilson wrap), and the
         // diagnostic message reports the observed rate, the SLA
         // threshold, and the sample count.
-        PUnit.testing(ShoppingBasketUseCase.sampling(STANDARD_INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
                 .criterion(PassRate.meeting(0.85, ThresholdOrigin.SLA))
                 .assertPasses();
     }
