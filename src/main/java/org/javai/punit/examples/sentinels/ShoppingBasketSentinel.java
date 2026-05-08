@@ -1,5 +1,8 @@
 package org.javai.punit.examples.sentinels;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.engine.criteria.PassRate;
@@ -73,25 +76,30 @@ import org.javai.punit.runtime.PUnit;
 public class ShoppingBasketSentinel {
 
     /**
-     * The asymmetry is intentional. The baseline is captured once
-     * with high statistical power, so the recorded pass rate is a
-     * tight estimate; the verification test then runs cheaply and
-     * frequently against that baseline. Equal sample counts on
-     * both sides would flatten this distinction and burn budget
-     * that calibration deserves more than routine verification does.
+     * The asymmetry between the baseline and verification sample
+     * counts is intentional. The baseline is captured once with
+     * high statistical power, so the recorded pass rate is a tight
+     * estimate; the verification test then runs cheaply and
+     * frequently against that baseline. Equal sample counts on both
+     * sides would flatten this distinction and burn budget that
+     * calibration deserves more than routine verification does.
+     *
+     * <p>The two values are read from
+     * {@link org.javai.punit.examples.usecases.ShoppingBasketSampleSizes},
+     * the single sample-size policy shared across the use case's
+     * dev experiments, dev tests, and this sentinel — so a baseline
+     * captured here is commensurate with whatever the dev tests
+     * recorded, and vice versa.
      */
-    private static final int BASELINE_SAMPLES = 1000;
-    private static final int VERIFICATION_SAMPLES = 50;
-
     @Experiment
     void shoppingBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(BASELINE_SAMPLES), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketUseCase.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .run();
     }
 
     @ProbabilisticTest
     void shoppingMeetsBaseline() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(VERIFICATION_SAMPLES), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

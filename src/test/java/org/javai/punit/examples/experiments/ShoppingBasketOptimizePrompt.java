@@ -1,5 +1,7 @@
 package org.javai.punit.examples.experiments;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.OPTIMIZE_PER_ITERATION_SAMPLE_SIZE;
+
 import java.util.List;
 
 import org.javai.punit.api.Experiment;
@@ -16,17 +18,21 @@ import org.javai.punit.runtime.PUnit;
  * lives in {@link PromptEngineerStepper}; this class wires it into a
  * PUnit optimize run. Early termination is disabled so all
  * {@code maxIterations} run regardless of whether a given step
- * improves the score — useful pedagogically, since a flat or
- * dipping intermediate iteration is informative about how the
- * meta-LLM responds to feedback.
+ * improves the score — a reader gets to see the full trajectory,
+ * including any flat or dipping intermediate iteration that
+ * shows how the meta-LLM responds to feedback.
  *
  * <h2>Setup</h2>
  *
  * <p>This experiment makes real LLM calls. Configure the
  * {@code ChatLlm} provider via {@code OPENAI_API_KEY} (or the
- * equivalent for your provider). With {@code maxIterations=5} and
- * 20 samples per iteration, expect ~100 sample calls plus 5
- * meta-prompt calls.
+ * equivalent for your provider). The example is sized small to
+ * keep the run cheap — {@code maxIterations=5} at
+ * {@link org.javai.punit.examples.usecases.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
+ * samples per iteration plus one meta-prompt call per iteration. A
+ * realistic prompt-optimisation run uses 30+ samples per iteration
+ * so the per-iteration score has enough signal for the meta-LLM to
+ * act on.
  *
  * <h2>Running</h2>
  *
@@ -86,7 +92,7 @@ public class ShoppingBasketOptimizePrompt {
                     "ShoppingBasketOptimizePrompt requires a real meta-LLM. "
                             + "Set PUNIT_LLM_MODE=real and provide OPENAI_API_KEY.");
         }
-        PUnit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, 20))
+        PUnit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, OPTIMIZE_PER_ITERATION_SAMPLE_SIZE))
                 .initialFactors(LlmTuning.DEFAULT.systemPrompt(INITIAL_PROMPT))
                 .stepper(PromptEngineerStepper.create())
                 .maximize(PASS_RATE_SCORE)

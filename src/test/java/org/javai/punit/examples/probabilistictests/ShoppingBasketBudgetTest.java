@@ -1,5 +1,7 @@
 package org.javai.punit.examples.probabilistictests;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+
 import java.time.Duration;
 
 import org.javai.punit.api.ProbabilisticTest;
@@ -39,7 +41,7 @@ public class ShoppingBasketBudgetTest {
         // emitting a verdict on incomplete data. Use this when the
         // statistical claim requires the full sample set.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(100)
+                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.FAIL)
                         .build(),
@@ -55,7 +57,7 @@ public class ShoppingBasketBudgetTest {
         // this when partial information is better than none — but be
         // aware the verdict may not be statistically significant.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(100)
+                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),
@@ -70,7 +72,7 @@ public class ShoppingBasketBudgetTest {
         // onto each UseCaseOutcome via .withTokens(...), so the engine
         // sees real usage per sample.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(100)
+                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .tokenBudget(10_000L)
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),

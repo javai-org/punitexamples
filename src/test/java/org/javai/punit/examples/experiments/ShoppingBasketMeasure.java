@@ -1,5 +1,7 @@
 package org.javai.punit.examples.experiments;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
+
 import org.javai.punit.api.Experiment;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
@@ -32,7 +34,7 @@ public class ShoppingBasketMeasure {
 
     @Experiment
     void measureBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketUseCase.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .run();
     }

@@ -1,5 +1,10 @@
 package org.javai.punit.examples.probabilistictests;
 
+import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_PASS_RATE;
+import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE;
+import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.INTERNAL_SLO_PASS_RATE;
+import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE;
+
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
@@ -34,25 +39,26 @@ public class PaymentGatewaySlaTest {
 
     @ProbabilisticTest
     void verifiesAgainstInternalSlo() {
-        // 268 samples is the minimum that supports a verification-
-        // grade claim against a 99% target at default 95% confidence
-        // — the framework's pre-flight feasibility gate is satisfied.
-        // The default intent (VERIFICATION) is implicit.
-        PUnit.testing(PaymentGatewayUseCase.sampling(268))
-                .criterion(PassRate.meeting(0.99, ThresholdOrigin.SLO))
+        // The pre-flight feasibility gate accepts this configuration
+        // because the sample count meets the framework's minimum for
+        // a 99% target at default 95% confidence. The default intent
+        // (VERIFICATION) is implicit.
+        PUnit.testing(PaymentGatewayUseCase.sampling(INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE))
+                .criterion(PassRate.meeting(INTERNAL_SLO_PASS_RATE, ThresholdOrigin.SLO))
                 .assertPasses();
     }
 
     @ProbabilisticTest
     void smokeTestsAgainstSla() {
-        // 50 samples is too few to verify a 99.99% SLA target. The
-        // explicit SMOKE intent tells the framework "I know it's
-        // undersized; treat this as a sentinel, not a verification
-        // claim." The framework records the sizing gap on the
-        // verdict (the pre-flight gate is bypassed in SMOKE mode).
-        PUnit.testing(PaymentGatewayUseCase.sampling(50))
+        // The sample count is intentionally too few to verify a
+        // 99.99% SLA target. The explicit SMOKE intent tells the
+        // framework "I know it's undersized; treat this as a
+        // sentinel, not a verification claim." The framework records
+        // the sizing gap on the verdict (the pre-flight gate is
+        // bypassed in SMOKE mode).
+        PUnit.testing(PaymentGatewayUseCase.sampling(CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE))
                 .intent(TestIntent.SMOKE)
-                .criterion(PassRate.meeting(0.9999, ThresholdOrigin.SLA))
+                .criterion(PassRate.meeting(CONTRACTUAL_SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 }

@@ -47,7 +47,8 @@
       "Bash(chmod +x /Users/mikemannion/workspace/javai-orchestrator/punitexamples/ex-report.sh)",
       "Read(//Users/mikemannion/punitexamples/punit/punit-core/src/main/java/org/javai/punit/verdict/**)",
       "Bash(sed -n '60,90p' /Users/mikemannion/workspace/javai-orchestrator/punit/punit-core/src/main/java/org/javai/punit/verdict/VerdictAdapter.java)",
-      "Bash(PUNIT_LLM_MODE=real ./gradlew test --tests \"ChatLlmProviderTest\")"
+      "Bash(PUNIT_LLM_MODE=real ./gradlew test --tests \"ChatLlmProviderTest\")",
+      "Bash(curl *)"
     ]
   }
 }

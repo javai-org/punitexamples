@@ -1,5 +1,7 @@
 package org.javai.punit.examples.probabilistictests;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
@@ -55,7 +57,7 @@ class InvalidProbabilisticTestExamplesTest {
     /**
      * <b>Error:</b> No criterion supplied.
      *
-     * <p><b>What it says:</b> "Run 50 samples and assert it passes."</p>
+     * <p><b>What it says:</b> "Run a sample batch and assert it passes."</p>
      * <p><b>Why invalid:</b> A probabilistic test needs a criterion to
      * make any claim. {@code .assertPasses()} without
      * {@code .criterion(...)} leaves the engine with nothing to evaluate;
@@ -67,7 +69,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void noCriterion_emptyClaim() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .assertPasses();
     }
 
@@ -99,7 +101,7 @@ class InvalidProbabilisticTestExamplesTest {
     @ProbabilisticTest
     void empiricalEntryPoint_rejectsContractualCriterion() {
         PUnit.testing(() -> null) // baseline supplier — never invoked here
-                .samples(50)
+                .samples(PROBABILISTIC_TEST_SAMPLE_SIZE)
                 .criterion(PassRate.meeting(0.95, ThresholdOrigin.SLA));
     }
 
@@ -146,7 +148,7 @@ class InvalidProbabilisticTestExamplesTest {
     @ProbabilisticTest
     void empiricalBuilder_missingCriterion() {
         PUnit.testing(() -> null)
-                .samples(50)
+                .samples(PROBABILISTIC_TEST_SAMPLE_SIZE)
                 .assertPasses();
     }
 
@@ -262,7 +264,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void empiricalCriterion_noBaselineProducesInconclusive() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

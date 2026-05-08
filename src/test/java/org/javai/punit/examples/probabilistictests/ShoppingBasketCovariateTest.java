@@ -1,5 +1,7 @@
 package org.javai.punit.examples.probabilistictests;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
@@ -30,7 +32,7 @@ public class ShoppingBasketCovariateTest {
         // and temperature as covariates on the resolved profile, so
         // the baseline this test consults is the one measured under
         // the same configuration.
-        PUnit.testing(ShoppingBasketUseCase.sampling(50), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -42,7 +44,7 @@ public class ShoppingBasketCovariateTest {
         // file than the default-configuration test above.
         LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
-        PUnit.testing(ShoppingBasketUseCase.sampling(50), gpt4Turbo)
+        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), gpt4Turbo)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -54,7 +56,7 @@ public class ShoppingBasketCovariateTest {
         // — typically higher than the default-temperature baseline.
         LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
-        PUnit.testing(ShoppingBasketUseCase.sampling(50), lowTemp)
+        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), lowTemp)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -65,7 +67,7 @@ public class ShoppingBasketCovariateTest {
         // for this configuration captures the looser pass rate.
         LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
-        PUnit.testing(ShoppingBasketUseCase.sampling(50), highTemp)
+        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), highTemp)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

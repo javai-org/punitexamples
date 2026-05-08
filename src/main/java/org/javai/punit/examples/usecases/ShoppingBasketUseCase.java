@@ -181,7 +181,7 @@ public final class ShoppingBasketUseCase
                                 .formatted(action.name(), action.context()));
             }
         }
-        return Outcome.fail("TEMPORARY", "NOPE");
+        return Outcome.ok();
     }
 
     private static Outcome<Void> checkQuantitiesArePositiveIntegers(BasketTranslation translation) {

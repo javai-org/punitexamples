@@ -1,5 +1,7 @@
 package org.javai.punit.examples.experiments;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.OPTIMIZE_PER_ITERATION_SAMPLE_SIZE;
+
 import java.util.List;
 
 import org.javai.punit.api.Experiment;
@@ -21,8 +23,12 @@ import org.javai.punit.runtime.PUnit;
  *
  * <p>This experiment makes real LLM calls. Configure the
  * {@code ChatLlm} provider via {@code OPENAI_API_KEY} (or the
- * equivalent for your provider). With 11 iterations and 20 samples
- * per iteration, expect ~220 sample calls.
+ * equivalent for your provider). The example is sized small to
+ * keep the run cheap — 11 iterations at
+ * {@link org.javai.punit.examples.usecases.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
+ * samples per iteration. A realistic optimisation run uses 30+
+ * samples per iteration so the per-iteration score has enough
+ * signal to drive the stepper.
  *
  * <h2>Running</h2>
  *
@@ -56,7 +62,7 @@ public class ShoppingBasketOptimizeTemperature {
 
     @Experiment
     void optimizeTemperature() {
-        PUnit.optimizing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, 20))
+        PUnit.optimizing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, OPTIMIZE_PER_ITERATION_SAMPLE_SIZE))
                 .initialFactors(LlmTuning.DEFAULT.temperature(1.0))
                 .stepper(COOL_DOWN)
                 .maximize(PASS_RATE_SCORE)

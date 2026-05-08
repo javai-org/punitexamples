@@ -1,5 +1,8 @@
 package org.javai.punit.examples.probabilistictests;
 
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
+import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.spec.Experiment;
@@ -63,19 +66,18 @@ public class ShoppingBasketThresholdApproachesTest {
      * select the same baseline file at test time.
      */
     private Experiment baseline() {
-        return PUnit.measuring(ShoppingBasketUseCase.sampling(1000), LlmTuning.DEFAULT)
+        return PUnit.measuring(ShoppingBasketUseCase.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .build();
     }
 
     @ProbabilisticTest
     void sampleSizeFirst() {
-        // Fixed sample budget of 100. Confidence stays at the
-        // empirical criterion's default (0.95). The threshold the
-        // verdict tests against is the resolved baseline's
-        // observed rate.
+        // Fixed sample budget. Confidence stays at the empirical
+        // criterion's default (0.95). The threshold the verdict
+        // tests against is the resolved baseline's observed rate.
         PUnit.testing(this::baseline)
-                .samples(100)
+                .samples(PROBABILISTIC_TEST_SAMPLE_SIZE)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -111,7 +113,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // — the verdict is the deterministic observed >= threshold
         // comparison; the threshold's provenance is stamped onto
         // the result for audit.
-        PUnit.testing(ShoppingBasketUseCase.sampling(100), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
