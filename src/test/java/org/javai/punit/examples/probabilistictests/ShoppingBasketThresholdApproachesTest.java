@@ -113,7 +113,15 @@ public class ShoppingBasketThresholdApproachesTest {
         // — the verdict is the deterministic observed >= threshold
         // comparison; the threshold's provenance is stamped onto
         // the result for audit.
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        //
+        // The framework's feasibility preflight requires at least 25
+        // samples to verify a 90% SLA at 95% confidence; the
+        // shared PROBABILISTIC_TEST_SAMPLE_SIZE (3) is deliberately
+        // smaller than that for cost reasons, so this test pins the
+        // minimum literal in place. See the per-test-literal note in
+        // ShoppingBasketSampleSizes for the convention.
+        int samples = 25;
+        PUnit.testing(ShoppingBasketUseCase.sampling(samples), LlmTuning.DEFAULT)
                 .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }

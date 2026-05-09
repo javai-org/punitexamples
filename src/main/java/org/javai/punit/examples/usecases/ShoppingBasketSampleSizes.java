@@ -57,10 +57,14 @@ public final class ShoppingBasketSampleSizes {
     /**
      * Sample size for ordinary measure experiments — recording a
      * pass-rate / latency baseline that paired probabilistic tests
-     * later verify against. Kept small so the example runs cheaply
-     * against a real LLM; a real shopping-basket baseline uses 200+.
+     * later verify against. Big enough that an occasional transient
+     * LLM failure surfaces in the recorded rate (so confidence-first
+     * planning has signal to plan against), small enough that a
+     * curious reader can run the experiment end-to-end without
+     * burning a tier of API credits. A real shopping-basket baseline
+     * uses 200+.
      */
-    public static final int MEASURE_EXPERIMENT_SAMPLE_SIZE = 10;
+    public static final int MEASURE_EXPERIMENT_SAMPLE_SIZE = 30;
 
     /**
      * Sample size for ordinary probabilistic tests — verifying the
