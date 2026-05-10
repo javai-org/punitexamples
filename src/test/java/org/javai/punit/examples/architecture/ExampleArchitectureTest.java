@@ -39,8 +39,6 @@ class ExampleArchitectureTest {
                         "org.javai.punit.experiment..",
                         "org.javai.punit.spec..",
                         "org.javai.punit.statistics..",
-                        "org.javai.punit.model..",
-                        "org.javai.punit.controls..",
                         "org.javai.punit.reporting..",
                         "org.javai.punit.engine.."
                 )
