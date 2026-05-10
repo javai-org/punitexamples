@@ -35,12 +35,10 @@ class ExampleArchitectureTest {
                 .should().dependOnClassesThat()
                 .resideInAnyPackage(
                         "org.javai.punit.api..",
-                        "org.javai.punit.ptest..",
-                        "org.javai.punit.experiment..",
-                        "org.javai.punit.spec..",
                         "org.javai.punit.statistics..",
-                        "org.javai.punit.reporting..",
-                        "org.javai.punit.engine.."
+                        "org.javai.punit.runtime..",
+                        "org.javai.punit.verdict..",
+                        "org.javai.punit.internal.."
                 )
                 .because("infrastructure represents application code that is independent of the test framework");
 
