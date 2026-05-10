@@ -8,7 +8,7 @@ import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.INTERN
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.engine.criteria.PassRate;
+import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
 import org.javai.punit.runtime.PUnit;
 

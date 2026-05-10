@@ -6,11 +6,11 @@ import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBAB
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.spec.Experiment;
-import org.javai.punit.engine.criteria.PassRate;
+import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
-import org.javai.punit.engine.baseline.PowerAnalysis;
+import org.javai.punit.internal.engine.baseline.PowerAnalysis;
 
 /**
  * Demonstrates the three operational approaches for choosing a
