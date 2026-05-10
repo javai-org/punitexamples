@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0-alpha3] - 2026-05-10
+
+> **🧪 Experimental release.** Tracks [punit 0.7.0-alpha3](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha3---2026-05-10) — the structural-cleanup arc release. Mechanical migration on this side: every consumer-side import that touched a relocated punit package was rewritten.
+
+### Changed
+- **Upgraded PUnit dependency from 0.7.0-alpha2 to 0.7.0-alpha3.** Pulls in the four-PR cleanup arc: the `contract/*` parallel stack removal, the RP07 verdict XML alignment (`ci-lower`/`ci-upper` → `wilson-lower`), the package-drift collapse (`model/`, `controls/`, `power/`, `engine/output/`, top-level `spec/` all dispersed), and the internal-namespace move that relocated every framework-internal package under `org.javai.punit.internal.*`. See punit's CHANGELOG for the full list.
+- **Follow punit's package-drift fix.** Imports of `org.javai.punit.power.PowerAnalysis` updated to `org.javai.punit.engine.baseline.PowerAnalysis` (then `internal.engine.baseline.PowerAnalysis` after the namespace move). Dead `model..` and `controls..` package entries dropped from `ExampleArchitectureTest`'s prohibited-packages list.
+- **Follow punit's internal-namespace move.** Every import of `engine.criteria.PassRate`, `engine.baseline.PowerAnalysis`, and `engine.*` generally rewritten to `internal.engine.*` across sentinel classes and probabilistic tests. The `ExampleArchitectureTest`'s "infrastructure does not depend on the PUnit framework" rule replaces its enumerated internal-package list with the structural marker `org.javai.punit.internal..` plus the public surfaces — the post-namespace layout makes the rule noticeably tighter.
+
 ## [0.5.0-alpha2] - 2026-05-10
 
 > **🧪 Experimental release.** Tracks [punit 0.7.0-alpha2](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha2---2026-05-10).

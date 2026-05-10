@@ -54,14 +54,14 @@ dependencies {
     // engine, statistics, baselines, runtime entry point. JUnit-free so
     // sentinel-deployable classes can call PUnit.testing(...).assertPasses()
     // without dragging the test harness onto the production classpath.
-    implementation("org.javai:punit-core:0.7.0-alpha2")
+    implementation("org.javai:punit-core:0.7.0-alpha3")
 
     // Nullability annotations used by use case postcondition methods.
     implementation("org.jspecify:jspecify:1.0.0")
 
     // Test stack — PUnit JUnit5 integration (transitively pulls punit-core),
     // JUnit Jupiter, AssertJ, ArchUnit.
-    testImplementation("org.javai:punit-junit5:0.7.0-alpha2")
+    testImplementation("org.javai:punit-junit5:0.7.0-alpha3")
     testImplementation(platform("org.junit:junit-bom:5.14.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
