@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0-alpha2] - 2026-05-10
+
+> **🧪 Experimental release.** Tracks [punit 0.7.0-alpha2](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha2---2026-05-10).
+
+### Changed
+- **Upgraded PUnit dependency from 0.7.0-alpha to 0.7.0-alpha2.** Pulls in
+  the empirical-threshold-derivation methodology fix, PowerAnalysis covariate
+  resolution + perfect-baseline support, INCONCLUSIVE console diagnostics,
+  the empirical-no-baseline preflight short-circuit, and PT08 soundness-floor
+  enforcement. See punit's CHANGELOG for the full list.
+- **Sample-size tuning** in `ShoppingBasketThresholdApproachesTest` so the
+  threshold-approach examples actually verify against the post-fix
+  feasibility maths. Sample-size constants centralised so curious developers
+  can tweak them in one place.
+- **Generated-baseline directory renamed `specs/` → `baselines/`** to match
+  punit 0.7.x's `BaselineResolver` convention. The README under that
+  directory and the project's `.gitignore` were updated in lockstep.
+
 ## [0.5.0-alpha] - 2026-05-07
 
 > **🧪 Experimental release.** Tracks the experimental [punit 0.7.0-alpha](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha---2026-05-07) typed-builder API. Pin to this exact version if you depend on its surface today; v0.x means breaking changes are still possible.
