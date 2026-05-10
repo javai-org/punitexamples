@@ -10,7 +10,7 @@ import org.javai.punit.engine.criteria.PassRate;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
 import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
 import org.javai.punit.runtime.PUnit;
-import org.javai.punit.power.PowerAnalysis;
+import org.javai.punit.engine.baseline.PowerAnalysis;
 
 /**
  * Demonstrates the three operational approaches for choosing a
