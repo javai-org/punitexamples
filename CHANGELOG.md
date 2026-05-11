@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0-alpha5] - 2026-05-11
+
+> **🧪 Experimental release.** Tracks [punit 0.7.0-alpha5](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha5---2026-05-11) — punit's adoption of `org.javai:outcome` 0.3.0 (which now ships its own `module-info`) and removal of the `extra-java-module-info` shim. No source changes on this side; mechanical version bump only.
+
+### Changed
+- **Upgraded PUnit dependency from 0.7.0-alpha4 to 0.7.0-alpha5.** Plugin pin in `settings.gradle.kts` and `punit-core` / `punit-report` coordinates in `build.gradle.kts` bumped in lockstep.
+
 ## [0.5.0-alpha4] - 2026-05-11
 
 > **🧪 Experimental release.** Tracks [punit 0.7.0-alpha4](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha4---2026-05-11) — the public-surface consolidation arc: JPMS module declarations on every published library module, the `punit-junit5` bundler artifact retired, four verdict-side types promoted out of `internal.*` (breaking FQN change), and the orphan `@Latency` annotation retired in favour of the `PercentileLatency` criterion. No source changes were needed on this side — the project never depended on `punit-junit5`, the retired `@Latency` annotation, or the promoted-type FQNs.
@@ -152,7 +159,8 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha4...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha5...HEAD
+[0.5.0-alpha5]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha4...v0.5.0-alpha5
 [0.5.0-alpha4]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha3...v0.5.0-alpha4
 [0.5.0-alpha3]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha2...v0.5.0-alpha3
 [0.5.0-alpha2]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha...v0.5.0-alpha2
