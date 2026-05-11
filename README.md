@@ -31,7 +31,7 @@ src/test/java/org/javai/punit/examples/
 src/test/resources/        Test fixtures + committed baseline specs.
 ```
 
-The use cases and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 9: The Sentinel](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-9-the-sentinel) in the user guide). The test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
+The use cases and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 9: The Sentinel](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-9-the-sentinel) in the user guide). The test stack (`punit-report`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
 
 ## Use cases
 
@@ -77,12 +77,12 @@ compatibility indicator is successful compilation.
 
 PUnit's experiment types map to stages in a testing workflow:
 
-| Stage | Gradle task | What it does |
-|-------|-------------|--------------|
-| Explore | `./gradlew flowExplore` | Compares configurations (models, prompts) side by side |
-| Optimize | `./gradlew flowOptimize` | Auto-tunes parameters (temperature, prompt text) |
-| Measure | `./gradlew flowMeasure` | Establishes an empirical baseline from 1000+ samples |
-| Test | `./gradlew flowTest` | Runs a probabilistic test against the baseline |
+| Stage    | Gradle task              | What it does                                           |
+|----------|--------------------------|--------------------------------------------------------|
+| Explore  | `./gradlew flowExplore`  | Compares configurations (models, prompts) side by side |
+| Optimize | `./gradlew flowOptimize` | Auto-tunes parameters (temperature, prompt text)       |
+| Measure  | `./gradlew flowMeasure`  | Establishes an empirical baseline from 1000+ samples   |
+| Test     | `./gradlew flowTest`     | Runs a probabilistic test against the baseline         |
 
 To run the full flow end to end:
 
