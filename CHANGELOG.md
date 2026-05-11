@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0-alpha4] - 2026-05-11
+
+> **🧪 Experimental release.** Tracks [punit 0.7.0-alpha4](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha4---2026-05-11) — the public-surface consolidation arc: JPMS module declarations on every published library module, the `punit-junit5` bundler artifact retired, four verdict-side types promoted out of `internal.*` (breaking FQN change), and the orphan `@Latency` annotation retired in favour of the `PercentileLatency` criterion. No source changes were needed on this side — the project never depended on `punit-junit5`, the retired `@Latency` annotation, or the promoted-type FQNs.
+
+### Changed
+- **Upgraded PUnit dependency from 0.7.0-alpha3 to 0.7.0-alpha4.** Plugin pin in `settings.gradle.kts` and `punit-core` / `punit-report` coordinates in `build.gradle.kts` bumped in lockstep. See punit's CHANGELOG for the full set of changes pulled in.
+
 ## [0.5.0-alpha3] - 2026-05-10
 
 > **🧪 Experimental release.** Tracks [punit 0.7.0-alpha3](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha3---2026-05-10) — the structural-cleanup arc release. Mechanical migration on this side: every consumer-side import that touched a relocated punit package was rewritten.
@@ -145,7 +152,10 @@ tests demonstrating the PUnit framework.
 - Verdict catalogue generation (summary and verbose)
 - User guide documentation
 
-[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha...HEAD
+[Unreleased]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha4...HEAD
+[0.5.0-alpha4]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha3...v0.5.0-alpha4
+[0.5.0-alpha3]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha2...v0.5.0-alpha3
+[0.5.0-alpha2]: https://github.com/javai-org/punitexamples/compare/v0.5.0-alpha...v0.5.0-alpha2
 [0.5.0-alpha]: https://github.com/javai-org/punitexamples/compare/v0.4.0...v0.5.0-alpha
 [0.4.0]: https://github.com/javai-org/punitexamples/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/javai-org/punitexamples/compare/v0.3.0...v0.3.1
