@@ -43,8 +43,8 @@ bin/
 ### Mac OS ###
 .DS_Store
 /temp/
-/src/test/resources/punit/explorations/ShoppingBasketUseCase/
-/src/test/resources/punit/optimizations/ShoppingBasketUseCase/
+/src/test/resources/punit/explorations/ShoppingBasketServiceContract/
+/src/test/resources/punit/optimizations/ShoppingBasketServiceContract/
 /src/test/resources/punit/baselines/
 
 ### Demo scripts ###

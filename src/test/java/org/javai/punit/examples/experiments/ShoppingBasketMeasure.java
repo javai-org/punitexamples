@@ -1,18 +1,18 @@
 package org.javai.punit.examples.experiments;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
 
 import org.javai.punit.api.Experiment;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
  * MEASURE experiment establishing a baseline for
- * {@link ShoppingBasketUseCase}. Runs samples through the LLM and
+ * {@link ShoppingBasketServiceContract}. Runs samples through the LLM and
  * records the observed pass rate plus latency percentiles as a
  * baseline file under {@code punit.baseline.dir}. Probabilistic
- * tests with the same use case and factors then test against the
+ * tests with the same service contract and factors then test against the
  * recorded numbers.
  *
  * <h2>Setup</h2>
@@ -34,7 +34,7 @@ public class ShoppingBasketMeasure {
 
     @Experiment
     void measureBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketServiceContract.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .run();
     }

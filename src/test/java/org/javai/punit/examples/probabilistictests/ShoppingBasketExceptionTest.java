@@ -1,12 +1,12 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.ExceptionPolicy;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -14,14 +14,14 @@ import org.javai.punit.runtime.PUnit;
  * testing.
  *
  * <p>The framework reserves <em>thrown exceptions</em> from
- * {@code UseCase.apply()} for genuine defects — programming
+ * {@code ServiceContract.apply()} for genuine defects — programming
  * mistakes, misconfiguration, catastrophe. Anticipated failures
  * (contract violations, validation errors, service-returned error
- * codes) travel through {@code UseCaseOutcome.fail(...)} as data,
+ * codes) travel through {@code ServiceContractOutcome.fail(...)} as data,
  * never as exceptions. See
- * {@link org.javai.punit.api.UseCaseOutcome}.
+ * {@link org.javai.punit.api.ServiceContractOutcome}.
  *
- * <p>That said, real-world use cases occasionally throw despite
+ * <p>That said, real-world service contracts occasionally throw despite
  * the convention — flaky network, third-party libraries that
  * surface failures as exceptions. The {@link ExceptionPolicy} knob
  * controls what the engine does:
@@ -52,7 +52,7 @@ public class ShoppingBasketExceptionTest {
         // out of the engine and aborts the run. The engine never
         // gets a chance to render a verdict.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
+                ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .onException(ExceptionPolicy.ABORT_TEST)
                         .build(),
                 LlmTuning.DEFAULT)
@@ -69,7 +69,7 @@ public class ShoppingBasketExceptionTest {
         // "reliability" you're measuring rather than a signal that
         // the test setup is broken.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
+                ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .build(),
                 LlmTuning.DEFAULT)
@@ -85,7 +85,7 @@ public class ShoppingBasketExceptionTest {
         // over every sample; only the per-failure detail kept for
         // post-run inspection is bounded. Default is 10.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
+                ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .maxExampleFailures(3)
                         .build(),

@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed (breaking)
+
+- **Examples renamed `UseCase` → `ServiceContract` in lockstep with
+  punit.** `ShoppingBasketUseCase` → `ShoppingBasketServiceContract`,
+  `PaymentGatewayUseCase` → `PaymentGatewayServiceContract`. Package
+  moves from `org.javai.punit.examples.usecases` to
+  `org.javai.punit.examples.servicecontracts`. Sample-size constant
+  holders move with them.
+- Test classes and method names referencing `UseCase` follow the
+  same rename. Imports and prose throughout the project are swept.
+- The punit-core / punit-report pins will bump to the punit release
+  that carries the rename. Until that release ships, the
+  `settings.gradle.kts` composite-build substitution sources punit
+  from the local `../punit` checkout on the matching feature
+  branch.
+
 ## [0.5.0-alpha5] - 2026-05-11
 
 > **🧪 Experimental release.** Tracks [punit 0.7.0-alpha5](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha5---2026-05-11) — punit's adoption of `org.javai:outcome` 0.3.0 (which now ships its own `module-info`) and removal of the `extra-java-module-info` shim. No source changes on this side; mechanical version bump only.
@@ -53,49 +69,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 > **🧪 Experimental release.** Tracks the experimental [punit 0.7.0-alpha](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha---2026-05-07) typed-builder API. Pin to this exact version if you depend on its surface today; v0.x means breaking changes are still possible.
 
 ### Changed
-- **Upgraded PUnit dependency from 0.6.0 to 0.7.0-alpha.** The 0.7 line replaces the annotation-driven authoring style of 0.6.x with a typed, builder-based one. See punit's [MIGRATION-0.6-to-0.7.md](https://github.com/javai-org/punit/blob/main/docs/MIGRATION-0.6-to-0.7.md). Every use case, experiment, and probabilistic test in this project has been migrated.
-- **Use cases are typed `UseCase<FT, I, O>` implementations.** `ShoppingBasketUseCase` and `PaymentGatewayUseCase` now implement the typed interface; metadata (`description`, `warmup`, `pacing`, `covariates`, `customCovariateResolvers`) is expressed as method overrides. The factor record is passed at construction time, preserving immutability. `ShoppingBasketUseCase.O` is `String`; its `Contract` is folded into the use case and uses `deriving(...)` to combine parsing and validation in one expression. `PaymentGatewayUseCase` declares `NoFactors` since it has no tunable factors. The legacy `@UseCase` annotation, parameter-level annotations (`@Factor`, `@FactorSource`, `@Input`, `@InputSource`, `@Config`, `@ConfigSource`, `@ControlFactor`, `@DayGroup`, `@RegionGroup`, `@Latency`, `@ExperimentDesign`, `@ExperimentGoal`), and the reflection-based factor accessors (`@FactorSetter`, `@FactorGetter`) are gone — see punit 0.7.0-alpha.
+- **Upgraded PUnit dependency from 0.6.0 to 0.7.0-alpha.** The 0.7 line replaces the annotation-driven authoring style of 0.6.x with a typed, builder-based one. See punit's [MIGRATION-0.6-to-0.7.md](https://github.com/javai-org/punit/blob/main/docs/MIGRATION-0.6-to-0.7.md). Every service contract, experiment, and probabilistic test in this project has been migrated.
+- **Service contracts are typed `ServiceContract<FT, I, O>` implementations.** `ShoppingBasketServiceContract` and `PaymentGatewayServiceContract` now implement the typed interface; metadata (`description`, `warmup`, `pacing`, `covariates`, `customCovariateResolvers`) is expressed as method overrides. The factor record is passed at construction time, preserving immutability. `ShoppingBasketServiceContract.O` is `String`; its `Contract` is folded into the service contract and uses `deriving(...)` to combine parsing and validation in one expression. `PaymentGatewayServiceContract` declares `NoFactors` since it has no tunable factors. The legacy `@ServiceContract` annotation, parameter-level annotations (`@Factor`, `@FactorSource`, `@Input`, `@InputSource`, `@Config`, `@ConfigSource`, `@ControlFactor`, `@DayGroup`, `@RegionGroup`, `@Latency`, `@ExperimentDesign`, `@ExperimentGoal`), and the reflection-based factor accessors (`@FactorSetter`, `@FactorGetter`) are gone — see punit 0.7.0-alpha.
 - **Probabilistic tests use `PUnit.testing(...)`.** `@ProbabilisticTest` survives only as a bare marker; configuration moves into the body via the typed builder. Migrated tests: `ShoppingBasketTest`, `ShoppingBasketBudgetTest`, `ShoppingBasketCovariateTest`, `ShoppingBasketDiagnosticsTest`, `ShoppingBasketExceptionTest`, `ShoppingBasketPacingTest`, `ShoppingBasketThresholdApproachesTest`, `SlaTest`, `InvalidProbabilisticTestExamplesTest`.
 - **Experiments use the unified `@Experiment` marker plus `PUnit.measuring(...)` / `.exploring(...)` / `.optimizing(...)`.** Migrated: `ShoppingBasketMeasure`, `ShoppingBasketExplore`, `ShoppingBasketOptimizePrompt`, `ShoppingBasketOptimizeTemperature`. The three legacy experiment annotations (`@MeasureExperiment`, `@ExploreExperiment`, `@OptimizeExperiment`) are gone.
-- **Covariate redesign adopted.** Covariate examples now consume the sealed `Covariate` hierarchy (`DayOfWeekCovariate`, `RegionCovariate`, `TimeOfDayCovariate`, `Covariate.custom(...)`) declared on `UseCase.covariates()`, with `customCovariateResolvers()` supplying the project-defined resolver. The `@Covariate`, `@CovariateSource`, `@DayGroup`, `@RegionGroup` annotations are gone.
-- **Sentinel reliability examples** rebuilt against the typed surface. `@Sentinel` annotation removed — `punit-sentinel` scans typed `UseCase` implementations directly. `CoinTossReliabilityExamples` added as a worked example.
+- **Covariate redesign adopted.** Covariate examples now consume the sealed `Covariate` hierarchy (`DayOfWeekCovariate`, `RegionCovariate`, `TimeOfDayCovariate`, `Covariate.custom(...)`) declared on `ServiceContract.covariates()`, with `customCovariateResolvers()` supplying the project-defined resolver. The `@Covariate`, `@CovariateSource`, `@DayGroup`, `@RegionGroup` annotations are gone.
+- **Sentinel reliability examples** rebuilt against the typed surface. `@Sentinel` annotation removed — `punit-sentinel` scans typed `ServiceContract` implementations directly. `CoinTossReliabilityExamples` added as a worked example.
 - **Optimize experiments use `FactorsStepper` returning `NextFactor`** (sealed `Continue` / `Stop`). `PromptEngineerStepper` extracted as a reusable component; `ShoppingBasketOptimizePrompt` now models a realistic LLM-as-prompt-engineer iteration loop instead of a scripted prompt progression. `ShoppingBasketOptimizeTemperature` calls `disableEarlyTermination()` on the optimize builder.
 - **Config record renames.** Shopping-basket factor record `Config` → `LlmTuning`; `Config.defaults()` → `Config.DEFAULT`. The `with` prefix is dropped from `LlmTuning` builder methods. `ShoppingActionValidator.ValidationResult` → `BasketTranslation`.
 - **Statistic rename.** `BernoulliPassRate` → `PassRate` throughout (matches punit).
 - **`Punit` → `PUnit`** to match the brand convention.
-- **Contract postcondition shape.** Postconditions now consume `ContractBuilder<O>` and are evaluated against `UseCaseOutcome`; success checks moved out of `invoke(...)` and into postconditions where they belong (`PaymentGatewayUseCase`).
+- **Contract postcondition shape.** Postconditions now consume `ContractBuilder<O>` and are evaluated against `ServiceContractOutcome`; success checks moved out of `invoke(...)` and into postconditions where they belong (`PaymentGatewayServiceContract`).
 - **Anticipated transport failures travel as `ChatLlmException`** — a checked exception declared on `ChatLlm` — rather than wrapped runtime exceptions. Aligns with the project's Outcome/exception convention: thrown exceptions signal defects, not anticipated failure modes.
-- **Collapsed to a single Gradle module.** The previous three-module split (`app/` + `app-usecases/` + `app-tests/`) mirrored punit's internal multi-module layout for no real benefit; a developer reading the examples ought to see a normal `src/main/java` + `src/test/java` project, not a multi-module Gradle setup. Domain code, use cases, and sentinels now live under `src/main/java/org/javai/punit/examples/{app,usecases,sentinels}/`; tests under `src/test/java/...`. Sentinel-deployability is preserved by scoping the test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) to `testImplementation`. No package renames.
-- **Single input source per use case.** `ShoppingBasketUseCase` exposes one canonical input source consumed by both `ShoppingBasketMeasure` and `ShoppingBasketTest`, ensuring the measure baseline and the probabilistic test draw from the same population.
+- **Collapsed to a single Gradle module.** The previous three-module split (`app/` + `app-usecases/` + `app-tests/`) mirrored punit's internal multi-module layout for no real benefit; a developer reading the examples ought to see a normal `src/main/java` + `src/test/java` project, not a multi-module Gradle setup. Domain code, service contracts, and sentinels now live under `src/main/java/org/javai/punit/examples/{app,usecases,sentinels}/`; tests under `src/test/java/...`. Sentinel-deployability is preserved by scoping the test stack (`punit-junit5`, JUnit, AssertJ, ArchUnit) to `testImplementation`. No package renames.
+- **Single input source per service contract.** `ShoppingBasketServiceContract` exposes one canonical input source consumed by both `ShoppingBasketMeasure` and `ShoppingBasketTest`, ensuring the measure baseline and the probabilistic test draw from the same population.
 - **Drop punit-runtime dependency.** Runtime entry point now ships in `punit-core`; the `punit-runtime` declaration is removed.
 - **EXPLORE retuned for meaningful model comparison.** Sample sizes and instruction set adjusted so model differences are statistically resolvable.
 
 ### Added
 - `disableEarlyTermination()` use in the temperature optimisation example, demonstrating the explicit opt-out for the optimize surface.
 - Markdown code-fence stripping before parsing LLM JSON responses, for robustness against models that wrap JSON in fenced blocks.
-- `PaymentGatewayUseCase` warmup retained from 0.4.0 and adapted to the typed surface.
+- `PaymentGatewayServiceContract` warmup retained from 0.4.0 and adapted to the typed surface.
 
 ### Removed
-- Legacy use cases, sentinel specs, and JUnit wrappers from the pre-typed era.
+- Legacy service contracts, sentinel specs, and JUnit wrappers from the pre-typed era.
 - Verdict catalogue test (deferred — port pending in a follow-up).
-- `Tier` from `PaymentGatewayUseCase` (no factor variation needed; `NoFactors` suffices).
+- `Tier` from `PaymentGatewayServiceContract` (no factor variation needed; `NoFactors` suffices).
 - `BASELINE_DIR` constant — `PowerAnalysis` no-Path overload (punit#85) supersedes it.
 
 ### Fixed
-- `PaymentGatewayUseCase.invoke` no longer wraps the call in a dead `try/catch`; checked exceptions now propagate per the Outcome convention.
+- `PaymentGatewayServiceContract.invoke` no longer wraps the call in a dead `try/catch`; checked exceptions now propagate per the Outcome convention.
 
 ## [0.4.0] - 2026-04-17
 
 ### Changed
 - Upgraded PUnit dependency from 0.4.0 to 0.6.0
-- Reworked use cases to be immutable — factor settings (model, temperature, system prompt) are baked into the instance at construction, preserving the i.i.d. assumption required by the Bernoulli model
-- Simplified `ShoppingBasketExplore`: the use case instance *is* the factor specification, eliminating manual factor maps and trial-closure enrichment. Now combines `@ConfigSource` (named immutable use case instances) with `@InputSource` (curated instructions)
-- `@CovariateSource` annotations on `ShoppingBasketUseCase` accessors allow the framework to extract factors from the instance rather than a separate declaration
+- Reworked service contracts to be immutable — factor settings (model, temperature, system prompt) are baked into the instance at construction, preserving the i.i.d. assumption required by the Bernoulli model
+- Simplified `ShoppingBasketExplore`: the service contract instance *is* the factor specification, eliminating manual factor maps and trial-closure enrichment. Now combines `@ConfigSource` (named immutable service contract instances) with `@InputSource` (curated instructions)
+- `@CovariateSource` annotations on `ShoppingBasketServiceContract` accessors allow the framework to extract factors from the instance rather than a separate declaration
 - Flow exploration/optimisation output relocated from `src/test/resources/punit/` to `build/punit/` so generated artefacts no longer pollute the source tree
 - Enabled JUnit Jupiter extension autodetection on verdict catalogue and flow test tasks
 
 ### Added
-- Warmup on `PaymentGatewayUseCase` to stabilise latency measurements
+- Warmup on `PaymentGatewayServiceContract` to stabilise latency measurements
 - `skipWarmup` option on explore/optimize experiments for the shopping basket (LLM costs)
 - Log4j2 configuration so example runs produce visible log output
 
@@ -116,7 +132,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 - Upgraded PUnit dependency from 0.3.0 to 0.4.0
-- Restructured into three modules: `app` (domain classes), `app-usecases` (use case definitions and `@Sentinel` reliability specs), and `app-tests` (probabilistic tests and experiments)
+- Restructured into three modules: `app` (domain classes), `app-usecases` (service contract definitions and `@Sentinel` reliability specs), and `app-tests` (probabilistic tests and experiments)
 
 ### Added
 - Sentinel reliability specs: `PaymentGatewayReliability` and `ShoppingBasketReliability` in `app-usecases`

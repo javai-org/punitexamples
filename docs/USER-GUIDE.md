@@ -1,6 +1,6 @@
 # PUnit Examples — User Guide
 
-This project contains worked examples of [PUnit](https://github.com/javai-org/punit) experiments and probabilistic tests. It is not a replacement for [PUnit's own user guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md) — refer to that for full documentation of the framework's capabilities, in particular [Part 3: The Use Case](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case), which documents the contract-first authoring style every example here uses (`UseCase` interface; `invoke(I, TokenTracker)` for the service call; `postconditions(ContractBuilder<O>)` for the acceptance contract). This guide describes the example application, explains how to run the experiments and tests, and covers LLM configuration.
+This project contains worked examples of [PUnit](https://github.com/javai-org/punit) experiments and probabilistic tests. It is not a replacement for [PUnit's own user guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md) — refer to that for full documentation of the framework's capabilities, in particular [Part 3: The Service Contract](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case), which documents the contract-first authoring style every example here uses (`ServiceContract` interface; `invoke(I, TokenTracker)` for the service call; `postconditions(ContractBuilder<O>)` for the acceptance contract). This guide describes the example application, explains how to run the experiments and tests, and covers LLM configuration.
 
 ## The example application
 
@@ -44,13 +44,13 @@ The mock gateway intentionally underperforms its SLA slightly (~99.97% actual av
 experiments / tests
       │
       ▼
-  usecases          ← PUnit use case adapters
+  usecases          ← PUnit service contract adapters
       │
       ▼
     app             ← application code (no PUnit dependency)
 ```
 
-The `app` package contains the application code: LLM clients, the payment gateway, and the shopping domain model. The `usecases` package wraps these in PUnit use case adapters. The `experiments` and `probabilistictests` packages exercise the use cases through PUnit.
+The `app` package contains the application code: LLM clients, the payment gateway, and the shopping domain model. The `usecases` package wraps these in PUnit service contract adapters. The `experiments` and `probabilistictests` packages exercise the service contracts through PUnit.
 
 ## Prerequisites
 
@@ -173,7 +173,7 @@ For all settings, system properties take precedence over environment variables.
 
 ## Typical workflow
 
-A typical workflow for the shopping basket use case:
+A typical workflow for the shopping basket service contract:
 
 1. **Explore** — Compare models and temperatures to find the best configuration:
    ```bash

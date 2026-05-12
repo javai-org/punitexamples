@@ -1,14 +1,14 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import java.time.Duration;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.BudgetExhaustionPolicy;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -20,7 +20,7 @@ import org.javai.punit.runtime.PUnit;
  *   <li>{@code .timeBudget(Duration)} — wall-clock cap on the run.</li>
  *   <li>{@code .tokenBudget(long)} — token cap on the run. The use
  *       case stamps actual tokens via
- *       {@code UseCaseOutcome.withTokens(...)} per sample.</li>
+ *       {@code ServiceContractOutcome.withTokens(...)} per sample.</li>
  *   <li>{@code .onBudgetExhausted(BudgetExhaustionPolicy)} — what to
  *       do when a budget is exceeded:
  *       <ul>
@@ -41,7 +41,7 @@ public class ShoppingBasketBudgetTest {
         // emitting a verdict on incomplete data. Use this when the
         // statistical claim requires the full sample set.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
+                ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.FAIL)
                         .build(),
@@ -57,7 +57,7 @@ public class ShoppingBasketBudgetTest {
         // this when partial information is better than none — but be
         // aware the verdict may not be statistically significant.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
+                ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .timeBudget(Duration.ofSeconds(10))
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),
@@ -68,11 +68,11 @@ public class ShoppingBasketBudgetTest {
 
     @ProbabilisticTest
     void tokenBudgetWithDynamicTracking() {
-        // 10K-token cap. The use case stamps response.totalTokens()
-        // onto each UseCaseOutcome via .withTokens(...), so the engine
+        // 10K-token cap. The service contract stamps response.totalTokens()
+        // onto each ServiceContractOutcome via .withTokens(...), so the engine
         // sees real usage per sample.
         PUnit.testing(
-                ShoppingBasketUseCase.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
+                ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .tokenBudget(10_000L)
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),

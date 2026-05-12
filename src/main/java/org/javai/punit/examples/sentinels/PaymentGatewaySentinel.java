@@ -1,14 +1,14 @@
 package org.javai.punit.examples.sentinels;
 
-import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
-import org.javai.punit.examples.usecases.PaymentGatewayUseCase.Charge;
+import org.javai.punit.examples.servicecontracts.PaymentGatewayServiceContract;
+import org.javai.punit.examples.servicecontracts.PaymentGatewayServiceContract.Charge;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -48,7 +48,7 @@ public class PaymentGatewaySentinel {
 
     @ProbabilisticTest
     void paymentMeetsContractualSla() {
-        PUnit.testing(PaymentGatewayUseCase.sampling(CHARGES, PROBABILISTIC_TEST_SAMPLE_SIZE))
+        PUnit.testing(PaymentGatewayServiceContract.sampling(CHARGES, PROBABILISTIC_TEST_SAMPLE_SIZE))
                 .criterion(PassRate.meeting(SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .contractRef("Acme Payment SLA v3.2 §4.1")
                 .assertPasses();

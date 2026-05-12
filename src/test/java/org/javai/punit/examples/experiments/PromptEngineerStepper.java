@@ -11,7 +11,7 @@ import org.javai.punit.api.spec.NextFactor;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 
 /**
  * Builds a {@link FactorsStepper} that uses a meta-LLM as a prompt

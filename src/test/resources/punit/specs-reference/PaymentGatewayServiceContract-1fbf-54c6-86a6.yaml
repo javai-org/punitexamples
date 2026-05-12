@@ -1,9 +1,9 @@
-# Empirical Baseline for PaymentGatewayUseCase
+# Empirical Baseline for PaymentGatewayServiceContract
 # Generated automatically by punit experiment runner
 # DO NOT EDIT - create a specification based on this baseline instead
 
 schemaVersion: punit-spec-1
-useCaseId: PaymentGatewayUseCase
+useCaseId: PaymentGatewayServiceContract
 generatedAt: 2026-04-16T07:09:04.440507Z
 experimentClass: org.javai.punit.examples.probabilistictests.PaymentGatewayReliabilityTest
 experimentMethod: measureBaseline

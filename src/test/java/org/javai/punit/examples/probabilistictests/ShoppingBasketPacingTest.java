@@ -1,12 +1,12 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.Pacing;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -26,9 +26,9 @@ import org.javai.punit.runtime.PUnit;
  *   <li>When multiple knobs combine, the most restrictive wins.</li>
  * </ul>
  *
- * <p>Pacing is a property of the use case (it belongs to the
+ * <p>Pacing is a property of the service contract (it belongs to the
  * service under test, not to a particular test). The
- * {@link ShoppingBasketUseCase#samplingPaced(Pacing, int)
+ * {@link ShoppingBasketServiceContract#samplingPaced(Pacing, int)
  * samplingPaced} factory threads the pacing through for the
  * demonstrations below.
  */
@@ -40,7 +40,7 @@ public class ShoppingBasketPacingTest {
         // documents a per-second burst limit.
         Pacing pacing = Pacing.builder().maxRequestsPerSecond(5).build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -52,7 +52,7 @@ public class ShoppingBasketPacingTest {
         // and Anthropic free / lower tiers).
         Pacing pacing = Pacing.builder().maxRequestsPerMinute(60).build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -65,7 +65,7 @@ public class ShoppingBasketPacingTest {
         // room between requests.
         Pacing pacing = Pacing.builder().minMillisPerSample(200).build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -81,7 +81,7 @@ public class ShoppingBasketPacingTest {
                 .maxRequestsPerMinute(120)
                 .build();
 
-        PUnit.testing(ShoppingBasketUseCase.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

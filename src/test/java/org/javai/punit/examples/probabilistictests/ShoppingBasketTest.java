@@ -1,17 +1,17 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
- * Core probabilistic test for {@link ShoppingBasketUseCase},
+ * Core probabilistic test for {@link ShoppingBasketServiceContract},
  * demonstrating the empirical-pair pattern with a real LLM-backed
- * use case: a measure run records
+ * service contract: a measure run records
  * the LLM's observed pass rate under a configuration, and this
  * test verifies a future run under the same configuration still
  * meets the recorded baseline. The empirical
@@ -37,7 +37,7 @@ public class ShoppingBasketTest {
 
     @ProbabilisticTest
     void testInstructionTranslation() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

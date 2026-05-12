@@ -1,16 +1,16 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
  * Demonstrates covariate-aware baseline matching across LLM
- * configurations. {@link ShoppingBasketUseCase} declares
+ * configurations. {@link ShoppingBasketServiceContract} declares
  * {@code llm_model} and {@code temperature} as {@code CONFIGURATION}
  * covariates, and each configuration partitions into its own
  * baseline file. A test running under a configuration with no
@@ -27,12 +27,12 @@ public class ShoppingBasketCovariateTest {
 
     @ProbabilisticTest
     void runsUnderDefaultConfiguration() {
-        // Default LlmTuning: gpt-4o-mini @ 0.3 with the use case's
+        // Default LlmTuning: gpt-4o-mini @ 0.3 with the service contract's
         // shipping system prompt. The framework records llm_model
         // and temperature as covariates on the resolved profile, so
         // the baseline this test consults is the one measured under
         // the same configuration.
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -44,7 +44,7 @@ public class ShoppingBasketCovariateTest {
         // file than the default-configuration test above.
         LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), gpt4Turbo)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), gpt4Turbo)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -56,7 +56,7 @@ public class ShoppingBasketCovariateTest {
         // — typically higher than the default-temperature baseline.
         LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), lowTemp)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), lowTemp)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -67,7 +67,7 @@ public class ShoppingBasketCovariateTest {
         // for this configuration captures the looser pass rate.
         LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), highTemp)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), highTemp)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

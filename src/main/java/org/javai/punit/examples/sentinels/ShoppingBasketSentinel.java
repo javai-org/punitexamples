@@ -1,13 +1,13 @@
 package org.javai.punit.examples.sentinels;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -33,10 +33,10 @@ import org.javai.punit.runtime.PUnit;
  *       schedule via the Sentinel binary to detect regression.</li>
  * </ul>
  *
- * <p>Both methods reference {@link ShoppingBasketUseCase}, whose
+ * <p>Both methods reference {@link ShoppingBasketServiceContract}, whose
  * {@code id()} anchors the baseline filename and covariate
  * fingerprint. The sentinel itself carries no identity concerns:
- * the experiment and the test share a single use case definition,
+ * the experiment and the test share a single service contract definition,
  * so they cannot drift onto different baseline artefacts.
  *
  * <h2>Sentinel deployment</h2>
@@ -85,21 +85,21 @@ public class ShoppingBasketSentinel {
      * calibration deserves more than routine verification does.
      *
      * <p>The two values are read from
-     * {@link org.javai.punit.examples.usecases.ShoppingBasketSampleSizes},
-     * the single sample-size policy shared across the use case's
+     * {@link org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes},
+     * the single sample-size policy shared across the service contract's
      * dev experiments, dev tests, and this sentinel — so a baseline
      * captured here is commensurate with whatever the dev tests
      * recorded, and vice versa.
      */
     @Experiment
     void shoppingBaseline() {
-        PUnit.measuring(ShoppingBasketUseCase.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.measuring(ShoppingBasketServiceContract.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .run();
     }
 
     @ProbabilisticTest
     void shoppingMeetsBaseline() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

@@ -1,4 +1,4 @@
-package org.javai.punit.examples.usecases;
+package org.javai.punit.examples.servicecontracts;
 
 import java.util.List;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.javai.punit.api.ContractBuilder;
 import org.javai.punit.api.Pacing;
 import org.javai.punit.api.Sampling;
 import org.javai.punit.api.TokenTracker;
-import org.javai.punit.api.UseCase;
+import org.javai.punit.api.ServiceContract;
 import org.javai.punit.api.covariate.Covariate;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmException;
@@ -45,20 +45,20 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  * {@code gpt-4o-mini @ 0.3} cannot silently match a test running
  * under {@code gpt-4-turbo @ 0.1}.
  *
- * <p>The use case takes a {@link ChatLlm} in its constructor; the
+ * <p>The service contract takes a {@link ChatLlm} in its constructor; the
  * factory closure resolves one via {@link ChatLlmProvider#resolve()}
  * by default. Tests that need a different LLM supply their own
  * factory through {@link #samplingWith(ChatLlm, List, int)}.
  */
-public final class ShoppingBasketUseCase
-        implements UseCase<ShoppingBasketUseCase.LlmTuning, String, String> {
+public final class ShoppingBasketServiceContract
+        implements ServiceContract<ShoppingBasketServiceContract.LlmTuning, String, String> {
 
     public static final String DEFAULT_MODEL = "gpt-4o-mini";
     public static final double DEFAULT_TEMPERATURE = 0.3;
 
     /**
      * Canonical input list shared by the measure experiment and every
-     * probabilistic test for this use case. Keeping the list here —
+     * probabilistic test for this service contract. Keeping the list here —
      * not in any single test or experiment class — closes the drift
      * vector that produces silent INCONCLUSIVE / SKIPPED verdicts when
      * the measure-side and test-side {@code inputsIdentity} hashes
@@ -137,11 +137,11 @@ public final class ShoppingBasketUseCase
     private final LlmTuning tuning;
     private final Pacing pacing;
 
-    public ShoppingBasketUseCase(ChatLlm llm, LlmTuning tuning) {
+    public ShoppingBasketServiceContract(ChatLlm llm, LlmTuning tuning) {
         this(llm, tuning, Pacing.unlimited());
     }
 
-    public ShoppingBasketUseCase(ChatLlm llm, LlmTuning tuning, Pacing pacing) {
+    public ShoppingBasketServiceContract(ChatLlm llm, LlmTuning tuning, Pacing pacing) {
         this.llm = llm;
         this.tuning = tuning;
         this.pacing = pacing;
@@ -157,13 +157,13 @@ public final class ShoppingBasketUseCase
      */
     @Override
     public void postconditions(ContractBuilder<String> b) {
-        b.ensure("Response not empty", ShoppingBasketUseCase::checkResponseNotEmpty);
+        b.ensure("Response not empty", ShoppingBasketServiceContract::checkResponseNotEmpty);
         b.deriving("Valid JSON",
                 ShoppingActionValidator::parse,
                 sub -> sub.ensure("All actions valid for context",
-                                ShoppingBasketUseCase::checkActionsValidForContext)
+                                ShoppingBasketServiceContract::checkActionsValidForContext)
                         .ensure("Quantities are positive integers",
-                                ShoppingBasketUseCase::checkQuantitiesArePositiveIntegers));
+                                ShoppingBasketServiceContract::checkQuantitiesArePositiveIntegers));
     }
 
     private static Outcome<Void> checkResponseNotEmpty(String response) {
@@ -223,7 +223,7 @@ public final class ShoppingBasketUseCase
 
     /**
      * Resolves each custom covariate at run time by reading from
-     * the use case's tuning. Called once per run; the resolved
+     * the service contract's tuning. Called once per run; the resolved
      * value flows into the baseline's identity.
      */
     @Override
@@ -235,7 +235,7 @@ public final class ShoppingBasketUseCase
 
     /**
      * Surfaces the constructor-injected pacing so different test
-     * setups can exercise the same use case under different
+     * setups can exercise the same service contract under different
      * rate-limit and concurrency shapes.
      */
     @Override
@@ -274,7 +274,7 @@ public final class ShoppingBasketUseCase
     public static Sampling<LlmTuning, String, String> samplingWith(
             ChatLlm llm, List<String> inputs, int samples) {
         return Sampling.of(
-                tuning -> new ShoppingBasketUseCase(llm, tuning),
+                tuning -> new ShoppingBasketServiceContract(llm, tuning),
                 samples, inputs);
     }
 
@@ -285,13 +285,13 @@ public final class ShoppingBasketUseCase
     }
 
     /**
-     * Sampling whose constructed use case respects the supplied
+     * Sampling whose constructed service contract respects the supplied
      * {@link Pacing}.
      */
     public static Sampling<LlmTuning, String, String> samplingPaced(
             Pacing pacing, List<String> inputs, int samples) {
         return Sampling.of(
-                tuning -> new ShoppingBasketUseCase(
+                tuning -> new ShoppingBasketServiceContract(
                         ChatLlmProvider.resolve(), tuning, pacing),
                 samples, inputs);
     }
@@ -311,7 +311,7 @@ public final class ShoppingBasketUseCase
     public static Sampling.Builder<LlmTuning, String, String> samplingBuilder(
             List<String> inputs, int samples) {
         return Sampling.<LlmTuning, String, String>builder()
-                .useCaseFactory(tuning -> new ShoppingBasketUseCase(
+                .serviceContractFactory(tuning -> new ShoppingBasketServiceContract(
                         ChatLlmProvider.resolve(), tuning))
                 .inputs(inputs)
                 .samples(samples);
