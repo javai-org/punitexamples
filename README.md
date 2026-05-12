@@ -2,14 +2,14 @@
 
 Example applications and probabilistic tests demonstrating the
 [PUnit](https://github.com/javai-org/punit) framework. The project models
-realistic use cases — an LLM-powered shopping assistant and a payment gateway
+realistic service contracts — an LLM-powered shopping assistant and a payment gateway
 with SLA requirements — and shows how to apply statistical rigour at every
 stage of the testing lifecycle.
 
 For framework concepts and configuration details see the
 [PUnit User Guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md).
-The use cases here are written in the contract-first style documented in
-[Part 3: The Use Case](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case).
+The service contracts here are written in the contract-first style documented in
+[Part 3: The Service Contract](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case).
 
 ## Project structure
 
@@ -18,22 +18,22 @@ A standard single-module Gradle / Maven layout — no special wiring is required
 ```
 src/main/java/org/javai/punit/examples/
   app/         Domain classes — shopping actions, LLM integrations, payment gateway.
-  usecases/    Use case definitions (the contract-first authoring surface).
+  usecases/    Service contract definitions (the contract-first authoring surface).
   sentinels/   Sentinel-deployable reliability classes.
 
 src/test/java/org/javai/punit/examples/
   app/                     Unit tests for the domain code.
   experiments/             EXPLORE, MEASURE, OPTIMIZE experiments.
-  probabilistictests/      Probabilistic tests of the use cases.
+  probabilistictests/      Probabilistic tests of the service contracts.
   integration/             Operational-flow integration tests.
   architecture/            ArchUnit rules.
 
 src/test/resources/        Test fixtures + committed baseline specs.
 ```
 
-The use cases and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 9: The Sentinel](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-9-the-sentinel) in the user guide). The test stack (`punit-report`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
+The service contracts and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 9: The Sentinel](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md#part-9-the-sentinel) in the user guide). The test stack (`punit-report`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
 
-## Use cases
+## Service contracts
 
 ### Shopping basket
 
@@ -42,7 +42,7 @@ structured JSON shopping actions. The service contract validates that the
 response is non-blank, parses as valid JSON, and contains only actions
 appropriate to a shopping context.
 
-This use case demonstrates covariates (model, temperature, time of day),
+This service contract demonstrates covariates (model, temperature, time of day),
 input cycling, budget management (token tracking), exception handling modes,
 and pacing constraints.
 
@@ -52,7 +52,7 @@ A mock gateway processes card payments with configurable latency and failure
 rates. The service contract asserts both functional correctness (transaction
 succeeds) and temporal compliance (completes within the SLA threshold).
 
-This use case demonstrates latency testing (p50, p90, p95, p99 percentiles),
+This service contract demonstrates latency testing (p50, p90, p95, p99 percentiles),
 warmup, test intent (smoke vs verification), and threshold origin documentation.
 
 ## Running
@@ -115,7 +115,7 @@ without publishing intermediate artifacts.
 
 ## Documentation
 
-The **[PUnit User Guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md)** is the comprehensive reference for the framework. It covers the full experimentation-to-testing workflow, the use case pattern, latency assertions, budget and pacing control, the statistical core, the Sentinel runtime, and the HTML report.
+The **[PUnit User Guide](https://github.com/javai-org/punit/blob/main/docs/USER-GUIDE.md)** is the comprehensive reference for the framework. It covers the full experimentation-to-testing workflow, the service contract pattern, latency assertions, budget and pacing control, the statistical core, the Sentinel runtime, and the HTML report.
 
 The **[Statistical Companion](https://github.com/javai-org/punit/blob/main/docs/STATISTICAL-COMPANION.md)** covers the mathematical foundations for readers who want to understand the inference machinery.
 

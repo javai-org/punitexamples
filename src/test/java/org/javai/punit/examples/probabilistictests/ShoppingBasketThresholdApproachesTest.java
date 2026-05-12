@@ -1,14 +1,14 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.MEASURE_EXPERIMENT_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.spec.Experiment;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 import org.javai.punit.internal.engine.baseline.PowerAnalysis;
 
@@ -66,7 +66,7 @@ public class ShoppingBasketThresholdApproachesTest {
      * select the same baseline file at test time.
      */
     private Experiment baseline() {
-        return PUnit.measuring(ShoppingBasketUseCase.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        return PUnit.measuring(ShoppingBasketServiceContract.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
                 .build();
     }
@@ -121,7 +121,7 @@ public class ShoppingBasketThresholdApproachesTest {
         // minimum literal in place. See the per-test-literal note in
         // ShoppingBasketSampleSizes for the convention.
         int samples = 25;
-        PUnit.testing(ShoppingBasketUseCase.sampling(samples), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(samples), LlmTuning.DEFAULT)
                 .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }

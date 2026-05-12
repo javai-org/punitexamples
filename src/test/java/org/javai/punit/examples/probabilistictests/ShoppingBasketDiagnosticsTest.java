@@ -1,12 +1,12 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -30,7 +30,7 @@ public class ShoppingBasketDiagnosticsTest {
         // Empirical criterion: threshold derived from the resolved
         // baseline; verdict driven by the Wilson-score lower bound
         // on the observed rate clearing the baseline rate.
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -41,7 +41,7 @@ public class ShoppingBasketDiagnosticsTest {
         // around the observed rate. A run that's borderline at the
         // smaller n can be definitively PASS or FAIL at a larger n
         // — same criterion explanation shape, tighter numbers.
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE * 2), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE * 2), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -53,7 +53,7 @@ public class ShoppingBasketDiagnosticsTest {
         // observed >= threshold (no Wilson wrap), and the
         // diagnostic message reports the observed rate, the SLA
         // threshold, and the sample count.
-        PUnit.testing(ShoppingBasketUseCase.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.meeting(0.85, ThresholdOrigin.SLA))
                 .assertPasses();
     }

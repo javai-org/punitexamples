@@ -43,7 +43,7 @@ public class ShoppingActionValidator {
 
     /**
      * Parses and validates a JSON string as shopping actions. Used by
-     * the contract clause when the use case's output type is the raw
+     * the contract clause when the service contract's output type is the raw
      * LLM response — the contract's {@code deriving} step delegates to
      * this method.
      *

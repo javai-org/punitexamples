@@ -1,14 +1,14 @@
 package org.javai.punit.examples.experiments;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.OPTIMIZE_PER_ITERATION_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.OPTIMIZE_PER_ITERATION_SAMPLE_SIZE;
 
 import java.util.List;
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.spec.Scorer;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -28,7 +28,7 @@ import org.javai.punit.runtime.PUnit;
  * {@code ChatLlm} provider via {@code OPENAI_API_KEY} (or the
  * equivalent for your provider). The example is sized small to
  * keep the run cheap — {@code maxIterations=5} at
- * {@link org.javai.punit.examples.usecases.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
+ * {@link org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
  * samples per iteration plus one meta-prompt call per iteration. A
  * realistic prompt-optimisation run uses 30+ samples per iteration
  * so the per-iteration score has enough signal for the meta-LLM to
@@ -92,7 +92,7 @@ public class ShoppingBasketOptimizePrompt {
                     "ShoppingBasketOptimizePrompt requires a real meta-LLM. "
                             + "Set PUNIT_LLM_MODE=real and provide OPENAI_API_KEY.");
         }
-        PUnit.optimizing(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, OPTIMIZE_PER_ITERATION_SAMPLE_SIZE))
+        PUnit.optimizing(ShoppingBasketServiceContract.sampling(BASKET_INSTRUCTIONS, OPTIMIZE_PER_ITERATION_SAMPLE_SIZE))
                 .initialFactors(LlmTuning.DEFAULT.systemPrompt(INITIAL_PROMPT))
                 .stepper(PromptEngineerStepper.create())
                 .maximize(PASS_RATE_SCORE)

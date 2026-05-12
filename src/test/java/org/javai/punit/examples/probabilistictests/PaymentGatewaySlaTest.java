@@ -1,15 +1,15 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_PASS_RATE;
-import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE;
-import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.INTERNAL_SLO_PASS_RATE;
-import static org.javai.punit.examples.usecases.PaymentGatewaySampleSizes.INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_PASS_RATE;
+import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.INTERNAL_SLO_PASS_RATE;
+import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.PaymentGatewayUseCase;
+import org.javai.punit.examples.servicecontracts.PaymentGatewayServiceContract;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -43,7 +43,7 @@ public class PaymentGatewaySlaTest {
         // because the sample count meets the framework's minimum for
         // a 99% target at default 95% confidence. The default intent
         // (VERIFICATION) is implicit.
-        PUnit.testing(PaymentGatewayUseCase.sampling(INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE))
+        PUnit.testing(PaymentGatewayServiceContract.sampling(INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE))
                 .criterion(PassRate.meeting(INTERNAL_SLO_PASS_RATE, ThresholdOrigin.SLO))
                 .assertPasses();
     }
@@ -56,7 +56,7 @@ public class PaymentGatewaySlaTest {
         // sentinel, not a verification claim." The framework records
         // the sizing gap on the verdict (the pre-flight gate is
         // bypassed in SMOKE mode).
-        PUnit.testing(PaymentGatewayUseCase.sampling(CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE))
+        PUnit.testing(PaymentGatewayServiceContract.sampling(CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE))
                 .intent(TestIntent.SMOKE)
                 .criterion(PassRate.meeting(CONTRACTUAL_SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .assertPasses();

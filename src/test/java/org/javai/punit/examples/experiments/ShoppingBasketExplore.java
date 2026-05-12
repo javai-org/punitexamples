@@ -1,12 +1,12 @@
 package org.javai.punit.examples.experiments;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.EXPLORE_PER_CONFIG_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.EXPLORE_PER_CONFIG_SAMPLE_SIZE;
 
 import java.util.List;
 
 import org.javai.punit.api.Experiment;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -90,7 +90,7 @@ public class ShoppingBasketExplore {
 
     @Experiment
     void compareModels() {
-        PUnit.exploring(ShoppingBasketUseCase.sampling(BASKET_INSTRUCTIONS, EXPLORE_PER_CONFIG_SAMPLE_SIZE))
+        PUnit.exploring(ShoppingBasketServiceContract.sampling(BASKET_INSTRUCTIONS, EXPLORE_PER_CONFIG_SAMPLE_SIZE))
                 .experimentId("model-comparison-v1")
                 .grid(
                         WEAK_BASE.model("gpt-4o-mini"),

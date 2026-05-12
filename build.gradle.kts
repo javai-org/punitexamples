@@ -50,7 +50,7 @@ dependencies {
     runtimeOnly("org.apache.logging.log4j:log4j-core:2.25.4")
     runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.4")
 
-    // PUnit — author-facing API (UseCase, Contract, Sampling, criteria),
+    // PUnit — author-facing API (ServiceContract, Contract, Sampling, criteria),
     // engine, statistics, baselines, runtime entry point. JUnit-free so
     // sentinel-deployable classes can call PUnit.testing(...).assertPasses()
     // without dragging the test harness onto the production classpath.

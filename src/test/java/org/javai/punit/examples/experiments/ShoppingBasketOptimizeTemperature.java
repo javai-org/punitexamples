@@ -1,6 +1,6 @@
 package org.javai.punit.examples.experiments;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.OPTIMIZE_PER_ITERATION_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.OPTIMIZE_PER_ITERATION_SAMPLE_SIZE;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import org.javai.punit.api.Experiment;
 import org.javai.punit.api.spec.FactorsStepper;
 import org.javai.punit.api.spec.NextFactor;
 import org.javai.punit.api.spec.Scorer;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 
 /**
@@ -25,7 +25,7 @@ import org.javai.punit.runtime.PUnit;
  * {@code ChatLlm} provider via {@code OPENAI_API_KEY} (or the
  * equivalent for your provider). The example is sized small to
  * keep the run cheap — 11 iterations at
- * {@link org.javai.punit.examples.usecases.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
+ * {@link org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
  * samples per iteration. A realistic optimisation run uses 30+
  * samples per iteration so the per-iteration score has enough
  * signal to drive the stepper.
@@ -62,7 +62,7 @@ public class ShoppingBasketOptimizeTemperature {
 
     @Experiment
     void optimizeTemperature() {
-        PUnit.optimizing(ShoppingBasketUseCase.sampling(SINGLE_INSTRUCTION, OPTIMIZE_PER_ITERATION_SAMPLE_SIZE))
+        PUnit.optimizing(ShoppingBasketServiceContract.sampling(SINGLE_INSTRUCTION, OPTIMIZE_PER_ITERATION_SAMPLE_SIZE))
                 .initialFactors(LlmTuning.DEFAULT.temperature(1.0))
                 .stepper(COOL_DOWN)
                 .maximize(PASS_RATE_SCORE)

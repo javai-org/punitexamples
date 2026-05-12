@@ -24,7 +24,7 @@ The simplest passing verdict. PUnit detects that the required number of successe
   
   Mode:                EXPLICIT THRESHOLD
   Intent:              VERIFICATION
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.5000
   Samples:             50
 
@@ -33,7 +33,7 @@ The simplest passing verdict. PUnit detects that the required number of successe
 ```
 ═ VERDICT: PASS (VERIFICATION) ═══════════════════════════════════════ PUnit ═
 
-  servicePassesComfortably(ShoppingBasketUseCase, String)
+  servicePassesComfortably(ShoppingBasketServiceContract, String)
   
   Observed pass rate:  0.5682 (25/44) >= required: 0.5000
   Termination:         Required pass rate already achieved
@@ -100,7 +100,7 @@ When PUnit determines that the threshold can no longer be reached — even if ev
   
   Mode:                EXPLICIT THRESHOLD
   Intent:              SMOKE
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.9500
   Samples:             30
 
@@ -109,7 +109,7 @@ When PUnit determines that the threshold can no longer be reached — even if ev
 ```
 ═ VERDICT: FAIL (SMOKE) ══════════════════════════════════════════════ PUnit ═
 
-  failsEarlyWhenThresholdUnreachable(ShoppingBasketUseCase, String)
+  failsEarlyWhenThresholdUnreachable(ShoppingBasketServiceContract, String)
   
   Observed pass rate:  0.0000 (0/2) < required: 0.9500
   Termination:         Cannot reach required pass rate
@@ -181,7 +181,7 @@ A failing verdict. The verbose variant adds the HYPOTHESIS TEST and STATISTICAL 
   
   Mode:                EXPLICIT THRESHOLD
   Intent:              SMOKE
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.9500
   Samples:             50
 
@@ -273,7 +273,7 @@ When a cost budget (time or tokens) runs out before all samples complete, PUnit 
   
   Mode:                EXPLICIT THRESHOLD
   Intent:              VERIFICATION
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.5000
   Samples:             50
 
@@ -282,7 +282,7 @@ When a cost budget (time or tokens) runs out before all samples complete, PUnit 
 ```
 ═ VERDICT: FAIL (VERIFICATION) ═══════════════════════════════════════ PUnit ═
 
-  failsWhenBudgetRunsOut(ShoppingBasketUseCase, String)
+  failsWhenBudgetRunsOut(ShoppingBasketServiceContract, String)
   
   Samples executed:    5 of 50 (budget exhausted)
   Pass rate:           0.8000 (4/5), required: 0.5000
@@ -297,7 +297,7 @@ An alternative budget behaviour, `EVALUATE_PARTIAL`, evaluates the partial resul
 ```
 ═ VERDICT: PASS (VERIFICATION) ═══════════════════════════════════════ PUnit ═
 
-  evaluatesPartialResultsOnBudgetPass(ShoppingBasketUseCase, String)
+  evaluatesPartialResultsOnBudgetPass(ShoppingBasketServiceContract, String)
   
   Observed pass rate:  1.0000 (5/5) >= required: 0.5000
   Termination:         Method token budget exhausted
@@ -366,7 +366,7 @@ When a threshold originates from an SLA, SLO, or policy, PUnit frames the hypoth
   
   Mode:                SLA-DRIVEN
   Intent:              VERIFICATION
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.5000 (SLA)
   Contract:            Acme Payment SLA v3.2 §4.1
   Samples:             50
@@ -461,7 +461,7 @@ When the sample size is too small to provide meaningful statistical evidence of 
   
   Mode:                SLA-DRIVEN
   Intent:              SMOKE
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.9999 (SLA)
   Contract:            Acme Payment SLA v3.2 §4.1
   Samples:             50
@@ -572,9 +572,9 @@ When the test runs under conditions that differ from the baseline (e.g. differen
 ### Summary
 
 ```
-═ BASELINE FOUND FOR USE CASE: ShoppingBasketUseCase ═════════════════ PUnit ═
+═ BASELINE FOUND FOR USE CASE: ShoppingBasketServiceContract ═════════════════ PUnit ═
 
-  Baseline file:       ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml
+  Baseline file:       ShoppingBasketServiceContract-8e72-980b-d43e-5bad-a769.yaml
   
   Please note, the following covariates do not match the baseline:
     - day_of_week: baseline=WEEKEND, test=WEEKDAY
@@ -592,7 +592,7 @@ When the test runs under conditions that differ from the baseline (e.g. differen
   
   Mode:                SPEC-DRIVEN
   Intent:              VERIFICATION
-  Spec:                ShoppingBasketUseCase
+  Spec:                ShoppingBasketServiceContract
   Threshold:           0.4063 (derived from baseline)
   Samples:             50
 
@@ -607,7 +607,7 @@ When the test runs under conditions that differ from the baseline (e.g. differen
     Observed rate (p̂):    0.3478
   
   BASELINE REFERENCE
-    Source:                ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml (generated 2026-03-01)
+    Source:                ShoppingBasketServiceContract-8e72-980b-d43e-5bad-a769.yaml (generated 2026-03-01)
     Empirical basis:       1000 samples, 437 successes (0.4370)
     Threshold derivation:  Lower bound of 95% CI = 0.4114, min pass rate = 0.4063
   
@@ -629,7 +629,7 @@ When the test runs under conditions that differ from the baseline (e.g. differen
     Caveat:                Sample size is small for some percentiles — results
                            are indicative, not evidential.
   
-    Baseline reference:    ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml
+    Baseline reference:    ShoppingBasketServiceContract-8e72-980b-d43e-5bad-a769.yaml
   
   VERDICT
     Result:                FAIL
@@ -665,7 +665,7 @@ When the test runs under conditions that differ from the baseline (e.g. differen
     Observed rate (p̂):    0.3878
   
   BASELINE REFERENCE
-    Source:                ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml (generated 2026-03-01)
+    Source:                ShoppingBasketServiceContract-8e72-980b-d43e-5bad-a769.yaml (generated 2026-03-01)
     Empirical basis:       1000 samples, 437 successes (0.4370)
     Threshold derivation:  Lower bound of 95% CI = 0.4114, min pass rate = 0.4063
   
@@ -697,7 +697,7 @@ When the test runs under conditions that differ from the baseline (e.g. differen
     Caveat:                Sample size is small for some percentiles — results
                            are indicative, not evidential.
   
-    Baseline reference:    ShoppingBasketUseCase-8e72-980b-d43e-5bad-a769.yaml
+    Baseline reference:    ShoppingBasketServiceContract-8e72-980b-d43e-5bad-a769.yaml
   
   VERDICT
     Result:                FAIL
@@ -736,7 +736,7 @@ A VERIFICATION test with insufficient samples will fail at configuration time (n
   
   Mode:                SLA-DRIVEN
   Intent:              VERIFICATION
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.5000 (SLA)
   Contract:            Acme Payment SLA v3.2 §4.1
   Samples:             50
@@ -744,7 +744,7 @@ A VERIFICATION test with insufficient samples will fail at configuration time (n
 ```
 
 ```
-═ STATISTICAL ANALYSIS FOR: verificationPassSized(ShoppingBasketUseCase, ... ═
+═ STATISTICAL ANALYSIS FOR: verificationPassSized(ShoppingBasketServiceContract, ... ═
 
   OBSERVED DATA
     Sample size (n):       36
@@ -782,7 +782,7 @@ When a test is configured with `intent = SMOKE` and a normative threshold origin
   
   Mode:                SLA-DRIVEN
   Intent:              SMOKE
-  Use Case:            ShoppingBasketUseCase
+  Service Contract:            ShoppingBasketServiceContract
   Threshold:           0.9500 (SLA)
   Samples:             30
 
@@ -831,7 +831,7 @@ If the SMOKE sample is already large enough for verification, PUnit suggests upg
 ### Smoke sized with hint (normative)
 
 ```
-═ STATISTICAL ANALYSIS FOR: smokeSizedNormativeHint(ShoppingBasketUseCase... ═
+═ STATISTICAL ANALYSIS FOR: smokeSizedNormativeHint(ShoppingBasketServiceContract... ═
 
   OBSERVED DATA
     Sample size (n):       35
@@ -863,7 +863,7 @@ If the SMOKE sample is already large enough for verification, PUnit suggests upg
 ### Verbose
 
 ```
-═ STATISTICAL ANALYSIS FOR: verificationPassSized(ShoppingBasketUseCase, ... ═
+═ STATISTICAL ANALYSIS FOR: verificationPassSized(ShoppingBasketServiceContract, ... ═
 
   HYPOTHESIS TEST
     H₀ (null):             True success rate π ≥ 0.5000 (system meets SLA requirement)

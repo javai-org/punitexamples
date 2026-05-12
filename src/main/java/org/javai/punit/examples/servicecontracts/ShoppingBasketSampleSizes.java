@@ -1,7 +1,7 @@
-package org.javai.punit.examples.usecases;
+package org.javai.punit.examples.servicecontracts;
 
 /**
- * Sample-size policy for the {@link ShoppingBasketUseCase}. One set
+ * Sample-size policy for the {@link ShoppingBasketServiceContract}. One set
  * of values, shared across the service's measure experiments,
  * probabilistic tests, EXPLORE / OPTIMIZE experiments, and the
  * production sentinel. Keeping the policy in one place means a dev
@@ -68,7 +68,7 @@ public final class ShoppingBasketSampleSizes {
 
     /**
      * Sample size for ordinary probabilistic tests — verifying the
-     * use case against either an empirical baseline or a contractual
+     * service contract against either an empirical baseline or a contractual
      * threshold. Kept small so the example runs cheaply against a
      * real LLM; a real verification uses 20+.
      */

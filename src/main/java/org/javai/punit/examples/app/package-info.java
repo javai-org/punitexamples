@@ -12,7 +12,7 @@
  *   experiments / tests
  *         │
  *         ▼
- *     usecases          ← PUnit use case adapters
+ *     usecases          ← PUnit service contract adapters
  *         │
  *         ▼
  *       app (this)      ← application code (no PUnit dependency)

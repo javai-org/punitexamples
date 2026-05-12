@@ -1,6 +1,6 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.usecases.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
+import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.internal.engine.criteria.PassRate;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase;
-import org.javai.punit.examples.usecases.ShoppingBasketUseCase.LlmTuning;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
+import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 import org.junit.jupiter.api.Disabled;
 
@@ -69,7 +69,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void noCriterion_emptyClaim() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .assertPasses();
     }
 
@@ -182,7 +182,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void infeasibleVerification_empirical() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 5), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, 5), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }
@@ -203,7 +203,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void smokeIntent_tolerantOfUndersizing() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, 5), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, 5), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .intent(TestIntent.SMOKE)
                 .assertPasses();
@@ -264,7 +264,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void empiricalCriterion_noBaselineProducesInconclusive() {
-        PUnit.testing(ShoppingBasketUseCase.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
+        PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .criterion(PassRate.empirical())
                 .assertPasses();
     }

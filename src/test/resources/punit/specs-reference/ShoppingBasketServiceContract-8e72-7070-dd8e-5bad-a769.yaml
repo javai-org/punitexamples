@@ -1,9 +1,9 @@
-# Empirical Baseline for ShoppingBasketUseCase
+# Empirical Baseline for ShoppingBasketServiceContract
 # Generated automatically by punit experiment runner
 # DO NOT EDIT - create a specification based on this baseline instead
 
 schemaVersion: punit-spec-1
-useCaseId: ShoppingBasketUseCase
+useCaseId: ShoppingBasketServiceContract
 generatedAt: 2026-04-17T06:32:56.371044Z
 experimentClass: org.javai.punit.examples.experiments.ShoppingBasketMeasure
 experimentMethod: measureBaselineWithGolden

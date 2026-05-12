@@ -1,7 +1,7 @@
-package org.javai.punit.examples.usecases;
+package org.javai.punit.examples.servicecontracts;
 
 /**
- * Reliability policy for the {@link PaymentGatewayUseCase} — the
+ * Reliability policy for the {@link PaymentGatewayServiceContract} — the
  * sample sizes and contractual pass-rate targets that the service's
  * probabilistic tests and production sentinel assert against. One
  * file, one source of truth: a dev test and a sentinel run cannot
