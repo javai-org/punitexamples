@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.5.0-alpha6] - 2026-05-12
+
+> **🧪 Experimental release.** Tracks [punit 0.7.0-alpha6](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha6---2026-05-12),
+> which renames the authoring-surface interface `UseCase` →
+> `ServiceContract`. Worked examples rename in lockstep; see
+> *Changed (breaking)* for the consumer-side migration.
+
 ### Changed (breaking)
 
 - **Examples renamed `UseCase` → `ServiceContract` in lockstep with
@@ -17,11 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   holders move with them.
 - Test classes and method names referencing `UseCase` follow the
   same rename. Imports and prose throughout the project are swept.
-- The punit-core / punit-report pins will bump to the punit release
-  that carries the rename. Until that release ships, the
-  `settings.gradle.kts` composite-build substitution sources punit
-  from the local `../punit` checkout on the matching feature
-  branch.
+- punit-core / punit-report pins bump from 0.7.0-alpha5 to
+  0.7.0-alpha6. The Gradle plugin pin in `settings.gradle.kts`
+  bumps in lockstep.
 
 ## [0.5.0-alpha5] - 2026-05-11
 
