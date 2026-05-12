@@ -45,10 +45,10 @@ dependencies {
     // Outcome for result types; Log4j2 for logging.
     implementation("com.fasterxml.jackson.core:jackson-databind:2.21.3")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.3")
-    implementation("org.javai:outcome:0.2.0")
-    implementation("org.apache.logging.log4j:log4j-api:2.25.4")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:2.25.4")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.25.4")
+    implementation("org.javai:outcome:0.3.0")
+    implementation("org.apache.logging.log4j:log4j-api:2.26.0")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:2.26.0")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.26.0")
 
     // PUnit — author-facing API (ServiceContract, Contract, Sampling, criteria),
     // engine, statistics, baselines, runtime entry point. JUnit-free so
