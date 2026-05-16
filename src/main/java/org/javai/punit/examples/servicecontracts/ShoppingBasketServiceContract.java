@@ -240,18 +240,6 @@ public final class ShoppingBasketServiceContract
 	}
 
 	/**
-	 * No contract clauses live at the postcondition level — the
-	 * contract's two clauses are declared as criteria via
-	 * {@link #criteria(CriteriaBuilder)}. The framework's coexistence
-	 * rule rejects a contract that overrides both surfaces with
-	 * non-empty content, so this body must remain empty.
-	 */
-	@Override
-	public void postconditions(ContractBuilder<String> b) {
-		// Intentionally empty — see criteria(CriteriaBuilder) below.
-	}
-
-	/**
 	 * Declares the contract's two criteria.
 	 *
 	 * <p>{@code response-not-empty} is a direct criterion: it
