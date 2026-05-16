@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Notes — punit baseline schema bumped to `punit-baseline-3`
+
+- **punit#167 bumps the MEASURE baseline YAML schema from
+  `punit-baseline-2` to `punit-baseline-3`** (per-methodology-
+  criterion shape). The shopping-basket baseline directory
+  (`src/test/resources/punit/baselines/`) is gitignored — files
+  here regenerate on each `./gradlew exp -Prun=ShoppingBasketMeasure.measureBaseline`
+  run, so no committed baseline file is involved in the migration.
+- **Locally-cached `punit-baseline-2` files are rejected** by the
+  upgraded `BaselineReader` with a re-MEASURE diagnostic. Anyone
+  with an old baseline on disk should delete it and re-run
+  `ShoppingBasketMeasure.measureBaseline` (LLM credentials
+  required). New baselines emit in `punit-baseline-3` shape
+  automatically.
+- **No code or test changes in punitexamples.** The empirical
+  TEST path against a freshly-regenerated baseline behaves
+  identically — the `BaselineResolver`'s K=1 unwrap (in punit)
+  yields the same `PassRateStatistics` the old shape carried
+  directly.
+
 ## [0.5.0-alpha6] - 2026-05-12
 
 > **🧪 Experimental release.** Tracks [punit 0.7.0-alpha6](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#070-alpha6---2026-05-12),
