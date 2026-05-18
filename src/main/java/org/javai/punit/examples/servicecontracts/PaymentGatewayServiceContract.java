@@ -1,10 +1,10 @@
 package org.javai.punit.examples.servicecontracts;
 
+import static java.time.Duration.ofSeconds;
 import static org.javai.punit.api.PercentileKey.P95;
 import static org.javai.punit.api.ThresholdOrigin.SLA;
-import static org.javai.punit.api.criterion.Criteria.of;
+import static org.javai.punit.api.criterion.LatencyCriterion.ceiling;
 
-import java.time.Duration;
 import java.util.List;
 
 import org.javai.outcome.Outcome;
@@ -15,6 +15,7 @@ import org.javai.punit.api.ServiceContractOutcome;
 import org.javai.punit.api.TokenTracker;
 import org.javai.punit.api.criterion.Acceptance;
 import org.javai.punit.api.criterion.Criteria;
+import org.javai.punit.api.criterion.LatencyCriterion;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
@@ -44,9 +45,8 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  *
  * <p>Per-sample duration is captured automatically by the engine on
  * every {@link ServiceContractOutcome}. The contract declares an
- * SLA-style P95 ceiling alongside its pass-rate criterion via
- * {@code Acceptance.<O>meeting(SLA).ceiling(P95, ...)}; paired
- * probabilistic tests pick it up by auto-injection — no
+ * SLA-style P95 ceiling on its sibling {@link #latency()} method;
+ * paired probabilistic tests pick it up by auto-injection — no
  * {@code .criterion(...)} call required.
  */
 public final class PaymentGatewayServiceContract
@@ -88,17 +88,17 @@ public final class PaymentGatewayServiceContract
 
     @Override
     public Criteria<PaymentResult> criteria() {
-        return of(
-                Acceptance.<PaymentResult>meeting(0.99, SLA)
-                        .name("transaction-succeeds")
-                        .contractRef("Acme Payment SLA v3.2 §4.1")
-                        .satisfies("transaction succeeds", r -> r.paymentSucceeded()
-                                ? Outcome.ok()
-                                : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode())),
-                Acceptance.<PaymentResult>meeting(SLA)
-                        .ceiling(P95, Duration.ofSeconds(1))
-                        .name("latency-p95")
-                        .contractRef("Acme Payment SLA v3.2 §4.2"));
+        return Acceptance.<PaymentResult>meeting(SLA, 0.99)
+                .contractRef("Acme Payment SLA v3.2 §4.1")
+                .satisfies("transaction succeeds", r -> r.paymentSucceeded()
+                        ? Outcome.ok()
+                        : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
+    }
+
+    @Override
+    public LatencyCriterion latency() {
+        return LatencyCriterion.meeting(SLA, ceiling(P95, ofSeconds(1)))
+                .contractRef("Acme Payment SLA v3.2 §4.2");
     }
 
     @Override
