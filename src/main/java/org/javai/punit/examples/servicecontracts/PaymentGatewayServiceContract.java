@@ -34,7 +34,7 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * <p>Note the split: {@code invoke} is primitive — it calls the
  * gateway and returns the result. The {@link PaymentGateway}
  * contract surfaces transactional failures as
- * {@code PaymentResult.success() == false}, never as a thrown
+ * {@code PaymentResult.paymentSucceeded() == false}, never as a thrown
  * exception, so {@code invoke} doesn't need a try/catch. The
  * judgement on the returned result lives in
  * {@code postconditions(...)}.
@@ -87,7 +87,7 @@ public final class PaymentGatewayServiceContract
     public Criteria<PaymentResult> criteria() {
         return Acceptance.<PaymentResult>meeting(0.99, SLA)
                 .contractRef("Acme Payment SLA v3.2 §4.1")
-                .satisfies("transaction succeeds", r -> r.success()
+                .satisfies("transaction succeeds", r -> r.paymentSucceeded()
                         ? Outcome.ok()
                         : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
     }

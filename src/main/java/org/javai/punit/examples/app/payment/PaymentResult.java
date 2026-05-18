@@ -3,12 +3,12 @@ package org.javai.punit.examples.app.payment;
 /**
  * Result of a payment gateway transaction.
  *
- * @param success whether the transaction succeeded
+ * @param paymentSucceeded whether the transaction succeeded
  * @param transactionId unique identifier for the transaction (null on failure)
- * @param errorCode error code if failed (null on success)
+ * @param errorCode error code if failed (null on paymentSucceeded)
  */
 public record PaymentResult(
-        boolean success,
+        boolean paymentSucceeded,
         String transactionId,
         String errorCode
 ) {

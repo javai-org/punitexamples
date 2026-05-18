@@ -21,7 +21,7 @@
  * <h2>Subpackages</h2>
  * <ul>
  *   <li>{@code llm/} — Chat LLM clients (mock and real) with configurable
- *       success rates and realistic failure modes</li>
+ *       paymentSucceeded rates and realistic failure modes</li>
  *   <li>{@code payment/} — Payment gateway simulating real-world reliability
  *       patterns</li>
  *   <li>{@code shopping/} — Domain model for shopping basket operations

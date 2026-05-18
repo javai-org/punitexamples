@@ -40,7 +40,7 @@ public final class MockPaymentGateway implements PaymentGateway {
     private static final MockPaymentGateway INSTANCE = new MockPaymentGateway();
 
     /**
-     * Actual failure rate: ~0.03% (99.97% success).
+     * Actual failure rate: ~0.03% (99.97% paymentSucceeded).
      * This is intentionally below the 99.99% SLA to demonstrate SLA testing.
      */
     private static final double FAILURE_RATE = 0.0003;

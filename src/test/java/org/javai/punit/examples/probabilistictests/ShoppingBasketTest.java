@@ -15,7 +15,7 @@ import org.javai.punit.runtime.PUnit;
  * test verifies a future run under the same configuration still
  * meets the recorded baseline. The empirical
  * {@link PassRate} criterion passes when the Wilson-score
- * lower bound on observed success rate clears the recorded baseline.
+ * lower bound on observed paymentSucceeded rate clears the recorded baseline.
  *
  * <h2>Setup</h2>
  *
