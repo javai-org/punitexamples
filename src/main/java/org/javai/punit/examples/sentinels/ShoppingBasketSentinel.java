@@ -5,7 +5,6 @@ import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSize
 
 import org.javai.punit.api.Experiment;
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -29,7 +28,7 @@ import org.javai.punit.runtime.PUnit;
  *       purpose of the empirical comparison.</li>
  *   <li>{@link #shoppingMeetsBaseline()} — a {@code @ProbabilisticTest}
  *       that compares a fresh sample against the recorded baseline
- *       using {@link PassRate#empirical()}. Run this on a
+ *       using the empirical posture declared on the contract. Run this on a
  *       schedule via the Sentinel binary to detect regression.</li>
  * </ul>
  *
@@ -100,7 +99,6 @@ public class ShoppingBasketSentinel {
     @ProbabilisticTest
     void shoppingMeetsBaseline() {
         PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

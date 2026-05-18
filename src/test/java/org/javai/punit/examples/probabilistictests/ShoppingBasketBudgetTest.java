@@ -6,7 +6,6 @@ import java.time.Duration;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.BudgetExhaustionPolicy;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -46,7 +45,6 @@ public class ShoppingBasketBudgetTest {
                         .onBudgetExhausted(BudgetExhaustionPolicy.FAIL)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -62,7 +60,6 @@ public class ShoppingBasketBudgetTest {
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -77,7 +74,6 @@ public class ShoppingBasketBudgetTest {
                         .onBudgetExhausted(BudgetExhaustionPolicy.PASS_INCOMPLETE)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

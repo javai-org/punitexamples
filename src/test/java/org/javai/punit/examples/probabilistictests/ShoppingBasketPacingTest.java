@@ -4,7 +4,6 @@ import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSize
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.Pacing;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -41,7 +40,6 @@ public class ShoppingBasketPacingTest {
         Pacing pacing = Pacing.builder().maxRequestsPerSecond(5).build();
 
         PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -53,7 +51,6 @@ public class ShoppingBasketPacingTest {
         Pacing pacing = Pacing.builder().maxRequestsPerMinute(60).build();
 
         PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -66,7 +63,6 @@ public class ShoppingBasketPacingTest {
         Pacing pacing = Pacing.builder().minMillisPerSample(200).build();
 
         PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -82,7 +78,6 @@ public class ShoppingBasketPacingTest {
                 .build();
 
         PUnit.testing(ShoppingBasketServiceContract.samplingPaced(pacing, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

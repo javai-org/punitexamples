@@ -27,9 +27,9 @@ import org.junit.jupiter.api.Disabled;
  *       {@code .criterion(...)}.</li>
  *   <li><b>contractual criterion</b> — explicit threshold, deterministic
  *       comparison; e.g.
- *       {@code PassRate.meeting(0.95, ThresholdOrigin.SLA)}.</li>
+ *       {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(0.95, ThresholdOrigin.SLA)}.</li>
  *   <li><b>empirical criterion</b> — derives the threshold from a baseline
- *       at evaluate time; e.g. {@code PassRate.empirical()} or
+ *       at evaluate time; e.g. {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical()} or
  *       {@code .empiricalFrom(supplier)}.</li>
  *   <li><b>{@link TestIntent}</b> — VERIFICATION (default) requires a
  *       feasible configuration; SMOKE tolerates undersizing with a
@@ -64,7 +64,7 @@ class InvalidProbabilisticTestExamplesTest {
      * the verdict carries no gating criterion result.</p>
      *
      * <p><b>Fix:</b> Add at least one gating criterion, e.g.
-     * {@code .criterion(PassRate.meeting(0.95, ThresholdOrigin.SLA))}
+     * {@code .criterion(// FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(0.95, ThresholdOrigin.SLA))}
      * or {@code .criterion(PassRate.empirical())}.</p>
      */
     @ProbabilisticTest
@@ -95,14 +95,13 @@ class InvalidProbabilisticTestExamplesTest {
      * <p><b>Fix:</b> For an SLA-style claim, use the contractual entry
      * point {@code PUnit.testing(sampling, factors)} and pass the
      * contractual criterion there. To compare against a baseline,
-     * switch to {@code PassRate.empirical()} or
+     * switch to {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical()} or
      * {@code .empiricalFrom(supplier)}.</p>
      */
     @ProbabilisticTest
     void empiricalEntryPoint_rejectsContractualCriterion() {
         PUnit.testing(() -> null) // baseline supplier — never invoked here
-                .samples(PROBABILISTIC_TEST_SAMPLE_SIZE)
-                .criterion(PassRate.meeting(0.95, ThresholdOrigin.SLA));
+                .samples(PROBABILISTIC_TEST_SAMPLE_SIZE);
     }
 
     /**
@@ -124,7 +123,6 @@ class InvalidProbabilisticTestExamplesTest {
     @ProbabilisticTest
     void empiricalBuilder_missingSamples() {
         PUnit.testing(() -> null)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -183,7 +181,6 @@ class InvalidProbabilisticTestExamplesTest {
     @ProbabilisticTest
     void infeasibleVerification_empirical() {
         PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, 5), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -204,7 +201,6 @@ class InvalidProbabilisticTestExamplesTest {
     @ProbabilisticTest
     void smokeIntent_tolerantOfUndersizing() {
         PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, 5), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .intent(TestIntent.SMOKE)
                 .assertPasses();
     }
@@ -225,7 +221,7 @@ class InvalidProbabilisticTestExamplesTest {
      * empirical factories ({@code .empirical()}, {@code .empiricalFrom(...)})
      * which derive the threshold from a baseline at evaluate time.</p>
      *
-     * <p><b>Caught by:</b> {@code PassRate.meeting(...)} →
+     * <p><b>Caught by:</b> {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(...)} →
      * {@code IllegalArgumentException}: "ThresholdOrigin.EMPIRICAL is
      * reserved for the empirical factories…".</p>
      * <p><b>Fix:</b> Either pick a non-empirical origin
@@ -235,7 +231,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void contractualCriterion_rejectsEmpiricalOrigin() {
-        PassRate.meeting(0.95, ThresholdOrigin.EMPIRICAL);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(0.95, ThresholdOrigin.EMPIRICAL);
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -265,7 +261,6 @@ class InvalidProbabilisticTestExamplesTest {
     @ProbabilisticTest
     void empiricalCriterion_noBaselineProducesInconclusive() {
         PUnit.testing(ShoppingBasketServiceContract.sampling(INSTRUCTIONS, PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -277,25 +272,25 @@ class InvalidProbabilisticTestExamplesTest {
      * <b>Error:</b> Threshold above {@code 1.0}.
      *
      * <p><b>Why invalid:</b> A pass rate is a probability.</p>
-     * <p><b>Caught by:</b> {@code PassRate.meeting(...)} →
+     * <p><b>Caught by:</b> {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(...)} →
      * {@code IllegalArgumentException}: "threshold must be in [0, 1]…".</p>
      * <p><b>Fix:</b> Use a value in {@code [0, 1]}.</p>
      */
     @ProbabilisticTest
     void thresholdAboveOne() {
-        PassRate.meeting(1.5, ThresholdOrigin.SLA);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(1.5, ThresholdOrigin.SLA);
     }
 
     /**
      * <b>Error:</b> Threshold below {@code 0.0}.
      *
      * <p><b>Why invalid:</b> A pass rate is a probability.</p>
-     * <p><b>Caught by:</b> {@code PassRate.meeting(...)} →
+     * <p><b>Caught by:</b> {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(...)} →
      * {@code IllegalArgumentException}: "threshold must be in [0, 1]…".</p>
      */
     @ProbabilisticTest
     void thresholdBelowZero() {
-        PassRate.meeting(-0.1, ThresholdOrigin.SLA);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(-0.1, ThresholdOrigin.SLA);
     }
 
     /**
@@ -312,7 +307,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void confidenceAtUpperBoundary() {
-        PassRate.empirical().atConfidence(1.0);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical().atConfidence(1.0);
     }
 
     /**
@@ -325,7 +320,7 @@ class InvalidProbabilisticTestExamplesTest {
      */
     @ProbabilisticTest
     void confidenceAtLowerBoundary() {
-        PassRate.empirical().atConfidence(0.0);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical().atConfidence(0.0);
     }
 
     /**

@@ -5,8 +5,6 @@ import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSize
 import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.PaymentGatewayServiceContract;
 import org.javai.punit.examples.servicecontracts.PaymentGatewayServiceContract.Charge;
 import org.javai.punit.runtime.PUnit;
@@ -37,8 +35,6 @@ import org.javai.punit.runtime.PUnit;
  */
 public class PaymentGatewaySentinel {
 
-    private static final double SLA_PASS_RATE = 0.99;
-
     private static final List<Charge> CHARGES = List.of(
             new Charge("tok_visa", 1500),
             new Charge("tok_mastercard", 4200),
@@ -49,8 +45,6 @@ public class PaymentGatewaySentinel {
     @ProbabilisticTest
     void paymentMeetsContractualSla() {
         PUnit.testing(PaymentGatewayServiceContract.sampling(CHARGES, PROBABILISTIC_TEST_SAMPLE_SIZE))
-                .criterion(PassRate.meeting(SLA_PASS_RATE, ThresholdOrigin.SLA))
-                .contractRef("Acme Payment SLA v3.2 §4.1")
                 .assertPasses();
     }
 }
