@@ -1,6 +1,6 @@
 package org.javai.punit.examples.servicecontracts;
 
-import static org.javai.punit.api.criterion.Composite.compose;
+import static org.javai.punit.api.criterion.Criteria.of;
 
 import java.util.List;
 import java.util.Map;
@@ -257,16 +257,18 @@ public final class ShoppingBasketServiceContract
 	 */
 	@Override
 	public Criteria<String> criteria() {
-		return compose(
-				"response-not-empty", Acceptance.<String>empirical()
+		return of(
+				Acceptance.<String>empirical()
+						.name("response-not-empty")
 						.satisfies("Response not empty",
 								ShoppingBasketServiceContract::checkResponseNotEmpty),
-				"valid-json", Acceptance.<String>empirical()
+				Acceptance.<String>empirical()
 						.transforming(ShoppingActionValidator::parse)
 						.satisfies("All actions valid for context",
 								ShoppingBasketServiceContract::checkActionsValidForContext)
 						.satisfies("Quantities are positive integers",
-								ShoppingBasketServiceContract::checkQuantitiesArePositiveIntegers));
+								ShoppingBasketServiceContract::checkQuantitiesArePositiveIntegers)
+						.name("valid-json"));
 	}
 
 	/**
