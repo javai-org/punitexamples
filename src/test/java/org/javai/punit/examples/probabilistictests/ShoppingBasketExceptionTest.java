@@ -4,7 +4,6 @@ import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSize
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.spec.ExceptionPolicy;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -56,7 +55,6 @@ public class ShoppingBasketExceptionTest {
                         .onException(ExceptionPolicy.ABORT_TEST)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -73,7 +71,6 @@ public class ShoppingBasketExceptionTest {
                         .onException(ExceptionPolicy.FAIL_SAMPLE)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -90,7 +87,6 @@ public class ShoppingBasketExceptionTest {
                         .maxExampleFailures(3)
                         .build(),
                 LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

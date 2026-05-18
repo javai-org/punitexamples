@@ -1,16 +1,14 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_PASS_RATE;
 import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE;
-import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.INTERNAL_SLO_PASS_RATE;
 import static org.javai.punit.examples.servicecontracts.PaymentGatewaySampleSizes.INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
 import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.PaymentGatewayServiceContract;
 import org.javai.punit.runtime.PUnit;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * Probabilistic tests for payment-gateway reliability against a
@@ -37,6 +35,14 @@ import org.javai.punit.runtime.PUnit;
  */
 public class PaymentGatewaySlaTest {
 
+    // Both test methods exercise test-side override of the contract's
+    // declared SLA posture (the contract bakes in
+    // ThresholdOrigin.SLA at 0.99). The override mechanism is the
+    // subject of a follow-on directive
+    // (DIR-CRITERIA-OVERRIDE-punit); these tests are re-enabled when
+    // it lands.
+
+    @Disabled("awaiting DIR-CRITERIA-OVERRIDE-punit: test-side override of contract posture")
     @ProbabilisticTest
     void verifiesAgainstInternalSlo() {
         // The pre-flight feasibility gate accepts this configuration
@@ -44,10 +50,10 @@ public class PaymentGatewaySlaTest {
         // a 99% target at default 95% confidence. The default intent
         // (VERIFICATION) is implicit.
         PUnit.testing(PaymentGatewayServiceContract.sampling(INTERNAL_SLO_VERIFICATION_FLOOR_SAMPLE_SIZE))
-                .criterion(PassRate.meeting(INTERNAL_SLO_PASS_RATE, ThresholdOrigin.SLO))
                 .assertPasses();
     }
 
+    @Disabled("awaiting DIR-CRITERIA-OVERRIDE-punit: test-side override of contract posture")
     @ProbabilisticTest
     void smokeTestsAgainstSla() {
         // The sample count is intentionally too few to verify a
@@ -58,7 +64,6 @@ public class PaymentGatewaySlaTest {
         // bypassed in SMOKE mode).
         PUnit.testing(PaymentGatewayServiceContract.sampling(CONTRACTUAL_SLA_SMOKE_SAMPLE_SIZE))
                 .intent(TestIntent.SMOKE)
-                .criterion(PassRate.meeting(CONTRACTUAL_SLA_PASS_RATE, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 }

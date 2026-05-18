@@ -4,13 +4,12 @@ import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSize
 import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.api.ThresholdOrigin;
 import org.javai.punit.api.spec.Experiment;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
 import org.javai.punit.internal.engine.baseline.PowerAnalysis;
+import org.junit.jupiter.api.Disabled;
 
 /**
  * Demonstrates the three operational approaches for choosing a
@@ -78,7 +77,6 @@ public class ShoppingBasketThresholdApproachesTest {
         // tests against is the resolved baseline's observed rate.
         PUnit.testing(this::baseline)
                 .samples(PROBABILISTIC_TEST_SAMPLE_SIZE)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -103,10 +101,10 @@ public class ShoppingBasketThresholdApproachesTest {
 
         PUnit.testing(this::baseline)
                 .samples(n)
-                .criterion(PassRate.empirical().atConfidence(0.95))
                 .assertPasses();
     }
 
+    @Disabled("awaiting DIR-CRITERIA-OVERRIDE-punit: test-side override of contract posture")
     @ProbabilisticTest
     void thresholdFirst() {
         // Externally-dictated threshold (SLA). No baseline involved
@@ -114,15 +112,11 @@ public class ShoppingBasketThresholdApproachesTest {
         // comparison; the threshold's provenance is stamped onto
         // the result for audit.
         //
-        // The framework's feasibility preflight requires at least 25
-        // samples to verify a 90% SLA at 95% confidence; the
-        // shared PROBABILISTIC_TEST_SAMPLE_SIZE (3) is deliberately
-        // smaller than that for cost reasons, so this test pins the
-        // minimum literal in place. See the per-test-literal note in
-        // ShoppingBasketSampleSizes for the convention.
+        // This test overrides the contract's empirical posture with
+        // an SLA-driven one; the override mechanism is the subject
+        // of a follow-on directive.
         int samples = 25;
         PUnit.testing(ShoppingBasketServiceContract.sampling(samples), LlmTuning.DEFAULT)
-                .criterion(PassRate.meeting(0.90, ThresholdOrigin.SLA))
                 .assertPasses();
     }
 }

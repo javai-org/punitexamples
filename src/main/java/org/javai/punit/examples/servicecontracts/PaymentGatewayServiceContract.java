@@ -1,14 +1,17 @@
 package org.javai.punit.examples.servicecontracts;
 
+import static org.javai.punit.api.ThresholdOrigin.SLA;
+
 import java.util.List;
 
 import org.javai.outcome.Outcome;
-import org.javai.punit.api.ContractBuilder;
 import org.javai.punit.api.NoFactors;
 import org.javai.punit.api.Sampling;
 import org.javai.punit.api.TokenTracker;
 import org.javai.punit.api.ServiceContract;
 import org.javai.punit.api.ServiceContractOutcome;
+import org.javai.punit.api.criterion.Criteria;
+import org.javai.punit.api.criterion.Acceptance;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
@@ -81,11 +84,12 @@ public final class PaymentGatewayServiceContract
     }
 
     @Override
-    public void postconditions(ContractBuilder<PaymentResult> b) {
-        // A very simple contract for the payment gateway. Either the payment succeeds or it doesn't.
-        b.ensure("transaction succeeds", r -> r.success()
-                ? Outcome.ok()
-                : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
+    public Criteria<PaymentResult> criteria() {
+        return Acceptance.<PaymentResult>meeting(0.99, SLA)
+                .contractRef("Acme Payment SLA v3.2 §4.1")
+                .satisfies("transaction succeeds", r -> r.success()
+                        ? Outcome.ok()
+                        : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
     }
 
     @Override

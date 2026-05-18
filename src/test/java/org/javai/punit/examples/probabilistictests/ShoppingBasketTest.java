@@ -3,7 +3,6 @@ package org.javai.punit.examples.probabilistictests;
 import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -38,7 +37,6 @@ public class ShoppingBasketTest {
     @ProbabilisticTest
     void testInstructionTranslation() {
         PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }

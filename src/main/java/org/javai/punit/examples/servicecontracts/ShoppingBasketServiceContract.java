@@ -1,18 +1,19 @@
 package org.javai.punit.examples.servicecontracts;
 
+import static org.javai.punit.api.criterion.Composite.compose;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.javai.outcome.Outcome;
-import org.javai.punit.api.ContractBuilder;
 import org.javai.punit.api.Pacing;
 import org.javai.punit.api.Sampling;
 import org.javai.punit.api.ServiceContract;
 import org.javai.punit.api.TokenTracker;
 import org.javai.punit.api.covariate.Covariate;
 import org.javai.punit.api.covariate.CovariateCategory;
-import org.javai.punit.api.criterion.CriteriaBuilder;
 import org.javai.punit.api.criterion.Criteria;
+import org.javai.punit.api.criterion.Acceptance;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
@@ -30,7 +31,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  * sampling temperature, and system prompt. The input type is the
  * natural-language instruction; the output type is the LLM's raw
  * response string. The contract — declared via
- * {@link #criteria(CriteriaBuilder) criteria} — judges the response
+ * {@link #criteria()} — judges the response
  * through two criteria: a direct {@code response-not-empty} criterion
  * that checks the LLM returned content, and a transforming
  * {@code valid-json} criterion that parses the response into a
@@ -242,30 +243,30 @@ public final class ShoppingBasketServiceContract
 	/**
 	 * Declares the contract's two criteria.
 	 *
-	 * <p>{@code response-not-empty} is a direct criterion: it
-	 * evaluates against the LLM's raw response string. Its only
-	 * postcondition checks the response is non-blank.
+	 * <p>{@code response-not-empty} is a direct criterion: its single
+	 * postcondition checks the LLM's raw response string is non-blank.
 	 *
-	 * <p>{@code valid-json} is a transforming criterion: it parses
-	 * the response into a {@link BasketTranslation} via
-	 * {@link ShoppingActionValidator#parse} and, on a successful
-	 * parse, evaluates two postconditions over the translation — that
-	 * every action's name is valid for its declared context, and that
-	 * any {@code quantity} parameter is a positive integer. A parse
-	 * failure classifies the sample INCONCLUSIVE for this criterion;
-	 * the engine surfaces the parse Failure on the per-sample record.
+	 * <p>{@code valid-json} is a transforming criterion: it parses the
+	 * response into a {@link BasketTranslation} via
+	 * {@link ShoppingActionValidator#parse} and, on a successful parse,
+	 * evaluates two postconditions over the translation — that every
+	 * action's name is valid for its declared context, and that any
+	 * {@code quantity} parameter is a positive integer. A parse failure
+	 * classifies the sample INCONCLUSIVE for this criterion; the engine
+	 * surfaces the parse Failure on the per-sample record.
 	 */
 	@Override
-	public void criteria(CriteriaBuilder<String> b) {
-		b.add(Criteria.direct("response-not-empty",
-				cb -> cb.ensure("Response not empty",
-						ShoppingBasketServiceContract::checkResponseNotEmpty)));
-		b.add(Criteria.transforming("valid-json",
-				ShoppingActionValidator::parse,
-				cb -> cb.ensure("All actions valid for context",
+	public Criteria<String> criteria() {
+		return compose(
+				"response-not-empty", Acceptance.<String>empirical()
+						.satisfies("Response not empty",
+								ShoppingBasketServiceContract::checkResponseNotEmpty),
+				"valid-json", Acceptance.<String>empirical()
+						.transforming(ShoppingActionValidator::parse)
+						.satisfies("All actions valid for context",
 								ShoppingBasketServiceContract::checkActionsValidForContext)
-						.ensure("Quantities are positive integers",
-								ShoppingBasketServiceContract::checkQuantitiesArePositiveIntegers)));
+						.satisfies("Quantities are positive integers",
+								ShoppingBasketServiceContract::checkQuantitiesArePositiveIntegers));
 	}
 
 	/**

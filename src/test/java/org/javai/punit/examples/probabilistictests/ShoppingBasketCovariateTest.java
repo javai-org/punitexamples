@@ -3,7 +3,6 @@ package org.javai.punit.examples.probabilistictests;
 import static org.javai.punit.examples.servicecontracts.ShoppingBasketSampleSizes.PROBABILISTIC_TEST_SAMPLE_SIZE;
 
 import org.javai.punit.api.ProbabilisticTest;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -33,7 +32,6 @@ public class ShoppingBasketCovariateTest {
         // the baseline this test consults is the one measured under
         // the same configuration.
         PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), LlmTuning.DEFAULT)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -45,7 +43,6 @@ public class ShoppingBasketCovariateTest {
         LlmTuning gpt4Turbo = LlmTuning.DEFAULT.model("gpt-4-turbo");
 
         PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), gpt4Turbo)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -57,7 +54,6 @@ public class ShoppingBasketCovariateTest {
         LlmTuning lowTemp = LlmTuning.DEFAULT.temperature(0.1);
 
         PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), lowTemp)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 
@@ -68,7 +64,6 @@ public class ShoppingBasketCovariateTest {
         LlmTuning highTemp = LlmTuning.DEFAULT.temperature(0.7);
 
         PUnit.testing(ShoppingBasketServiceContract.sampling(PROBABILISTIC_TEST_SAMPLE_SIZE), highTemp)
-                .criterion(PassRate.empirical())
                 .assertPasses();
     }
 }
