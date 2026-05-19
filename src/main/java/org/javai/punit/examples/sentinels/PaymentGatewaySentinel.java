@@ -27,7 +27,7 @@ import org.javai.punit.runtime.PUnit;
  *
  * <p>An SLA-driven probabilistic test gates on a threshold expressed
  * in the contract — there is no "baseline" to measure or pair against.
- * The {@code PassRate.meeting(threshold, ThresholdOrigin.SLA)}
+ * The contract's {@code meeting().passRate(threshold).contractRef(SLA, "...")}
  * criterion compares observed pass rate against the SLA target
  * directly. Empirical thresholds (with an accompanying
  * {@code @Experiment} measure step) are demonstrated in

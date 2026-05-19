@@ -327,9 +327,9 @@ public final class ShoppingBasketServiceContract
 	 * so the engine counts them as sample failures. Anything else the
 	 * client might throw (an unchecked exception from a logic bug,
 	 * misconfiguration) is left to bubble — that is a defect, and the
-	 * run should abort so the author can fix it. The contract —
-	 * declared in {@link #postconditions(ContractBuilder) postconditions} —
-	 * judges the returned response shape.
+	 * run should abort so the author can fix it. The contract's
+	 * criteria — declared in {@link #criteria()} — judge the returned
+	 * response shape.
 	 */
 	@Override
 	public Outcome<String> invoke(String instruction, TokenTracker tracker) {
