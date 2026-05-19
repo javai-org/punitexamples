@@ -115,8 +115,8 @@ mavenPublishing {
 
         licenses {
             license {
-                name.set("Attribution Required License (ARL-1.0)")
-                url.set("https://github.com/javai-org/punitexamples/blob/main/LICENSE")
+                name.set("The Apache License, Version 2.0")
+                url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
             }
         }
 
