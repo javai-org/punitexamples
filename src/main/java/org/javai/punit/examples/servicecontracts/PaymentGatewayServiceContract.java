@@ -3,7 +3,7 @@ package org.javai.punit.examples.servicecontracts;
 import static java.time.Duration.ofSeconds;
 import static org.javai.punit.api.PercentileKey.P95;
 import static org.javai.punit.api.ThresholdOrigin.SLA;
-import static org.javai.punit.api.criterion.LatencyCriterion.ceiling;
+import static org.javai.punit.api.criterion.Criteria.meeting;
 
 import java.util.List;
 
@@ -13,7 +13,6 @@ import org.javai.punit.api.Sampling;
 import org.javai.punit.api.ServiceContract;
 import org.javai.punit.api.ServiceContractOutcome;
 import org.javai.punit.api.TokenTracker;
-import org.javai.punit.api.criterion.Acceptance;
 import org.javai.punit.api.criterion.Criteria;
 import org.javai.punit.api.criterion.LatencyCriterion;
 import org.javai.punit.examples.app.payment.MockPaymentGateway;
@@ -88,8 +87,8 @@ public final class PaymentGatewayServiceContract
 
     @Override
     public Criteria<PaymentResult> criteria() {
-        return Acceptance.<PaymentResult>meeting(SLA, 0.99)
-                .contractRef("Acme Payment SLA v3.2 §4.1")
+        return meeting().<PaymentResult>passRate(0.99)
+                .contractRef(SLA, "Acme Payment SLA v3.2 §4.1")
                 .satisfies("transaction succeeds", r -> r.paymentSucceeded()
                         ? Outcome.ok()
                         : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
@@ -97,8 +96,8 @@ public final class PaymentGatewayServiceContract
 
     @Override
     public LatencyCriterion latency() {
-        return LatencyCriterion.meeting(SLA, ceiling(P95, ofSeconds(1)))
-                .contractRef("Acme Payment SLA v3.2 §4.2");
+        return meeting().atMost(P95, ofSeconds(1))
+                .contractRef(SLA, "Acme Payment SLA v3.2 §4.2");
     }
 
     @Override

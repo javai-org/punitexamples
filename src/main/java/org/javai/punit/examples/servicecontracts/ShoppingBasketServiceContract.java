@@ -1,5 +1,6 @@
 package org.javai.punit.examples.servicecontracts;
 
+import static org.javai.punit.api.criterion.Criteria.empirical;
 import static org.javai.punit.api.criterion.Criteria.of;
 
 import java.util.List;
@@ -13,7 +14,6 @@ import org.javai.punit.api.TokenTracker;
 import org.javai.punit.api.covariate.Covariate;
 import org.javai.punit.api.covariate.CovariateCategory;
 import org.javai.punit.api.criterion.Criteria;
-import org.javai.punit.api.criterion.Acceptance;
 import org.javai.punit.examples.app.llm.ChatLlm;
 import org.javai.punit.examples.app.llm.ChatLlmException;
 import org.javai.punit.examples.app.llm.ChatLlmProvider;
@@ -258,11 +258,11 @@ public final class ShoppingBasketServiceContract
 	@Override
 	public Criteria<String> criteria() {
 		return of(
-				Acceptance.<String>empirical()
+				empirical().<String>passRate()
 						.name("response-not-empty")
 						.satisfies("Response not empty",
 								ShoppingBasketServiceContract::checkResponseNotEmpty),
-				Acceptance.<String>empirical()
+				empirical().<String>passRate()
 						.transforming(ShoppingActionValidator::parse)
 						.satisfies("All actions valid for context",
 								ShoppingBasketServiceContract::checkActionsValidForContext)
