@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Disabled;
  *
  * <p>Use when compute or token budget is the binding constraint
  * and you want the most rigorous threshold within that budget. The
- * framework's {@code PassRate.empirical()} criterion
+ * framework's {@code empirical().passRate()} criterion
  * does this natively — the threshold is the resolved baseline's
  * observed pass rate, and the verdict comes from the Wilson-score
  * lower bound on the test's observed rate at the configured
@@ -49,8 +49,8 @@ import org.junit.jupiter.api.Disabled;
  * <p>Use when the threshold is dictated externally — an SLA, a
  * regulatory requirement, a policy commitment — and the test's job
  * is to verify conformance. The framework's
- * {@code PassRate.meeting(threshold, origin)} factory is
- * the contractual path: a deterministic
+ * {@code meeting().passRate(threshold).contractRef(origin, ref)} chain
+ * is the contractual path: a deterministic
  * {@code observed >= threshold} comparison, with the threshold's
  * provenance ({@link ThresholdOrigin#SLA SLA},
  * {@link ThresholdOrigin#SLO SLO}, {@link ThresholdOrigin#POLICY POLICY})

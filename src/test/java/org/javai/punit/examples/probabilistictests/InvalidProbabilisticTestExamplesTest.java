@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.javai.punit.api.ProbabilisticTest;
 import org.javai.punit.api.TestIntent;
-import org.javai.punit.api.ThresholdOrigin;
-import org.javai.punit.internal.engine.criteria.PassRate;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.javai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.javai.punit.runtime.PUnit;
@@ -27,9 +25,9 @@ import org.junit.jupiter.api.Disabled;
  *       {@code .criterion(...)}.</li>
  *   <li><b>contractual criterion</b> — explicit threshold, deterministic
  *       comparison; e.g.
- *       {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(0.95, ThresholdOrigin.SLA)}.</li>
+ *       {@code meeting().passRate(0.95).contractRef(SLA, "...")}.</li>
  *   <li><b>empirical criterion</b> — derives the threshold from a baseline
- *       at evaluate time; e.g. {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical()} or
+ *       at evaluate time; e.g. {@code empirical().passRate()} or
  *       {@code .empiricalFrom(supplier)}.</li>
  *   <li><b>{@link TestIntent}</b> — VERIFICATION (default) requires a
  *       feasible configuration; SMOKE tolerates undersizing with a
@@ -59,13 +57,15 @@ class InvalidProbabilisticTestExamplesTest {
      *
      * <p><b>What it says:</b> "Run a sample batch and assert it passes."</p>
      * <p><b>Why invalid:</b> A probabilistic test needs a criterion to
-     * make any claim. {@code .assertPasses()} without
-     * {@code .criterion(...)} leaves the engine with nothing to evaluate;
-     * the verdict carries no gating criterion result.</p>
+     * make any claim. A service contract whose {@code criteria()} returns
+     * {@link org.javai.punit.api.criterion.Criteria#empty} leaves the
+     * engine with nothing to evaluate; the verdict carries no gating
+     * criterion result.</p>
      *
-     * <p><b>Fix:</b> Add at least one gating criterion, e.g.
-     * {@code .criterion(// FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(0.95, ThresholdOrigin.SLA))}
-     * or {@code .criterion(PassRate.empirical())}.</p>
+     * <p><b>Fix:</b> Declare at least one gating criterion on the
+     * contract, e.g.
+     * {@code meeting().passRate(0.95).contractRef(SLA, "...")} or
+     * {@code empirical().passRate()}.</p>
      */
     @ProbabilisticTest
     void noCriterion_emptyClaim() {
@@ -85,9 +85,10 @@ class InvalidProbabilisticTestExamplesTest {
      * gate on an SLA-style explicit threshold."</p>
      * <p><b>Why invalid:</b> {@code PUnit.testing(supplier)} pulls
      * sampling, factors, and the threshold from the supplied baseline; a
-     * contractual criterion (constructed via {@code .meeting(threshold,
-     * origin)}) makes its own threshold claim independent of any
-     * baseline. The two are incompatible at this entry point.</p>
+     * contractual criterion (constructed via
+     * {@code meeting().passRate(...)}) makes its own threshold claim
+     * independent of any baseline. The two are incompatible at this
+     * entry point.</p>
      *
      * <p><b>Caught by:</b> {@code EmpiricalTestBuilder.criterion(...)} →
      * {@code IllegalArgumentException}: "PUnit.testing(supplier) only
@@ -95,7 +96,7 @@ class InvalidProbabilisticTestExamplesTest {
      * <p><b>Fix:</b> For an SLA-style claim, use the contractual entry
      * point {@code PUnit.testing(sampling, factors)} and pass the
      * contractual criterion there. To compare against a baseline,
-     * switch to {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical()} or
+     * switch to {@code empirical().passRate()} or
      * {@code .empiricalFrom(supplier)}.</p>
      */
     @ProbabilisticTest
@@ -138,7 +139,7 @@ class InvalidProbabilisticTestExamplesTest {
      *
      * <p><b>Caught by:</b> {@code EmpiricalTestBuilder.build()} →
      * {@code IllegalStateException}: "criterion is required — call
-     * .criterion(PassRate.empirical()) or similar before
+     * .criterion(empirical().passRate()) or similar before
      * .build() / .assertPasses()".</p>
      * <p><b>Fix:</b> Add {@code .criterion(...)} before
      * {@code .assertPasses()}.</p>
@@ -221,17 +222,17 @@ class InvalidProbabilisticTestExamplesTest {
      * empirical factories ({@code .empirical()}, {@code .empiricalFrom(...)})
      * which derive the threshold from a baseline at evaluate time.</p>
      *
-     * <p><b>Caught by:</b> {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(...)} →
+     * <p><b>Caught by:</b> criterion construction →
      * {@code IllegalArgumentException}: "ThresholdOrigin.EMPIRICAL is
      * reserved for the empirical factories…".</p>
      * <p><b>Fix:</b> Either pick a non-empirical origin
      * ({@code SLA}, {@code SLO}, {@code POLICY}, {@code NONE}), or
-     * switch to {@code PassRate.empirical()} and let the
+     * switch to {@code empirical().passRate()} and let the
      * threshold come from the baseline.</p>
      */
     @ProbabilisticTest
     void contractualCriterion_rejectsEmpiricalOrigin() {
-        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(0.95, ThresholdOrigin.EMPIRICAL);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: meeting().passRate(0.95).contractRef(EMPIRICAL, "ref");
     }
 
     // ═══════════════════════════════════════════════════════════════════════════
@@ -251,8 +252,8 @@ class InvalidProbabilisticTestExamplesTest {
      * reports INCONCLUSIVE at evaluate time with the message "no
      * matching baseline was resolvable for empirical threshold."</p>
      *
-     * <p><b>Caught by:</b> {@code PassRate.evaluate} returns a
-     * {@code Verdict.INCONCLUSIVE} {@code CriterionResult}; the test
+     * <p><b>Caught by:</b> the empirical criterion's evaluate step returns
+     * a {@code Verdict.INCONCLUSIVE} {@code CriterionResult}; the test
      * surfaces as a JUnit <em>aborted</em> result, not a failure.</p>
      * <p><b>Fix:</b> Run the measure phase first
      * ({@code PUnit.measuring(sampling, factors).run()}) so a baseline
@@ -272,25 +273,25 @@ class InvalidProbabilisticTestExamplesTest {
      * <b>Error:</b> Threshold above {@code 1.0}.
      *
      * <p><b>Why invalid:</b> A pass rate is a probability.</p>
-     * <p><b>Caught by:</b> {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(...)} →
+     * <p><b>Caught by:</b> criterion construction →
      * {@code IllegalArgumentException}: "threshold must be in [0, 1]…".</p>
      * <p><b>Fix:</b> Use a value in {@code [0, 1]}.</p>
      */
     @ProbabilisticTest
     void thresholdAboveOne() {
-        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(1.5, ThresholdOrigin.SLA);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: meeting().passRate(1.5).contractRef(SLA, "ref");
     }
 
     /**
      * <b>Error:</b> Threshold below {@code 0.0}.
      *
      * <p><b>Why invalid:</b> A pass rate is a probability.</p>
-     * <p><b>Caught by:</b> {@code // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(...)} →
+     * <p><b>Caught by:</b> criterion construction →
      * {@code IllegalArgumentException}: "threshold must be in [0, 1]…".</p>
      */
     @ProbabilisticTest
     void thresholdBelowZero() {
-        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.meeting(-0.1, ThresholdOrigin.SLA);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: meeting().passRate(-0.1).contractRef(SLA, "ref");
     }
 
     /**
@@ -300,14 +301,14 @@ class InvalidProbabilisticTestExamplesTest {
      * which cannot be obtained from finite samples. If the system under
      * test is fully deterministic, use a regular JUnit {@code @Test} —
      * not a probabilistic one.</p>
-     * <p><b>Caught by:</b> {@code PassRate.atConfidence(...)} →
+     * <p><b>Caught by:</b> {@code .atConfidence(...)} on the criterion chain →
      * {@code IllegalArgumentException}: "confidence must be in (0, 1)…".</p>
      * <p><b>Fix:</b> Use a value strictly between 0 and 1
      * (e.g. 0.95, 0.99).</p>
      */
     @ProbabilisticTest
     void confidenceAtUpperBoundary() {
-        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical().atConfidence(1.0);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: empirical().passRate().atConfidence(1.0);
     }
 
     /**
@@ -315,12 +316,12 @@ class InvalidProbabilisticTestExamplesTest {
      *
      * <p><b>Why invalid:</b> {@code α = 1} is meaningless — accepting
      * any observation as evidence at no confidence level.</p>
-     * <p><b>Caught by:</b> {@code PassRate.atConfidence(...)} →
+     * <p><b>Caught by:</b> {@code .atConfidence(...)} on the criterion chain →
      * {@code IllegalArgumentException}: "confidence must be in (0, 1)…".</p>
      */
     @ProbabilisticTest
     void confidenceAtLowerBoundary() {
-        // FIXME post-DIR-CRITERIA-OVERRIDE: PassRate.empirical().atConfidence(0.0);
+        // FIXME post-DIR-CRITERIA-OVERRIDE: empirical().passRate().atConfidence(0.0);
     }
 
     /**
