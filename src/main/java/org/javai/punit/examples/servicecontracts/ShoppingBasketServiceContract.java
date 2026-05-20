@@ -2,7 +2,6 @@ package org.javai.punit.examples.servicecontracts;
 
 import static org.javai.punit.api.criterion.Criteria.empirical;
 import static org.javai.punit.api.criterion.Criteria.of;
-
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -114,6 +113,7 @@ public final class ShoppingBasketServiceContract
 	private final ChatLlm llm;
 	private final LlmTuning tuning;
 	private final Pacing pacing;
+
 	public ShoppingBasketServiceContract(ChatLlm llm, LlmTuning tuning) {
 		this(llm, tuning, Pacing.unlimited());
 	}
