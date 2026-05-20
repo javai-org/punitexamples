@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-05-20
+
+> **🎯 Stable release.** Tracks [punit 0.8.0](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#080---2026-05-20),
+> the graduation of the 0.7.0-alpha series. Examples migrate to
+> punit's value-form `Criteria.meeting()` / `Criteria.empirical()`
+> authoring surface, declare the PaymentGateway latency-p95 SLA
+> via `Contract.latency()`, and pick up the Apache 2.0 relicense
+> with DCO contributor model.
+
+### Changed (breaking)
+
+- **Examples migrated to punit's value-form criterion authoring
+  surface.** `ShoppingBasketServiceContract` and
+  `PaymentGatewayServiceContract` declare criteria via
+  `Criteria.meeting(...)` / `Criteria.empirical(...)` factories,
+  named with `.name(...)`. The legacy `PostconditionBuilder` /
+  `deriving(...)` paths are gone in punit 0.8.0; examples follow
+  in lockstep.
+- **PaymentGateway latency-p95 SLA declared on the contract** via
+  the new `Contract.latency(...)` sibling. Replaces the prior
+  experiment-side latency declaration.
+- **punit-core / punit-report pins bump from 0.7.0-alpha6 to
+  0.8.0.** The Gradle plugin pin in `settings.gradle.kts` bumps
+  in lockstep.
+
 ### Changed (license)
 
 - **Relicensed from Attribution Required License (ARL-1.0) to
