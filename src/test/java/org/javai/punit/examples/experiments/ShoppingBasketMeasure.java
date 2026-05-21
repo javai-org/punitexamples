@@ -36,6 +36,7 @@ public class ShoppingBasketMeasure {
     void measureBaseline() {
         PUnit.measuring(ShoppingBasketServiceContract.sampling(MEASURE_EXPERIMENT_SAMPLE_SIZE), LlmTuning.DEFAULT)
                 .experimentId("baseline-v1")
+                .expiresInDays(30)
                 .run();
     }
 }
