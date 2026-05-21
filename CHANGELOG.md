@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-05-21
+
+> Tracks [punit 0.8.1](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#081---2026-05-21):
+> adds a single-artefact inline-contract example and demonstrates
+> baseline expiration.
+
+### Added
+
+- **`PaymentGatewayInlineSlaTest`** — a worked example of punit's inline
+  contract (`Contract.inline()`): a payment gateway held to its
+  normative SLA (pass rate, contract reference, success postcondition,
+  latency ceiling) authored in a single test method, with no separate
+  `ServiceContract` class. `PaymentGatewayServiceContract` remains as the
+  named graduation target for when an empirical baseline is needed.
+
+### Changed
+
+- The shopping-basket measure experiment now declares a baseline
+  validity window via `expiresInDays(...)`, demonstrating punit 0.8.1's
+  baseline expiration.
+
 ## [0.6.0] - 2026-05-20
 
 > **🎯 Stable release.** Tracks [punit 0.8.0](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#080---2026-05-20),
