@@ -13,12 +13,12 @@ import org.javai.punit.runtime.PUnit;
  * testing.
  *
  * <p>The framework reserves <em>thrown exceptions</em> from
- * {@code ServiceContract.apply()} for genuine defects — programming
+ * {@code ServiceContract.invoke(...)} for genuine defects — programming
  * mistakes, misconfiguration, catastrophe. Anticipated failures
  * (contract violations, validation errors, service-returned error
- * codes) travel through {@code ServiceContractOutcome.fail(...)} as data,
+ * codes) travel through {@code Outcome.fail(...)} as data,
  * never as exceptions. See
- * {@link org.javai.punit.api.ServiceContractOutcome}.
+ * {@link org.javai.outcome.Outcome}.
  *
  * <p>That said, real-world service contracts occasionally throw despite
  * the convention — flaky network, third-party libraries that
@@ -47,7 +47,7 @@ public class ShoppingBasketExceptionTest {
 
     @ProbabilisticTest
     void abortTestPolicyStopsOnFirstDefect() {
-        // Default policy. Any thrown exception from apply() bubbles
+        // Default policy. Any thrown exception from invoke() bubbles
         // out of the engine and aborts the run. The engine never
         // gets a chance to render a verdict.
         PUnit.testing(

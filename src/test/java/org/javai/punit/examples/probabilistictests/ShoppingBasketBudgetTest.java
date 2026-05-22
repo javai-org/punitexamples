@@ -17,9 +17,9 @@ import org.javai.punit.runtime.PUnit;
  *
  * <ul>
  *   <li>{@code .timeBudget(Duration)} — wall-clock cap on the run.</li>
- *   <li>{@code .tokenBudget(long)} — token cap on the run. The use
- *       case stamps actual tokens via
- *       {@code ServiceContractOutcome.withTokens(...)} per sample.</li>
+ *   <li>{@code .tokenBudget(long)} — token cap on the run. The
+ *       service contract records actual tokens via
+ *       {@code tracker.recordTokens(...)} inside {@code invoke}.</li>
  *   <li>{@code .onBudgetExhausted(BudgetExhaustionPolicy)} — what to
  *       do when a budget is exceeded:
  *       <ul>
@@ -65,9 +65,9 @@ public class ShoppingBasketBudgetTest {
 
     @ProbabilisticTest
     void tokenBudgetWithDynamicTracking() {
-        // 10K-token cap. The service contract stamps response.totalTokens()
-        // onto each ServiceContractOutcome via .withTokens(...), so the engine
-        // sees real usage per sample.
+        // 10K-token cap. The service contract records
+        // response.totalTokens() via tracker.recordTokens(...) inside
+        // invoke, so the engine sees real usage per sample.
         PUnit.testing(
                 ShoppingBasketServiceContract.samplingBuilder(PROBABILISTIC_TEST_SAMPLE_SIZE)
                         .tokenBudget(10_000L)
