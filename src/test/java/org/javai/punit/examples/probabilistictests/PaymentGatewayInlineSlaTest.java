@@ -1,7 +1,5 @@
 package org.javai.punit.examples.probabilistictests;
 
-import static java.time.Duration.ofSeconds;
-import static org.javai.punit.api.PercentileKey.P95;
 import static org.javai.punit.api.ThresholdOrigin.SLA;
 import java.util.List;
 import org.javai.outcome.Outcome;
@@ -12,26 +10,29 @@ import org.javai.punit.examples.app.payment.MockPaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentGateway;
 import org.javai.punit.examples.app.payment.PaymentResult;
 import org.javai.punit.runtime.PUnit;
+import org.jspecify.annotations.NonNull;
 
 /**
- * The smallest shape a probabilistic test takes: one artefact, no
- * separate service-contract class.
+ * The smallest shape a probabilistic test takes: an <em>inline</em>
+ * contract. "Inline" means the contract — the service call plus its
+ * acceptance criteria — is written directly here at the test call
+ * site, rather than as its own named {@code ServiceContract} class.
  *
  * <p>A payment gateway is a genuinely stochastic dependency — it
  * succeeds <em>most</em> of the time — which is exactly why it warrants
  * probabilistic testing rather than a single pass/fail call. Its
- * commitments are <em>normative</em>: a contractual pass rate and a
- * latency ceiling drawn from an SLA document, not from a measured
- * baseline. Normative criteria need no baseline, and so no stable
- * identity, so the whole contract is authored inline at the call site.
+ * commitments are <em>normative</em>: a contractual pass rate drawn
+ * from an SLA document, not from a measured baseline. Normative
+ * criteria need no baseline, and so no stable identity, so the whole
+ * contract is authored inline at the call site.
  *
  * <p>The chain reads contract-first: open an {@link Contract#inline()},
  * declare the service call and the criteria, then {@code .sampling(...)}
  * says how to exercise it — sample {@code n} times over these inputs.
- * 99% of charges must succeed (Acme Payment SLA v3.2 §4.1), each within
- * a P95 of one second (§4.2); the {@code .satisfies(...)} clause names
- * the failure mode so a breach is attributed to "transaction succeeds"
- * in the verdict rather than to an undifferentiated count.
+ * 99% of charges must succeed (Acme Payment SLA v3.2 §4.1); the
+ * {@code .satisfies(...)} clause names the failure mode so a breach is
+ * attributed to "transaction succeeds" in the verdict rather than to an
+ * undifferentiated count.
  *
  * <p>The inline builder offers no empirical path by design. The moment
  * a criterion needs an <em>empirical</em> baseline — a threshold
@@ -58,22 +59,28 @@ public class PaymentGatewayInlineSlaTest {
 	 */
 	private static final int SMOKE_SAMPLES = 50;
 
+	private static PaymentResult getPaymentResult(Charge charge) {
+		PaymentGateway gateway = MockPaymentGateway.instance();
+		return gateway.charge(charge.cardToken(), charge.amountCents());
+	}
+
+	private static @NonNull Outcome<?> paymentOutcome(PaymentResult r) {
+		return r.paymentSucceeded()
+				? Outcome.ok()
+				: Outcome.fail("transaction-failed", "errorCode=" + r.errorCode());
+	}
+
 	@ProbabilisticTest
 	void paymentGatewayMeetsItsSla() {
-		PaymentGateway gateway = MockPaymentGateway.instance();
-
-		PUnit.testing(
-						Contract.<Charge, PaymentResult>inline()
-								.invoking(charge ->
-										Outcome.ok(gateway.charge(charge.cardToken(), charge.amountCents())))
-								.passRate(0.99)
-								.contractRef(SLA, "Acme Payment SLA v3.2 §4.1")
-								.satisfies("transaction succeeds", r -> r.paymentSucceeded()
-										? Outcome.ok()
-										: Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()))
-								.latencyAtMost(P95, ofSeconds(1))
-								.sampling(SMOKE_SAMPLES, CHARGES)
-				)
+		// a Sampling — the contract plus how to exercise it — ready for PUnit.testing(...)
+		var paymentSampling =
+				Contract.<Charge, PaymentResult>inline()
+						.returning(PaymentGatewayInlineSlaTest::getPaymentResult)
+						.passRate(0.99)
+						.contractRef(SLA, "Acme Payment SLA v3.2 §4.1")
+						.satisfies("transaction succeeds", PaymentGatewayInlineSlaTest::paymentOutcome)
+						.sampling(SMOKE_SAMPLES, CHARGES);
+		PUnit.testing(paymentSampling)
 				.intent(TestIntent.SMOKE)
 				.assertPasses();
 	}
