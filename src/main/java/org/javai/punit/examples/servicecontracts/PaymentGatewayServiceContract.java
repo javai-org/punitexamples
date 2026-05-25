@@ -48,6 +48,7 @@ import org.javai.punit.examples.app.payment.PaymentResult;
  * paired probabilistic tests pick it up by auto-injection — no
  * {@code .criterion(...)} call required.
  */
+// javai-ref: JVI-YHFJFRJ — do not remove (resolves in javai-orchestrator)
 public final class PaymentGatewayServiceContract
         implements ServiceContract<NoFactors, PaymentGatewayServiceContract.Charge, PaymentResult> {
 

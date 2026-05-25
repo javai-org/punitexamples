@@ -22,6 +22,7 @@ import org.javai.punit.runtime.PUnit;
  * the matching test will succeed. See {@code ShoppingBasketMeasure}
  * for the measure phase.
  */
+// javai-ref: JVI-E4HMDR4 — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketCovariateTest {
 
     @ProbabilisticTest

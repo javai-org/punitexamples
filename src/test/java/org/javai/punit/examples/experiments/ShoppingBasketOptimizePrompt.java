@@ -40,6 +40,7 @@ import org.javai.punit.runtime.PUnit;
  * ./gradlew experiment -Prun=ShoppingBasketOptimizePrompt.optimizeSystemPrompt
  * }</pre>
  */
+// javai-ref: JVI-HM8NNY6 — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketOptimizePrompt {
 
     private static final List<String> BASKET_INSTRUCTIONS = List.of(

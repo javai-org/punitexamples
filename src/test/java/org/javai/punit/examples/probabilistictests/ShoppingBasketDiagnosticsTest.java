@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Disabled;
  * the run's covariate profile, the verdict's warnings list each
  * rejected candidate and the category mismatch that rejected it.
  */
+// javai-ref: JVI-JJ7N1T~ — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketDiagnosticsTest {
 
     @ProbabilisticTest

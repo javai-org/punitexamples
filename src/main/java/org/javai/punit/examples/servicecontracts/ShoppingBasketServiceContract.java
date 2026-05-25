@@ -53,6 +53,7 @@ import org.javai.punit.examples.app.shopping.ShoppingActionValidator.BasketTrans
  * by default. Tests that need a different LLM supply their own
  * factory through {@link #samplingWith(ChatLlm, List, int)}.
  */
+// javai-ref: JVI-6P9FH4F — do not remove (resolves in javai-orchestrator)
 public final class ShoppingBasketServiceContract
 		implements ServiceContract<ShoppingBasketServiceContract.LlmTuning, String, String> {
 
