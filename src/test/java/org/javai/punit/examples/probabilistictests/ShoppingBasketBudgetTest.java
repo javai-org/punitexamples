@@ -32,6 +32,7 @@ import org.javai.punit.runtime.PUnit;
  *   </li>
  * </ul>
  */
+// javai-ref: JVI-F893NWX — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketBudgetTest {
 
     @ProbabilisticTest

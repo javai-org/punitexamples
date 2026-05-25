@@ -39,6 +39,7 @@ import org.javai.punit.runtime.PUnit;
  * ./gradlew experiment -Prun=ShoppingBasketExplore.compareModels
  * }</pre>
  */
+// javai-ref: JVI-9QC7E6Z — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketExplore {
 
     private static final List<String> BASKET_INSTRUCTIONS = List.of(

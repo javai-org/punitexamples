@@ -43,6 +43,7 @@ import org.javai.punit.runtime.PUnit;
  * statistics still see every sample; only the retained-for-display
  * detail is capped.
  */
+// javai-ref: JVI-AKXG921 — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketExceptionTest {
 
     @ProbabilisticTest

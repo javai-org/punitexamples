@@ -36,6 +36,7 @@ import org.javai.punit.runtime.PUnit;
  * ./gradlew experiment -Prun=ShoppingBasketOptimizeTemperature.optimizeTemperature
  * }</pre>
  */
+// javai-ref: JVI-K47ZVJU — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketOptimizeTemperature {
 
     private static final double TEMPERATURE_FLOOR = 0.0;

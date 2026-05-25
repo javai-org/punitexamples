@@ -59,6 +59,7 @@ import java.util.Random;
  * @see ChatLlm
  * @see ChatResponse
  */
+// javai-ref: JVI-EMJBHE4 — do not remove (resolves in javai-orchestrator)
 public final class MockChatLlm implements ChatLlm {
 
     private static final MockChatLlm INSTANCE = new MockChatLlm();

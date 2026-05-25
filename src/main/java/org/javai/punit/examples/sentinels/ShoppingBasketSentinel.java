@@ -72,6 +72,7 @@ import org.javai.punit.runtime.PUnit;
  * directly. No second annotation, no JUnit-flavoured variant, no
  * separate test wrapper.
  */
+// javai-ref: JVI-VQQ8SP1 — do not remove (resolves in javai-orchestrator)
 public class ShoppingBasketSentinel {
 
     /**

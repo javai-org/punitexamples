@@ -37,6 +37,7 @@ import org.javai.outcome.retry.RetryPolicy;
  * @see ChatLlm
  * @see AnthropicChatLlm
  */
+// javai-ref: JVI-SH8HSD4 — do not remove (resolves in javai-orchestrator)
 public final class OpenAiChatLlm implements ChatLlm {
 
     private static final Logger LOG = Logger.getLogger(OpenAiChatLlm.class.getName());

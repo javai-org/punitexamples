@@ -33,6 +33,7 @@ import org.javai.punit.runtime.PUnit;
  * {@code @Experiment} measure step) are demonstrated in
  * {@link ShoppingBasketSentinel}.
  */
+// javai-ref: JVI-VQQ8SP1 — do not remove (resolves in javai-orchestrator)
 public class PaymentGatewaySentinel {
 
     private static final List<Charge> CHARGES = List.of(
