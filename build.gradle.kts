@@ -43,8 +43,8 @@ repositories {
 dependencies {
     // Domain support — Jackson for JSON parsing in domain classes;
     // Outcome for result types; Log4j2 for logging.
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.3")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.21.4")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.4")
     implementation("org.mavai:outcome:1.0.0-alpha1")
     implementation("org.apache.logging.log4j:log4j-api:2.26.0")
     runtimeOnly("org.apache.logging.log4j:log4j-core:2.26.0")
