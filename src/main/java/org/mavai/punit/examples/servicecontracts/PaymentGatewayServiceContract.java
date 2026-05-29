@@ -1,0 +1,140 @@
+package org.mavai.punit.examples.servicecontracts;
+
+import static java.time.Duration.ofSeconds;
+import static org.mavai.punit.api.PercentileKey.P95;
+import static org.mavai.punit.api.ThresholdOrigin.SLA;
+import static org.mavai.punit.api.criterion.Criteria.meeting;
+
+import java.util.List;
+
+import org.mavai.outcome.Outcome;
+import org.mavai.punit.api.NoFactors;
+import org.mavai.punit.api.Sampling;
+import org.mavai.punit.api.ServiceContract;
+import org.mavai.punit.api.ServiceContractOutcome;
+import org.mavai.punit.api.TokenTracker;
+import org.mavai.punit.api.criterion.Criteria;
+import org.mavai.punit.api.criterion.LatencyCriterion;
+import org.mavai.punit.examples.app.payment.MockPaymentGateway;
+import org.mavai.punit.examples.app.payment.PaymentGateway;
+import org.mavai.punit.examples.app.payment.PaymentResult;
+
+/**
+ * Payment-gateway service contract demonstrating the SLA approach to
+ * probabilistic testing: thresholds come from contractual agreements
+ * rather than empirical baselines.
+ *
+ * <p>This service contract has no varying factors, so {@code FT} is
+ * {@link NoFactors} — punit's empty factor record, paired with the
+ * no-arg {@code PUnit.testing(sampling)} / {@code PUnit.measuring(sampling)}
+ * overloads at the call site. The input is a {@link Charge} record
+ * bundling card token and amount; the output is the gateway's
+ * {@link PaymentResult}. The contract has a
+ * single postcondition — "transaction succeeds" — so a sample's
+ * failure mode is attributed to a named clause in the verdict's
+ * failure histogram, rather than to an undifferentiated count.
+ *
+ * <p>Note the split: {@code invoke} is primitive — it calls the
+ * gateway and returns the result. The {@link PaymentGateway}
+ * contract surfaces transactional failures as
+ * {@code PaymentResult.paymentSucceeded() == false}, never as a thrown
+ * exception, so {@code invoke} doesn't need a try/catch. The
+ * judgement on the returned result lives in
+ * {@code postconditions(...)}.
+ *
+ * <p>Per-sample duration is captured automatically by the engine on
+ * every {@link ServiceContractOutcome}. The contract declares an
+ * SLA-style P95 ceiling on its sibling {@link #latency()} method;
+ * paired probabilistic tests pick it up by auto-injection — no
+ * {@code .criterion(...)} call required.
+ */
+// javai-ref: JVI-YHFJFRJ — do not remove (resolves in javai-orchestrator)
+public final class PaymentGatewayServiceContract
+        implements ServiceContract<NoFactors, PaymentGatewayServiceContract.Charge, PaymentResult> {
+
+    /** The per-sample input: a card token plus amount in cents. */
+    public record Charge(String cardToken, long amountCents) { }
+
+    private static final int WARMUP_INVOCATIONS = 3;
+
+    /**
+     * Canonical input list shared by every probabilistic test for
+     * this service contract (and any future measure experiment that pairs
+     * with one). Centralising the list here closes the
+     * inputs-identity drift vector that produces silent INCONCLUSIVE
+     * verdicts when measure-side and test-side input lists diverge.
+     */
+    private static final List<Charge> CHARGES = List.of(
+            new Charge("tok_visa_4242", 1999L),
+            new Charge("tok_mastercard_5555", 2499L),
+            new Charge("tok_amex_3782", 3499L),
+            new Charge("tok_discover_6011", 999L),
+            new Charge("tok_visa_4000", 5999L));
+
+    private final PaymentGateway gateway;
+
+    public PaymentGatewayServiceContract() {
+        this(MockPaymentGateway.instance());
+    }
+
+    public PaymentGatewayServiceContract(PaymentGateway gateway) {
+        this.gateway = gateway;
+    }
+
+    @Override
+    public String id() {
+        return "payment-gateway";
+    }
+
+    @Override
+    public Criteria<PaymentResult> criteria() {
+        return meeting().<PaymentResult>passRate(0.99)
+                .contractRef(SLA, "Acme Payment SLA v3.2 §4.1")
+                .satisfies("transaction succeeds", r -> r.paymentSucceeded()
+                        ? Outcome.ok()
+                        : Outcome.fail("transaction-failed", "errorCode=" + r.errorCode()));
+    }
+
+    @Override
+    public LatencyCriterion latency() {
+        return meeting().atMost(P95, ofSeconds(1))
+                .contractRef(SLA, "Acme Payment SLA v3.2 §4.2");
+    }
+
+    @Override
+    public int warmup() {
+        // Cold-start, connection-pool fill, and unwarmed caches inflate the
+        // latency of the first few invocations; discarding them keeps those
+        // outliers out of percentile latency measurements (e.g. P99). The
+        // same discard preserves the i.i.d. assumption behind the Bernoulli
+        // pass-rate criterion — cold-call failures are not identically
+        // distributed with steady-state ones.
+        return WARMUP_INVOCATIONS;
+    }
+
+    @Override
+    public Outcome<PaymentResult> invoke(Charge charge, TokenTracker tracker) {
+        return Outcome.ok(gateway.charge(charge.cardToken(), charge.amountCents()));
+    }
+
+    /**
+     * Canonical-inputs factory: builds a {@link Sampling} over
+     * {@link #CHARGES} configured with the {@link MockPaymentGateway}
+     * singleton. This is the factory probabilistic tests should use —
+     * a single shared input source means every paired measure ↔ test
+     * comparison's inputs-identity matches by construction.
+     */
+    public static Sampling<NoFactors, Charge, PaymentResult> sampling(int samples) {
+        return sampling(CHARGES, samples);
+    }
+
+    /**
+     * Custom-inputs overload for experiments that legitimately need
+     * a different charge list (typically EXPLORE / OPTIMIZE shapes).
+     * Tests that need a different gateway implementation supply their
+     * own factory closure via {@link Sampling#builder()}.
+     */
+    public static Sampling<NoFactors, Charge, PaymentResult> sampling(List<Charge> charges, int samples) {
+        return Sampling.of(nf -> new PaymentGatewayServiceContract(), samples, charges);
+    }
+}

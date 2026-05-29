@@ -2,7 +2,7 @@ plugins {
     id("java-library")
     id("signing")
     id("com.vanniktech.maven.publish") version "0.36.0"
-    id("org.javai.punit")
+    id("org.mavai.punit")
     idea
 }
 
@@ -17,7 +17,7 @@ signing {
     useGpgCmd()
 }
 
-group = "org.javai"
+group = "org.mavai"
 version = property("punitExamplesVersion") as String
 
 java {
@@ -45,7 +45,7 @@ dependencies {
     // Outcome for result types; Log4j2 for logging.
     implementation("com.fasterxml.jackson.core:jackson-databind:2.21.3")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.21.3")
-    implementation("org.javai:outcome:0.3.0")
+    implementation("org.mavai:outcome:1.0.0-alpha1")
     implementation("org.apache.logging.log4j:log4j-api:2.26.0")
     runtimeOnly("org.apache.logging.log4j:log4j-core:2.26.0")
     runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.26.0")
@@ -54,7 +54,7 @@ dependencies {
     // engine, statistics, baselines, runtime entry point. JUnit-free so
     // sentinel-deployable classes can call PUnit.testing(...).assertPasses()
     // without dragging the test harness onto the production classpath.
-    implementation("org.javai:punit-core:0.8.1")
+    implementation("org.mavai:punit-core:0.9.0")
 
     // Nullability annotations used by use case postcondition methods.
     implementation("org.jspecify:jspecify:1.0.0")
@@ -62,7 +62,7 @@ dependencies {
     // Test stack — JUnit Jupiter directly (punit-core auto-discovers its
     // JUnit extension via ServiceLoader when Jupiter is on the test
     // classpath; punit-report likewise auto-registers its XML VerdictSink).
-    testImplementation("org.javai:punit-report:0.8.1")
+    testImplementation("org.mavai:punit-report:0.9.0")
     testImplementation(platform("org.junit:junit-bom:5.14.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -97,7 +97,7 @@ tasks.jar {
             "Implementation-Title" to "PUnit Examples",
             "Implementation-Version" to project.version,
             "Implementation-Vendor" to "javai.org",
-            "Automatic-Module-Name" to "org.javai.punit.examples"
+            "Automatic-Module-Name" to "org.mavai.punit.examples"
         )
     }
 }
@@ -106,12 +106,12 @@ mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
 
-    coordinates("org.javai", "punit-examples", version.toString())
+    coordinates("org.mavai", "punit-examples", version.toString())
 
     pom {
         name.set("PUnit Examples")
         description.set("Example applications and probabilistic tests demonstrating the PUnit framework")
-        url.set("https://github.com/javai-org/punitexamples")
+        url.set("https://github.com/mavai-org/punitexamples")
 
         licenses {
             license {
@@ -129,9 +129,9 @@ mavenPublishing {
         }
 
         scm {
-            url.set("https://github.com/javai-org/punitexamples")
-            connection.set("scm:git:git://github.com/javai-org/punitexamples.git")
-            developerConnection.set("scm:git:ssh://github.com/javai-org/punitexamples.git")
+            url.set("https://github.com/mavai-org/punitexamples")
+            connection.set("scm:git:git://github.com/mavai-org/punitexamples.git")
+            developerConnection.set("scm:git:ssh://github.com/mavai-org/punitexamples.git")
         }
     }
 }

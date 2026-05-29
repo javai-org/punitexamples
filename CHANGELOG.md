@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Moved to `org.mavai` (breaking), tracking punit 0.9.0.** Both the
+  consumer side and punitexamples' own coordinates move off `org.javai`:
+  - Consumed dependencies → `org.mavai:punit-core:0.9.0`,
+    `org.mavai:punit-report:0.9.0`, `org.mavai:outcome:1.0.0-alpha1`, and
+    the `org.mavai.punit` Gradle plugin.
+  - Own coordinate → `org.mavai:punit-examples`; package
+    `org.javai.punit.examples.*` → `org.mavai.punit.examples.*`;
+    `Automatic-Module-Name` → `org.mavai.punit.examples`.
+
+  No example behaviour changes. A final `org.javai:punit-examples`
+  release carries a Maven relocation POM to the new coordinate.
+
 ## [0.6.1] - 2026-05-21
 
 > Tracks [punit 0.8.1](https://github.com/javai-org/punit/blob/main/CHANGELOG.md#081---2026-05-21):

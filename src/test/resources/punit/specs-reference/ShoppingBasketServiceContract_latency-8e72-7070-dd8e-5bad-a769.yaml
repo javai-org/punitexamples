@@ -5,7 +5,7 @@
 schemaVersion: punit-spec-1
 useCaseId: ShoppingBasketServiceContract
 generatedAt: 2026-04-17T06:32:56.371044Z
-experimentClass: org.javai.punit.examples.experiments.ShoppingBasketMeasure
+experimentClass: org.mavai.punit.examples.experiments.ShoppingBasketMeasure
 experimentMethod: measureBaselineWithGolden
 footprint: 8e7245de
 covariates:

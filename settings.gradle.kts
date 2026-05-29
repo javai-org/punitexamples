@@ -7,7 +7,7 @@ pluginManagement {
 
     // Allow resolving the PUnit plugin from Maven Central (used when local build is absent)
     plugins {
-        id("org.javai.punit") version "0.8.0"
+        id("org.mavai.punit") version "0.9.0"
     }
     repositories {
         gradlePluginPortal()
@@ -22,10 +22,10 @@ val punitDir = file("../punit")
 if (punitDir.isDirectory) {
     includeBuild(punitDir) {
         dependencySubstitution {
-            substitute(module("org.javai:punit")).using(project(":"))
-            substitute(module("org.javai:punit-core")).using(project(":punit-core"))
-            substitute(module("org.javai:punit-sentinel")).using(project(":punit-sentinel"))
-            substitute(module("org.javai:punit-report")).using(project(":punit-report"))
+            substitute(module("org.mavai:punit")).using(project(":"))
+            substitute(module("org.mavai:punit-core")).using(project(":punit-core"))
+            substitute(module("org.mavai:punit-sentinel")).using(project(":punit-sentinel"))
+            substitute(module("org.mavai:punit-report")).using(project(":punit-report"))
         }
     }
 }
@@ -35,7 +35,7 @@ val outcomeDir = file("../outcome")
 if (outcomeDir.isDirectory) {
     includeBuild(outcomeDir) {
         dependencySubstitution {
-            substitute(module("org.javai:outcome")).using(project(":"))
+            substitute(module("org.mavai:outcome")).using(project(":"))
         }
     }
 }

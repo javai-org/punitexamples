@@ -47,7 +47,7 @@ Unsigned commits will be blocked by automated checks on pull requests.
 
 ## Reporting issues
 
-Please use [GitHub Issues](https://github.com/javai-org/punitexamples/issues) for
+Please use [GitHub Issues](https://github.com/mavai-org/punitexamples/issues) for
 bug reports and feature requests. Include a minimal reproducer where
 possible.
 

@@ -5,7 +5,7 @@
 schemaVersion: punit-spec-1
 useCaseId: PaymentGatewayServiceContract
 generatedAt: 2026-04-16T07:09:04.440507Z
-experimentClass: org.javai.punit.examples.probabilistictests.PaymentGatewayReliabilityTest
+experimentClass: org.mavai.punit.examples.probabilistictests.PaymentGatewayReliabilityTest
 experimentMethod: measureBaseline
 footprint: 1fbf696f
 covariates:
