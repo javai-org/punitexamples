@@ -1,9 +1,39 @@
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.publish.tasks.GenerateModuleMetadata
+
 plugins {
     id("java-library")
     id("signing")
     id("com.vanniktech.maven.publish") version "0.36.0"
     id("org.mavai.punit")
     idea
+}
+
+// ===== RELOCATION-BRANCH ONLY (release/0.6.99-relocation) =====
+// Terminal org.javai:punit-examples:0.6.99 release whose POM carries a Maven
+// <relocation> to org.mavai:punit-examples:0.7.0, with Gradle Module Metadata
+// disabled so the .module file cannot override the POM relocation. Built from
+// the renamed (org.mavai) source under the old coordinate — the jar is inert
+// (consumers follow the relocation); the legacy org.javai source cannot be
+// built here, because its org.javai.punit plugin is published nowhere and the
+// sibling is now org.mavai.punit. Do NOT carry to main.
+allprojects {
+    tasks.withType<GenerateModuleMetadata>().configureEach { enabled = false }
+    plugins.withId("com.vanniktech.maven.publish") {
+        extensions.configure<PublishingExtension> {
+            publications.withType<MavenPublication>().configureEach {
+                pom.withXml {
+                    val rel = asNode().appendNode("distributionManagement")
+                        .appendNode("relocation")
+                    rel.appendNode("groupId", "org.mavai")
+                    rel.appendNode("artifactId", "punit-examples")
+                    rel.appendNode("version", "0.7.0")
+                    rel.appendNode("message",
+                        "punit-examples has moved to org.mavai (groupId). See https://mavai.org.")
+                }
+            }
+        }
+    }
 }
 
 idea {
@@ -17,7 +47,7 @@ signing {
     useGpgCmd()
 }
 
-group = "org.mavai"
+group = "org.javai"
 version = property("punitExamplesVersion") as String
 
 java {
@@ -106,7 +136,7 @@ mavenPublishing {
     publishToMavenCentral()
     signAllPublications()
 
-    coordinates("org.mavai", "punit-examples", version.toString())
+    coordinates("org.javai", "punit-examples", version.toString())
 
     pom {
         name.set("PUnit Examples")
