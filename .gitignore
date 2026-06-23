@@ -10,6 +10,9 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+# gradle.xml bakes machine-specific composite-build paths (../punit, ../outcome);
+# never commit it — it makes IDE imports diverge per workspace.
+.idea/gradle.xml
 *.iws
 *.iml
 *.ipr
