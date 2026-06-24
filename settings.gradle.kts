@@ -7,7 +7,7 @@ pluginManagement {
 
     // Allow resolving the PUnit plugin from Maven Central (used when local build is absent)
     plugins {
-        id("org.mavai.punit") version "0.9.0"
+        id("org.mavai.punit") version "0.9.1"
     }
     repositories {
         gradlePluginPortal()
