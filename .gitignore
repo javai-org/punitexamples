@@ -6,13 +6,9 @@ build/
 .kotlin
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-# gradle.xml bakes machine-specific composite-build paths (../punit, ../outcome);
-# never commit it — it makes IDE imports diverge per workspace.
-.idea/gradle.xml
+# Project-local IDE config is machine-specific (e.g. gradle.xml bakes composite-build
+# paths like ../punit, ../outcome) and must never be committed in this open-source repo.
+.idea/
 *.iws
 *.iml
 *.ipr
