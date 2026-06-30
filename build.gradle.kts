@@ -54,7 +54,7 @@ dependencies {
     // engine, statistics, baselines, runtime entry point. JUnit-free so
     // sentinel-deployable classes can call PUnit.testing(...).assertPasses()
     // without dragging the test harness onto the production classpath.
-    implementation("org.mavai:punit-core:0.9.2")
+    implementation("org.mavai:punit-core:0.9.3")
 
     // Nullability annotations used by use case postcondition methods.
     implementation("org.jspecify:jspecify:1.0.0")
@@ -62,7 +62,7 @@ dependencies {
     // Test stack — JUnit Jupiter directly (punit-core auto-discovers its
     // JUnit extension via ServiceLoader when Jupiter is on the test
     // classpath; punit-report likewise auto-registers its XML VerdictSink).
-    testImplementation("org.mavai:punit-report:0.9.2")
+    testImplementation("org.mavai:punit-report:0.9.3")
     testImplementation(platform("org.junit:junit-bom:5.14.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
