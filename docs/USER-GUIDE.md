@@ -117,6 +117,44 @@ Probabilistic tests verify that the system's observed behaviour meets expectatio
 
 Individual sample failures are expected — that's the nature of probabilistic testing. PUnit aggregates the results and applies statistical analysis to determine the verdict.
 
+## Generating reports
+
+PUnit's Gradle plugin (`org.mavai.punit`, applied by this project) turns the raw experiment and test outputs into browser-friendly HTML reports. Each report is a single self-contained page — all CSS embedded, no JavaScript, no external requests — so it opens straight from disk with no server. Running a report over data that was never produced states that none was found rather than failing the build, so it is always safe to run.
+
+### Test report
+
+Aggregates every verdict from the most recent `./gradlew test` run:
+
+```bash
+./gradlew test punitReport
+```
+
+Output: `build/reports/punit/html/index.html`. Per test it shows the verdict (PASS / FAIL / INCONCLUSIVE) and the contract reference, the criteria evaluated, the per-postcondition failure histogram, and the latency profile.
+
+### Exploration comparison
+
+Compares the variants of an EXPLORE run — overall and per criterion — so you can see which configuration performed best without reading the raw YAML. Run an explore experiment first, then the report:
+
+```bash
+./gradlew exp -Prun=ShoppingBasketExplore
+./gradlew explorationReport
+```
+
+Reads `build/punit/explorations/` and writes `build/reports/punit-explorations/html/index.html`.
+
+### Optimization comparison
+
+Summarises one OPTIMIZE run's iterations — listed in run order, with the chosen best highlighted and each row expanding to reveal the factor bundle that produced it. Run an optimize experiment first, then the report:
+
+```bash
+./gradlew exp -Prun=ShoppingBasketOptimizePrompt
+./gradlew optimizationReport
+```
+
+Reads `build/punit/optimizations/` and writes `build/reports/punit-optimizations/html/index.html`.
+
+For the full description of what each report shows — the per-criterion matrices, latency strips, the score trajectory, and the *too close to call* markers — see [Part 11: Reports](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-11-reports) in the PUnit user guide.
+
 ## LLM configuration
 
 ### Mock mode (default)
