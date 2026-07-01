@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-07-01
+
+> Tracks [punit 0.9.3](https://github.com/mavai-org/punit/blob/main/CHANGELOG.md#093---2026-06-30):
+> punit's HTML **report generation** is now demonstrable straight from these
+> examples, including the OPTIMIZE comparison report's run-order layout.
+
+### Changed
+
+- **Bumped punit to 0.9.3** (`punit-core`, `punit-report`, and the
+  `org.mavai.punit` Gradle plugin). This makes punit's HTML report generation
+  runnable against the worked examples here: the per-test report
+  (`punitReport`) and the EXPLORE / OPTIMIZE experiment comparison reports
+  (`explorationReport`, `optimizationReport`). The optimize comparison report
+  lists a run's iterations in run order — the score rank in a **Rank** column
+  rather than by row order — with the chosen best highlighted. See
+  [Part 11: Reports](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-11-reports)
+  in the punit user guide for the full description of what each report shows.
+
+### Added
+
+- **User guide: _Generating reports_ section** — documents the `punitReport`,
+  `explorationReport`, and `optimizationReport` tasks against this project's
+  example experiments, with a pointer to the punit user guide for detail.
+
 ## [0.7.0] - 2026-05-29
 
 ### Changed
