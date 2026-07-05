@@ -39,8 +39,8 @@ import org.mavai.punit.examples.app.payment.PaymentResult;
  * contract surfaces transactional failures as
  * {@code PaymentResult.paymentSucceeded() == false}, never as a thrown
  * exception, so {@code invoke} doesn't need a try/catch. The
- * judgement on the returned result lives in
- * {@code postconditions(...)}.
+ * judgement on the returned result lives in the {@code satisfies}
+ * clause of {@link #criteria()}.
  *
  * <p>Per-sample duration is captured automatically by the engine on
  * every {@link ServiceContractOutcome}. The contract declares an
