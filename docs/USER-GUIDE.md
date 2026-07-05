@@ -1,6 +1,6 @@
 # PUnit Examples — User Guide
 
-This project contains worked examples of [PUnit](https://github.com/mavai-org/punit) experiments and probabilistic tests. It is not a replacement for [PUnit's own user guide](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md) — refer to that for full documentation of the framework's capabilities, in particular [Part 3: The Service Contract](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case), which documents the contract-first authoring style every example here uses (`ServiceContract` interface; `invoke(I, TokenTracker)` for the service call; `postconditions(ContractBuilder<O>)` for the acceptance contract). This guide describes the example application, explains how to run the experiments and tests, and covers LLM configuration.
+This project contains worked examples of [PUnit](https://github.com/mavai-org/punit) experiments and probabilistic tests. It is not a replacement for [PUnit's own user guide](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md) — refer to that for full documentation of the framework's capabilities, in particular [Part 1: The Service Contract](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-1-the-service-contract--the-shared-correctness-target), which documents the contract-first authoring style every example here uses (`ServiceContract` interface; `invoke(I, TokenTracker)` for the service call; `criteria()` — a `meeting()` chain with `satisfies(...)` clauses — for the acceptance criteria). This guide describes the example application, explains how to run the experiments and tests, and covers LLM configuration.
 
 ## The example application
 
@@ -79,7 +79,7 @@ Once you've chosen a configuration, run a measurement experiment to establish a 
 ./gradlew exp -Prun=ShoppingBasketMeasure
 ```
 
-This runs 1000 samples (by default) and writes a spec file to `src/test/resources/punit/specs/`. Probabilistic tests derive their pass/fail thresholds from this baseline.
+This runs 1000 samples (by default) and writes a baseline file (called a "spec" in earlier docs) to `src/test/resources/punit/baselines/`. Probabilistic tests derive their pass/fail thresholds from this baseline.
 
 ### Optimize — tune parameters
 

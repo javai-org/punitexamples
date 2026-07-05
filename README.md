@@ -9,7 +9,7 @@ stage of the testing lifecycle.
 For framework concepts and configuration details see the
 [PUnit User Guide](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md).
 The service contracts here are written in the contract-first style documented in
-[Part 3: The Service Contract](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-3-the-use-case).
+[Part 1: The Service Contract](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-1-the-service-contract--the-shared-correctness-target).
 
 ## Project structure
 
@@ -18,7 +18,7 @@ A standard single-module Gradle / Maven layout — no special wiring is required
 ```
 src/main/java/org/mavai/punit/examples/
   app/         Domain classes — shopping actions, LLM integrations, payment gateway.
-  usecases/    Service contract definitions (the contract-first authoring surface).
+  servicecontracts/    Service contract definitions (the contract-first authoring surface).
   sentinels/   Sentinel-deployable reliability classes.
 
 src/test/java/org/mavai/punit/examples/
@@ -28,10 +28,10 @@ src/test/java/org/mavai/punit/examples/
   integration/             Operational-flow integration tests.
   architecture/            ArchUnit rules.
 
-src/test/resources/        Test fixtures + committed baseline specs.
+src/test/resources/        Test fixtures + PUnit baseline files (see below).
 ```
 
-The service contracts and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 9: The Sentinel](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-9-the-sentinel) in the user guide). The test stack (`punit-report`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
+The service contracts and sentinels live in `src/main/` rather than `src/test/` because the same classes must be deployable as a sentinel JAR (see [Part 10: Sentinels](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-10-sentinels--production-time-execution) in the user guide). The test stack (`punit-report`, JUnit, AssertJ, ArchUnit) is `testImplementation`, so it stays out of the sentinel JAR's runtime classpath.
 
 ## Service contracts
 
@@ -93,17 +93,11 @@ To run the full flow end to end:
 This executes explore → optimize → measure → verify → test in sequence and
 validates the artifacts produced at each stage.
 
-## Specs and baselines
+## Baselines
 
-Measure experiments produce YAML spec files containing empirical baselines
-(observed pass rate, confidence interval, latency distribution). In a real
-project these specs are committed and consumed by probabilistic tests in CI.
+Measure experiments produce YAML **baseline files** — the empirical record of observed behaviour (pass rate, sample count, latency distribution) from which probabilistic tests derive their thresholds. Earlier docs called these files "specs" or "baseline specs"; the terms name the same artefact, and *baseline file* is the current one. In a real project baseline files are committed and consumed by probabilistic tests in CI.
 
-In this project the generated specs under `src/test/resources/punit/specs/`
-are gitignored because they regenerate frequently during development. Committed
-reference copies are in `src/test/resources/punit/specs-reference/` — see the
-[README](src/test/resources/punit/specs/README.md) in that directory for
-details.
+In this project the generated baseline files under `src/test/resources/punit/baselines/` are gitignored because they regenerate frequently during development. Committed reference copies are in `src/test/resources/punit/specs-reference/` — see the [README](src/test/resources/punit/baselines/README.md) in the baselines directory for details.
 
 ## PUnit dependency
 
