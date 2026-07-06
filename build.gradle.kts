@@ -46,9 +46,9 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.22.0")
     implementation("org.mavai:outcome:1.0.0-alpha1")
-    implementation("org.apache.logging.log4j:log4j-api:2.26.0")
-    runtimeOnly("org.apache.logging.log4j:log4j-core:2.26.0")
-    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.26.0")
+    implementation("org.apache.logging.log4j:log4j-api:2.26.1")
+    runtimeOnly("org.apache.logging.log4j:log4j-core:2.26.1")
+    runtimeOnly("org.apache.logging.log4j:log4j-slf4j2-impl:2.26.1")
 
     // PUnit — author-facing API (ServiceContract, Contract, Sampling, criteria),
     // engine, statistics, baselines, runtime entry point. JUnit-free so
