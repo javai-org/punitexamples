@@ -19,7 +19,7 @@ import org.mavai.punit.examples.servicecontracts.ShoppingBasketServiceContract.L
  * a per-postcondition failure breakdown to the meta-LLM and treats
  * the response as the next system prompt.
  */
-// javai-ref: JVI-HM8NNY6 — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-HM8NNY6 — do not remove (resolves in mavai-orchestrator)
 final class PromptEngineerStepper {
 
     private static final String META_LLM_MODEL = "gpt-4o";

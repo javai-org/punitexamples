@@ -42,7 +42,7 @@ package org.mavai.punit.examples.app.llm;
  * @see MockChatLlm
  * @see RoutingChatLlm
  */
-// javai-ref: JVI-QK0A20* — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-QK0A20* — do not remove (resolves in mavai-orchestrator)
 public final class ChatLlmProvider {
 
     private static final String MODE_PROPERTY = "punit.llm.mode";

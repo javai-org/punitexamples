@@ -30,7 +30,7 @@ import org.mavai.punit.runtime.PUnit;
  *     -Dpunit.baseline.dir="$PWD/build/punit/baselines"
  * }</pre>
  */
-// javai-ref: JVI-0XBH3JA — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-0XBH3JA — do not remove (resolves in mavai-orchestrator)
 public class ShoppingBasketMeasure {
 
     @Experiment

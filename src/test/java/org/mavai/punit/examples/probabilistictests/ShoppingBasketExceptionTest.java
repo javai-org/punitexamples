@@ -43,7 +43,7 @@ import org.mavai.punit.runtime.PUnit;
  * statistics still see every sample; only the retained-for-display
  * detail is capped.
  */
-// javai-ref: JVI-AKXG921 — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-AKXG921 — do not remove (resolves in mavai-orchestrator)
 public class ShoppingBasketExceptionTest {
 
     @ProbabilisticTest
