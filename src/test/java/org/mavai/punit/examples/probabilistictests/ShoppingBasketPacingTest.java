@@ -31,7 +31,7 @@ import org.mavai.punit.runtime.PUnit;
  * samplingPaced} factory threads the pacing through for the
  * demonstrations below.
  */
-// javai-ref: JVI-MGTJRSZ — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-MGTJRSZ — do not remove (resolves in mavai-orchestrator)
 public class ShoppingBasketPacingTest {
 
     @ProbabilisticTest

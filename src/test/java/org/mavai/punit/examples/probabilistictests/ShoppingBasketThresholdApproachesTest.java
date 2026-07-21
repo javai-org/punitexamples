@@ -56,7 +56,7 @@ import org.junit.jupiter.api.Disabled;
  * {@link ThresholdOrigin#SLO SLO}, {@link ThresholdOrigin#POLICY POLICY})
  * recorded for audit.
  */
-// javai-ref: JVI-9JCACWA — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-9JCACWA — do not remove (resolves in mavai-orchestrator)
 public class ShoppingBasketThresholdApproachesTest {
 
     /**

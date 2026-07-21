@@ -32,7 +32,7 @@ import org.mavai.punit.runtime.PUnit;
  *   </li>
  * </ul>
  */
-// javai-ref: JVI-F893NWX — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-F893NWX — do not remove (resolves in mavai-orchestrator)
 public class ShoppingBasketBudgetTest {
 
     @ProbabilisticTest

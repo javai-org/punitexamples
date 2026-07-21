@@ -28,7 +28,7 @@ package org.mavai.punit.examples.app.llm;
  * @see OpenAiChatLlm
  * @see AnthropicChatLlm
  */
-// javai-ref: JVI-SH8HSD4 — do not remove (resolves in javai-orchestrator)
+// mavai-ref: JVI-SH8HSD4 — do not remove (resolves in mavai-orchestrator)
 final class RoutingChatLlm implements ChatLlm {
 
     private static final int DEFAULT_TIMEOUT_MS = 30000;
