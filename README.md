@@ -11,6 +11,32 @@ For framework concepts and configuration details see the
 The service contracts here are written in the contract-first style documented in
 [Part 1: The Service Contract](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-1-the-service-contract--the-shared-correctness-target).
 
+## The declarative path — start here
+
+The fastest way in is a YAML contract plus a one-line test — no builder
+vocabulary on first contact. The worked example lives in
+`src/test/java/org/mavai/punit/examples/declarative/`:
+
+- **`shopping-basket.yaml`** (test resources, same package) — the claim:
+  the service, the inputs, one thresholded criterion over a `json` view.
+- **`MavaiBindings.java`** — the whole code surface: one `@Binding`
+  method making the service call.
+- **`ShoppingBasketDeclarativeTest.java`** — the test:
+  `PUnit.declared().samples(100).assertPasses();`
+
+```bash
+./gradlew mavaiCheck                                        # validate every contract, zero samples
+./gradlew test --tests ShoppingBasketDeclarativeTest        # run the declarative example
+```
+
+When a claim outgrows the file, graduate: `./gradlew mavaiMaterialise`
+emits the equivalent `ServiceContract` class under
+`build/punit/materialised/` — the same criteria the file instantiated,
+as Java source that is now yours. The rest of this repository shows
+that full-API style; see the user guide's
+[declarative part](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#the-declarative-surface--contracts-as-files)
+for the format.
+
 ## Project structure
 
 A standard single-module Gradle / Maven layout — no special wiring is required to use PUnit:

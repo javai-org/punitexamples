@@ -1,0 +1,27 @@
+# The shopping basket as the declarative newcomer path: the same
+# scenario the full-API examples exercise, stated as a contract file.
+# The file carries the claim; the invocation carries the budget.
+format: mavai-contract/1
+contract: shopping-basket-builds-valid-actions
+service: basket-builder
+
+transforms:
+  actions: json
+
+criteria:
+  - name: responses-are-valid-action-json
+    threshold: 0.85
+    parses: actions
+    postconditions:
+      - in: actions
+        path: "$.actions[*].context"
+        equals: "SHOP"
+      - in: actions
+        path: "$.actions[*].name"
+        one-of: ["add", "remove", "clear"]
+
+inputs:
+  - "Add 2 apples"
+  - "Remove the milk"
+  - "Add 3 oranges and 2 bananas"
+  - "Clear the basket"
