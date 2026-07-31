@@ -1,0 +1,24 @@
+# The pure-services example's service: a language model, declared
+# entirely in this file — no bindings class, no Java. The ollama
+# provider needs no credential and carries a default local endpoint;
+# the example's tests point the endpoint tier at a bundled stub, so
+# everything runs offline through the real punit-lm wire path.
+format: mavai-services/1
+services:
+  basket-model:
+    type: language-model
+    configuration:
+      provider: ollama
+      model: basket-builder-demo
+      system-prompt: >
+        You are a shopping assistant that converts natural language
+        instructions into JSON actions. Respond with JSON only: an
+        "actions" array of {context, name, parameters} objects, where
+        context is always "SHOP" and name is add, remove, or clear.
+      temperature: 0.2
+    explorations:
+      - temperature: 0.8
+    optimizations:
+      - id: tune-prompt
+        stepper: prompt-engineer
+        max-iterations: 2

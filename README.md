@@ -29,6 +29,24 @@ vocabulary on first contact. The worked example lives in
 ./gradlew test --tests ShoppingBasketDeclarativeTest        # run the declarative example
 ```
 
+**The pure-services variant** goes further: `shopping-basket-service.yaml`
+names a service declared entirely in `mavai-services.yaml` — a
+`language-model` type with a temperature exploration and a
+`prompt-engineer` optimization — **no bindings class at all**. A bundled
+stub endpoint (`StubLanguageModel`) stands in for the model, so
+everything runs offline through the real punit-lm wire path, token
+usage included:
+
+```bash
+./gradlew test --tests ShoppingBasketServiceTest        # the one-line test
+./gradlew exp -Prun=ShoppingBasketServiceExperiments    # explore + optimize
+```
+
+Artefacts land under `build/punit/explorations/` and
+`build/punit/optimizations/` with `totalTokens`/`avgTokensPerSample` in
+their cost blocks — render them with the shared `mavai` tool and the
+cost cells read "ms · tok".
+
 When a claim outgrows the file, graduate: `./gradlew mavaiMaterialise`
 emits the equivalent `ServiceContract` class under
 `build/punit/materialised/` — the same criteria the file instantiated,
