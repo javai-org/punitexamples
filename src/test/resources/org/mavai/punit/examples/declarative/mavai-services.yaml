@@ -16,6 +16,40 @@ services:
         "actions" array of {context, name, parameters} objects, where
         context is always "SHOP" and name is add, remove, or clear.
       temperature: 0.2
+      # The structured-output contract: the model is instructed to
+      # satisfy this JSON Schema (ollama's `format` mechanism). The
+      # strict rules apply — objects carry `required:` and
+      # `additionalProperties: false` — and the schema joins the
+      # configuration's drift-checked identity as a fingerprint.
+      response-schema:
+        type: object
+        properties:
+          actions:
+            type: array
+            items:
+              type: object
+              properties:
+                context:
+                  type: string
+                  enum: ["SHOP"]
+                name:
+                  type: string
+                  enum: ["add", "remove", "clear"]
+                parameters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: string
+                    required: ["name", "value"]
+                    additionalProperties: false
+              required: ["context", "name", "parameters"]
+              additionalProperties: false
+        required: ["actions"]
+        additionalProperties: false
     explorations:
       - temperature: 0.8
     optimizations:
