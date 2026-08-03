@@ -57,7 +57,7 @@ dependencies {
     implementation("org.mavai:punit-core:0.9.3")
 
     // Nullability annotations used by use case postcondition methods.
-    implementation("org.jspecify:jspecify:1.0.0")
+    implementation("org.jspecify:jspecify:1.0.1")
 
     // Test stack — JUnit Jupiter directly (punit-core auto-discovers its
     // JUnit extension via ServiceLoader when Jupiter is on the test
