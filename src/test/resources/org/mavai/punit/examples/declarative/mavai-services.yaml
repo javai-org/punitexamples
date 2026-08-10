@@ -1,0 +1,58 @@
+# The pure-services example's service: a language model, declared
+# entirely in this file — no bindings class, no Java. The ollama
+# provider needs no credential and carries a default local endpoint;
+# the example's tests point the endpoint tier at a bundled stub, so
+# everything runs offline through the real punit-lm wire path.
+format: mavai-services/1
+services:
+  basket-model:
+    type: language-model
+    configuration:
+      provider: ollama
+      model: basket-builder-demo
+      system-prompt: >
+        You are a shopping assistant that converts natural language
+        instructions into JSON actions. Respond with JSON only: an
+        "actions" array of {context, name, parameters} objects, where
+        context is always "SHOP" and name is add, remove, or clear.
+      temperature: 0.2
+      # The structured-output contract: the model is instructed to
+      # satisfy this JSON Schema (ollama's `format` mechanism). The
+      # strict rules apply — objects carry `required:` and
+      # `additionalProperties: false` — and the schema joins the
+      # configuration's drift-checked identity as a fingerprint.
+      response-schema:
+        type: object
+        properties:
+          actions:
+            type: array
+            items:
+              type: object
+              properties:
+                context:
+                  type: string
+                  enum: ["SHOP"]
+                name:
+                  type: string
+                  enum: ["add", "remove", "clear"]
+                parameters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: string
+                    required: ["name", "value"]
+                    additionalProperties: false
+              required: ["context", "name", "parameters"]
+              additionalProperties: false
+        required: ["actions"]
+        additionalProperties: false
+    explorations:
+      - temperature: 0.8
+    optimizations:
+      - id: tune-prompt
+        stepper: prompt-engineer
+        max-iterations: 2

@@ -11,6 +11,56 @@ For framework concepts and configuration details see the
 The service contracts here are written in the contract-first style documented in
 [Part 1: The Service Contract](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#part-1-the-service-contract--the-shared-correctness-target).
 
+## The declarative path — start here
+
+The fastest way in is two YAML files and a one-line test — no builder
+vocabulary, and in this example **no bindings code at all**. The worked
+example lives in `src/test/java/org/mavai/punit/examples/declarative/`:
+
+- **`shopping-basket.yaml`** (test resources, same package) — the claim:
+  one thresholded criterion over a `json` view, judged per path.
+- **`mavai-services.yaml`** — the service itself: a `language-model`
+  type with a structured-output `response-schema:`, a temperature
+  exploration, and a `prompt-engineer` optimization.
+- **`ShoppingBasketDeclarativeTest.java`** — the test:
+  `PUnit.declared().assertPasses();` (a bundled stub endpoint stands in
+  for the model, so everything runs offline through the real punit-lm
+  wire path, token usage included).
+
+```bash
+./gradlew mavaiCheck                                 # validate the pair, zero samples
+./gradlew test --tests ShoppingBasketDeclarativeTest # the one-line test
+./gradlew exp -Prun=ShoppingBasketExperiments        # explore + optimize
+```
+
+Artefacts land under `build/punit/explorations/` and
+`build/punit/optimizations/` with `totalTokens`/`avgTokensPerSample` in
+their cost blocks — render them with the shared `mavai` tool and the
+cost cells read "ms · tok".
+
+A service can equally be a **code binding** — one annotated method in a
+conventional `MavaiBindings` class beside the tests:
+
+```java
+class MavaiBindings {
+    @Binding("basket-builder")
+    Outcome<String> buildBasket(String instruction) { /* your call */ }
+}
+```
+
+— the contract's `service:` key resolves against definitions first,
+then bindings; nothing else changes.
+
+When a claim outgrows the file, graduate: `./gradlew mavaiMaterialise`
+emits the equivalent `ServiceContract` class under
+`build/punit/materialised/` — the same criteria the file instantiated,
+as Java source that is now yours. Copy it into the source tree, fill
+the invocation stub and the TODOs, delete the YAML. Nothing
+round-trips: from that moment the class is the contract, and the rest
+of this repository shows that full-API style; see the user guide's
+[declarative part](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md#the-declarative-surface--contracts-as-files)
+for the format.
+
 ## Project structure
 
 A standard single-module Gradle / Maven layout — no special wiring is required to use PUnit:
