@@ -43,8 +43,8 @@ repositories {
 dependencies {
     // Domain support — Jackson for JSON parsing in domain classes;
     // Outcome for result types; Log4j2 for logging.
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.1")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.22.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.22.2")
     implementation("org.mavai:outcome:1.0.0-alpha1")
     implementation("org.apache.logging.log4j:log4j-api:2.26.1")
     runtimeOnly("org.apache.logging.log4j:log4j-core:2.26.1")
@@ -57,7 +57,7 @@ dependencies {
     implementation("org.mavai:punit-core:0.10.0")
 
     // Nullability annotations used by use case postcondition methods.
-    implementation("org.jspecify:jspecify:1.0.0")
+    implementation("org.jspecify:jspecify:1.0.1")
 
     // Test stack — JUnit Jupiter directly (punit-core auto-discovers its
     // JUnit extension via ServiceLoader when Jupiter is on the test
@@ -76,7 +76,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core:3.27.7")
-    testImplementation("com.tngtech.archunit:archunit-junit5:1.4.2")
+    testImplementation("com.tngtech.archunit:archunit-junit5:1.5.0")
 }
 
 tasks.test {
