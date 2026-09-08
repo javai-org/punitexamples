@@ -114,8 +114,9 @@ warmup, test intent (smoke vs verification), and threshold origin documentation.
 # Run tests (some failures are expected — see note below)
 ./gradlew test
 
-# Generate the PUnit HTML report
-./gradlew punitReport
+# Render the verdict report with the family's shared mavai renderer
+# (https://github.com/mavai-org/mavai/releases)
+mavai verdict build/reports/punit -o build/reports/punit/verdict.html
 ```
 
 Many tests are **expected to fail at the sample level**. PUnit determines
@@ -159,7 +160,7 @@ without publishing intermediate artifacts.
 
 ## Documentation
 
-The **[PUnit User Guide](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md)** is the comprehensive reference for the framework. It covers the full experimentation-to-testing workflow, the service contract pattern, latency assertions, budget and pacing control, the statistical core, the Sentinel runtime, and the HTML report.
+The **[PUnit User Guide](https://github.com/mavai-org/punit/blob/main/docs/USER-GUIDE.md)** is the comprehensive reference for the framework. It covers the full experimentation-to-testing workflow, the service contract pattern, latency assertions, budget and pacing control, the statistical core, the Sentinel runtime, and rendering reports with the shared `mavai` tool.
 
 The **[Statistical Companion](https://github.com/mavai-org/punit/blob/main/docs/STATISTICAL-COMPANION.md)** covers the mathematical foundations for readers who want to understand the inference machinery.
 
