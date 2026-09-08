@@ -8,9 +8,10 @@ import org.mavai.punit.api.spec.FactorsStepper.IterationResult;
 import org.mavai.punit.api.spec.FailureCount;
 import org.mavai.punit.api.spec.FailureExemplar;
 import org.mavai.punit.api.spec.NextFactor;
-import org.mavai.punit.examples.app.llm.ChatLlm;
-import org.mavai.punit.examples.app.llm.ChatLlmException;
-import org.mavai.punit.examples.app.llm.ChatLlmProvider;
+import org.mavai.outcome.Outcome;
+import org.mavai.punit.examples.lm.LanguageModelMode;
+import org.mavai.punit.lm.api.LanguageModel;
+import org.mavai.punit.lm.api.LmReply;
 import org.mavai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 
 /**
@@ -41,7 +42,8 @@ final class PromptEngineerStepper {
     private PromptEngineerStepper() {}
 
     static FactorsStepper<LlmTuning> create() {
-        ChatLlm metaLlm = ChatLlmProvider.resolve();
+        LanguageModel metaLlm = LanguageModelMode.resolve(
+                META_LLM_MODEL, META_LLM_TEMPERATURE, META_SYSTEM_PROMPT);
         return (current, history) -> {
             if (history.isEmpty()) {
                 return NextFactor.stop();
@@ -52,19 +54,15 @@ final class PromptEngineerStepper {
         };
     }
 
-    private static String askMetaLlm(ChatLlm metaLlm, String userMessage) {
-        try {
-            return metaLlm.chat(
-                    META_SYSTEM_PROMPT,
-                    userMessage,
-                    META_LLM_MODEL,
-                    META_LLM_TEMPERATURE);
-        } catch (ChatLlmException e) {
+    private static String askMetaLlm(LanguageModel metaLlm, String userMessage) {
+        Outcome<LmReply> reply = metaLlm.invoke(userMessage);
+        if (reply instanceof Outcome.Fail<LmReply> failed) {
             // FactorsStepper is non-throwing; if the meta-LLM is
             // unreachable the optimize experiment cannot progress.
             // Bubble as runtime so the experiment surfaces the cause.
-            throw new RuntimeException("Meta-LLM call failed: " + e.getMessage(), e);
+            throw new RuntimeException("Meta-LLM call failed: " + failed.failure().message());
         }
+        return reply.getOrThrow().text();
     }
 
     private static String buildUserMessage(IterationResult<LlmTuning> last) {

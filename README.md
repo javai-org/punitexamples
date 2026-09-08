@@ -67,7 +67,8 @@ A standard single-module Gradle / Maven layout — no special wiring is required
 
 ```
 src/main/java/org/mavai/punit/examples/
-  app/         Domain classes — shopping actions, LLM integrations, payment gateway.
+  app/         Domain classes — shopping actions, payment gateway.
+  lm/          The mock language model and the mock-or-real switch over punit-lm's public API.
   servicecontracts/    Service contract definitions (the contract-first authoring surface).
   sentinels/   Sentinel-deployable reliability classes.
 
@@ -157,6 +158,19 @@ automatically substitute the local `../punit` source when available. The
 declared version in `build.gradle.kts` is only used when the local checkout
 is absent. This means you can develop punit and punitexamples side by side
 without publishing intermediate artifacts.
+
+## Language-model mode
+
+Every language-model call the examples make goes through punit-lm's public API (`org.mavai.punit.lm.api`); the examples carry no HTTP client of their own. The switch is `punit.llm.mode` (system property) or `PUNIT_LLM_MODE` (environment variable):
+
+- `mock` (default): the examples' own `MockLanguageModel`, offline, no keys, temperature-dependent failures, token usage estimated — every experiment and test runs from a fresh clone.
+- `real`: punit-lm configures a real provider from the model name (`claude-*` to Anthropic, everything else to OpenAI) and reads the credential the way a services file would — `MAVAI_LLM_API_KEY`, else `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. Real mode costs money; the measure experiment runs 1000 samples by default.
+
+```bash
+PUNIT_LLM_MODE=real OPENAI_API_KEY=sk-... ./gradlew test --tests '*ShoppingBasket*'
+```
+
+Mock and real runs never share a baseline: the model states its configuration as covariates, and the mock states itself as `provider: mock`.
 
 ## Documentation
 

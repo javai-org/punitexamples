@@ -17,8 +17,8 @@ import org.mavai.punit.runtime.PUnit;
  *
  * <h2>Setup</h2>
  *
- * <p>This experiment makes real LLM calls. Configure the
- * {@code ChatLlm} provider via {@code OPENAI_API_KEY}. The same
+ * <p>This experiment makes real LLM calls in real mode. Set
+ * {@code PUNIT_LLM_MODE=real} and {@code OPENAI_API_KEY}. The same
  * input list and {@link LlmTuning} value used here must drive any
  * paired probabilistic test — the pairing-integrity check rejects
  * mismatched inputs or factors at test time.

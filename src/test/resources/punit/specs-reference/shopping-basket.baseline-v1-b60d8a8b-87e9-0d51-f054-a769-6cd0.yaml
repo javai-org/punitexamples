@@ -1,0 +1,303 @@
+schemaVersion: punit-baseline-3
+useCaseId: shopping-basket
+methodName: baseline-v1
+factorsFingerprint: b60d8a8b
+inputsIdentity: sha256:7fed3d9dd07ffe730e0498b6435869d117c809239ed82b4c22c2574fcf09dc31
+sampleCount: 30
+generatedAt: '2026-09-08T09:57:49.624125Z'
+expiresInDays: 30
+expiresAt: '2026-10-08T09:57:49.624125Z'
+statistics:
+  bernoulli-pass-rate:
+    criteria:
+      response-not-empty:
+        observedPassRate: 1.0
+        sampleCount: 30
+      valid-json:
+        observedPassRate: 0.9666666666666667
+        sampleCount: 30
+covariates:
+  serviceType: mock-language-model
+  provider: mock
+  model: gpt-4o-mini
+  temperature: '0.3'
+  systemPrompt: |
+    You are a shopping assistant that converts natural language instructions into JSON actions.
+
+    Respond with JSON only — no explanation or commentary. The JSON must contain an "actions" array, even for single operations.
+
+    Format:
+    {
+      "actions": [
+        {
+          "context": "SHOP",
+          "name": "<action>",
+          "parameters": [
+            {"name": "item", "value": "<item_name>"},
+            {"name": "quantity", "value": "<number>"}
+          ]
+        }
+      ]
+    }
+
+    Valid actions for SHOP context: "add", "remove", "clear"
+    For "clear" actions, parameters may be empty.
+    Quantities must be positive integers (>= 1).
+
+    Examples:
+    - "Add 2 apples" -> {"actions": [{"context": "SHOP", "name": "add", "parameters": [{"name": "item", "value": "apples"}, {"name": "quantity", "value": "2"}]}]}
+    - "Add apples and remove milk" -> {"actions": [{"context": "SHOP", "name": "add", "parameters": [{"name": "item", "value": "apples"}, {"name": "quantity", "value": "1"}]}, {"context": "SHOP", "name": "remove", "parameters": [{"name": "item", "value": "milk"}]}]}
+    - "Clear the basket" -> {"actions": [{"context": "SHOP", "name": "clear", "parameters": []}]}
+latency:
+  basis: passing-samples
+  contributingSamples: 29
+  totalSamples: 30
+  p50Ms: 0
+  p90Ms: 0
+  p95Ms: 0
+  sortedPassingLatenciesMs:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 1
+postconditionStandings:
+- criterion: response-not-empty
+  rows:
+  - inputIndex: 0
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 1
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 2
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 3
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 4
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 5
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 6
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 7
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 8
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 9
+    check: Response not empty
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+- criterion: valid-json
+  rows:
+  - inputIndex: 0
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 0
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 1
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 1
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 2
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 2
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 3
+    check: All actions valid for context
+    optional: false
+    passed: 2
+    failed: 0
+    skipped: 1
+    observedFraction: 0.666667
+  - inputIndex: 3
+    check: Quantities are positive integers
+    optional: false
+    passed: 2
+    failed: 0
+    skipped: 1
+    observedFraction: 0.666667
+  - inputIndex: 4
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 4
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 5
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 5
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 6
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 6
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 7
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 7
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 8
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 8
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 9
+    check: All actions valid for context
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+  - inputIndex: 9
+    check: Quantities are positive integers
+    optional: false
+    passed: 3
+    failed: 0
+    skipped: 0
+    observedFraction: 1.0
+contentFingerprint: e26a2e72cad8657c21f9d45f76db61ee40f2a9bc0a72e91f2942acabd7c27963

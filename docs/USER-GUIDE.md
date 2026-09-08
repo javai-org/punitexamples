@@ -169,45 +169,38 @@ This means you can run every experiment and test in this project out of the box.
 
 ### Real mode
 
-To call real LLM providers, set the mode and provide API keys:
+To call a real provider, set the mode and let punit-lm find the credential the way a services file would:
 
 ```bash
 export PUNIT_LLM_MODE=real
-export OPENAI_API_KEY=sk-...
-export ANTHROPIC_API_KEY=sk-ant-...
+export OPENAI_API_KEY=sk-...        # or ANTHROPIC_API_KEY=sk-ant-... for claude-* models
 ```
 
-Alternatively, use system properties:
+Or as system properties:
 
 ```bash
-./gradlew test -Dpunit.llm.mode=real \
-               -Dpunit.llm.openai.key=sk-... \
-               -Dpunit.llm.anthropic.key=sk-ant-...
+./gradlew test -Dpunit.llm.mode=real -Dmavai.llm.api-key=sk-...
 ```
 
-In real mode, the `RoutingChatLlm` routes each call to the appropriate provider based on the model name:
+Every language-model call goes through punit-lm's public API (`LanguageModels.configure`), so the examples carry no HTTP client, no per-provider key and no base-URL setting of their own. The provider follows the model name:
 
-| Model pattern                                 | Provider  |
-|-----------------------------------------------|-----------|
-| `gpt-*`, `o1-*`, `o3-*`, `text-*`, `davinci*` | OpenAI    |
-| `claude-*`                                    | Anthropic |
+| Model pattern | Provider  |
+|---------------|-----------|
+| `claude-*`    | Anthropic |
+| anything else | OpenAI    |
 
-Providers are initialised lazily — if an experiment only uses OpenAI models, no Anthropic API key is required (and vice versa).
+Credentials resolve in punit-lm's tier: `mavai.llm.api-key` / `MAVAI_LLM_API_KEY` first, then the vendor's conventional variable (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`). A missing credential is refused at configure time, before any request.
 
 **Real mode will incur costs on your OpenAI and/or Anthropic accounts.** The measurement experiment, for example, runs 1000 samples by default. Be aware of your provider's rate limits and pricing before running large experiments.
 
-### Additional configuration
+### Configuration
 
-| Setting              | System property               | Environment variable | Default                        |
-|----------------------|-------------------------------|----------------------|--------------------------------|
-| LLM mode             | `punit.llm.mode`              | `PUNIT_LLM_MODE`     | `mock`                         |
-| OpenAI API key       | `punit.llm.openai.key`        | `OPENAI_API_KEY`     | —                              |
-| OpenAI base URL      | `punit.llm.openai.baseUrl`    | `OPENAI_BASE_URL`    | `https://api.openai.com/v1`    |
-| Anthropic API key    | `punit.llm.anthropic.key`     | `ANTHROPIC_API_KEY`  | —                              |
-| Anthropic base URL   | `punit.llm.anthropic.baseUrl` | `ANTHROPIC_BASE_URL` | `https://api.anthropic.com/v1` |
-| Request timeout (ms) | `punit.llm.timeout`           | `PUNIT_LLM_TIMEOUT`  | `30000`                        |
+| Setting  | System property  | Environment variable | Default |
+|----------|------------------|----------------------|---------|
+| LLM mode | `punit.llm.mode` | `PUNIT_LLM_MODE`     | `mock`  |
+| API key  | `mavai.llm.api-key` | `MAVAI_LLM_API_KEY` (else `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`) | — |
 
-For all settings, system properties take precedence over environment variables.
+System properties take precedence over environment variables. Everything else about the model (the request deadline, capabilities, structured output) is punit-lm's, documented in the PUnit User Guide.
 
 ## Typical workflow
 

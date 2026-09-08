@@ -71,7 +71,7 @@ dependencies {
     // The language-model service type (type: language-model in
     // mavai-services.yaml) and the prompt-engineer stepper — the
     // pure-services example needs no other code.
-    testRuntimeOnly("org.mavai:punit-lm:0.10.0")
+    implementation("org.mavai:punit-lm:0.10.0")
     testImplementation(platform("org.junit:junit-bom:5.14.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
