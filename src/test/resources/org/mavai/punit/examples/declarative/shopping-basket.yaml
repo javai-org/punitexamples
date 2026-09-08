@@ -16,11 +16,9 @@ criteria:
     threshold: 0.9
     parses: actions
     postconditions:
-      - in: actions
-        path: "$.actions[*].context"
+      - path: "$.actions[*].context"
         equals: "SHOP"
-      - in: actions
-        path: "$.actions[*].name"
+      - path: "$.actions[*].name"
         one-of: ["add", "remove", "clear"]
 
 inputs:
