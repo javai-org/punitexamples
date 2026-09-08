@@ -3,7 +3,10 @@ package org.mavai.punit.examples.servicecontracts;
 import static org.mavai.punit.api.criterion.Criteria.empirical;
 import static org.mavai.punit.api.criterion.Criteria.of;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.mavai.outcome.Outcome;
 import org.mavai.punit.api.Pacing;
@@ -13,14 +16,12 @@ import org.mavai.punit.api.TokenTracker;
 import org.mavai.punit.api.covariate.Covariate;
 import org.mavai.punit.api.covariate.CovariateCategory;
 import org.mavai.punit.api.criterion.Criteria;
-import org.mavai.punit.examples.app.llm.ChatLlm;
-import org.mavai.punit.examples.app.llm.ChatLlmException;
-import org.mavai.punit.examples.app.llm.ChatLlmProvider;
-import org.mavai.punit.examples.app.llm.ChatResponse;
 import org.mavai.punit.examples.app.shopping.ShoppingAction;
 import org.mavai.punit.examples.app.shopping.ShoppingActionParameter;
 import org.mavai.punit.examples.app.shopping.ShoppingActionValidator;
 import org.mavai.punit.examples.app.shopping.ShoppingActionValidator.BasketTranslation;
+import org.mavai.punit.examples.lm.LanguageModelMode;
+import org.mavai.punit.lm.api.LanguageModel;
 
 /**
  * Translation of natural-language shopping instructions into
@@ -111,18 +112,28 @@ public final class ShoppingBasketServiceContract
 			"Remove 2 eggs from the basket",
 			"Add a dozen eggs",
 			"I'd like to remove all the vegetables");
-	private final ChatLlm llm;
+	private final LanguageModel llm;
 	private final LlmTuning tuning;
 	private final Pacing pacing;
 
-	public ShoppingBasketServiceContract(ChatLlm llm, LlmTuning tuning) {
+	/** A contract over the model the resolved mode gives this tuning (mock by default). */
+	public ShoppingBasketServiceContract(LlmTuning tuning) {
+		this(modelFor(tuning), tuning, Pacing.unlimited());
+	}
+
+	public ShoppingBasketServiceContract(LanguageModel llm, LlmTuning tuning) {
 		this(llm, tuning, Pacing.unlimited());
 	}
 
-	public ShoppingBasketServiceContract(ChatLlm llm, LlmTuning tuning, Pacing pacing) {
+	public ShoppingBasketServiceContract(LanguageModel llm, LlmTuning tuning, Pacing pacing) {
 		this.llm = llm;
 		this.tuning = tuning;
 		this.pacing = pacing;
+	}
+
+	/** The model the resolved mode gives a tuning: the examples' mock, or punit-lm over a real provider. */
+	public static LanguageModel modelFor(LlmTuning tuning) {
+		return LanguageModelMode.resolve(tuning.model(), tuning.temperature(), tuning.systemPrompt());
 	}
 
 	private static Outcome<Void> checkResponseNotEmpty(String response) {
@@ -169,10 +180,10 @@ public final class ShoppingBasketServiceContract
 
 	/**
 	 * Canonical-inputs factory: builds a {@link Sampling} over
-	 * {@link #BASKET_INSTRUCTIONS} with the {@link ChatLlm} resolved
-	 * via {@link ChatLlmProvider#resolve()}. This is the factory
-	 * MEASURE experiments and probabilistic tests should use — sharing
-	 * one input source on both sides makes the empirical-pair's
+	 * {@link #BASKET_INSTRUCTIONS} with the {@link LanguageModel}
+	 * resolved per factor bundle via {@link LanguageModelMode}. This is
+	 * the factory MEASURE experiments and probabilistic tests should use
+	 * — sharing one input source on both sides makes the empirical-pair's
 	 * inputs-identity match structural rather than coincidental.
 	 */
 	public static Sampling<LlmTuning, String, String> sampling(int samples) {
@@ -186,19 +197,24 @@ public final class ShoppingBasketServiceContract
 	 */
 	public static Sampling<LlmTuning, String, String> sampling(
 			List<String> inputs, int samples) {
-		return samplingWith(ChatLlmProvider.resolve(), inputs, samples);
+		return samplingWith(ShoppingBasketServiceContract::modelFor, inputs, samples);
 	}
 
-	/** Canonical-inputs variant of {@link #samplingWith(ChatLlm, List, int)}. */
+	/** Canonical-inputs variant of {@link #samplingWith(Function, List, int)}. */
 	public static Sampling<LlmTuning, String, String> samplingWith(
-			ChatLlm llm, int samples) {
-		return samplingWith(llm, BASKET_INSTRUCTIONS, samples);
+			Function<LlmTuning, LanguageModel> models, int samples) {
+		return samplingWith(models, BASKET_INSTRUCTIONS, samples);
 	}
 
+	/**
+	 * Sampling over a caller-supplied model source — one
+	 * {@link LanguageModel} per factor bundle, since a configured model
+	 * carries its model name, temperature and system prompt.
+	 */
 	public static Sampling<LlmTuning, String, String> samplingWith(
-			ChatLlm llm, List<String> inputs, int samples) {
+			Function<LlmTuning, LanguageModel> models, List<String> inputs, int samples) {
 		return Sampling.of(
-				tuning -> new ShoppingBasketServiceContract(llm, tuning),
+				tuning -> new ShoppingBasketServiceContract(models.apply(tuning), tuning),
 				samples, inputs);
 	}
 
@@ -216,7 +232,7 @@ public final class ShoppingBasketServiceContract
 			Pacing pacing, List<String> inputs, int samples) {
 		return Sampling.of(
 				tuning -> new ShoppingBasketServiceContract(
-						ChatLlmProvider.resolve(), tuning, pacing),
+						modelFor(tuning), tuning, pacing),
 				samples, inputs);
 	}
 
@@ -235,8 +251,7 @@ public final class ShoppingBasketServiceContract
 	public static Sampling.Builder<LlmTuning, String, String> samplingBuilder(
 			List<String> inputs, int samples) {
 		return Sampling.<LlmTuning, String, String>builder()
-				.serviceContractFactory(tuning -> new ShoppingBasketServiceContract(
-						ChatLlmProvider.resolve(), tuning))
+				.serviceContractFactory(ShoppingBasketServiceContract::new)
 				.inputs(inputs)
 				.samples(samples);
 	}
@@ -273,28 +288,33 @@ public final class ShoppingBasketServiceContract
 	}
 
 	/**
-	 * Declares the factors that influence outcomes — here the LLM
-	 * model and the sampling temperature. Resolved values stamp the
-	 * baseline's identity, so a test under one configuration never
-	 * silently matches a baseline measured under another.
+	 * Declares the factors that influence outcomes: every configuration
+	 * value the language model states about itself (provider, model,
+	 * temperature, system prompt, …), exactly as a declarative
+	 * {@code type: language-model} service would. Resolved values stamp
+	 * the baseline's identity, so a test under one configuration never
+	 * silently matches a baseline measured under another — and a mock
+	 * run never matches a real one.
 	 */
 	@Override
 	public List<Covariate> covariates() {
-		return List.of(
-				Covariate.custom("llm_model", CovariateCategory.CONFIGURATION),
-				Covariate.custom("temperature", CovariateCategory.CONFIGURATION));
+		List<Covariate> covariates = new ArrayList<>();
+		for (String key : llm.configurationCovariates().keySet()) {
+			covariates.add(Covariate.custom(key, CovariateCategory.CONFIGURATION));
+		}
+		return List.copyOf(covariates);
 	}
 
 	/**
-	 * Resolves each custom covariate at run time by reading from
-	 * the service contract's tuning. Called once per run; the resolved
+	 * Resolves each custom covariate at run time from the model's own
+	 * statement of its configuration. Called once per run; the resolved
 	 * value flows into the baseline's identity.
 	 */
 	@Override
 	public Map<String, Supplier<String>> customCovariateResolvers() {
-		return Map.of(
-				"llm_model", tuning::model,
-				"temperature", () -> Double.toString(tuning.temperature()));
+		Map<String, Supplier<String>> resolvers = new LinkedHashMap<>();
+		llm.configurationCovariates().forEach((key, value) -> resolvers.put(key, () -> value));
+		return resolvers;
 	}
 
 	/**
@@ -319,31 +339,24 @@ public final class ShoppingBasketServiceContract
 	}
 
 	/**
-	 * The service call. Hits the LLM, records token cost via the
-	 * tracker, returns the raw response wrapped in {@link Outcome#ok}.
-	 * The catch clause is narrow: {@link ChatLlmException} models the
-	 * LLM client's anticipated transport-level failures (HTTP errors,
-	 * timeouts, malformed responses) — those are translated to
-	 * {@link Outcome#fail} under the symbolic name {@code "llm-error"}
-	 * so the engine counts them as sample failures. Anything else the
-	 * client might throw (an unchecked exception from a logic bug,
-	 * misconfiguration) is left to bubble — that is a defect, and the
-	 * run should abort so the author can fix it. The contract's
-	 * criteria — declared in {@link #criteria()} — judge the returned
-	 * response shape.
+	 * The service call. Invokes the model once, records the token usage
+	 * the reply states via the tracker, and returns the reply's text
+	 * wrapped in {@link Outcome#ok}. A failed delivery (an unreachable
+	 * endpoint, a server error, a client deadline, an off-shape reply)
+	 * comes back from punit-lm as an {@link Outcome} failure carrying its
+	 * delivery cause, and passes through unchanged so the engine counts
+	 * it as a sample failure under the family's own vocabulary. A
+	 * provider <em>rejection</em> (a bad credential, an unknown model)
+	 * throws instead — that is a defect, and the run should abort so the
+	 * author can fix it. The contract's criteria — declared in
+	 * {@link #criteria()} — judge the returned response shape.
 	 */
 	@Override
 	public Outcome<String> invoke(String instruction, TokenTracker tracker) {
-		try {
-			ChatResponse response = llm.chatWithMetadata(
-					tuning.systemPrompt(), instruction,
-					tuning.model(), tuning.temperature()
-			);
-			tracker.recordTokens(response.totalTokens());
-			return Outcome.ok(response.content());
-		} catch (ChatLlmException e) {
-			return Outcome.fail("llm-error", e.getMessage());
-		}
+		return llm.invoke(instruction).map(reply -> {
+			reply.usage().ifPresent(usage -> tracker.recordTokens(usage.totalTokens()));
+			return reply.text();
+		});
 	}
 
 	/**

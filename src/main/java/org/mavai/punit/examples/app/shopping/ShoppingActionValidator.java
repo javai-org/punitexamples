@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.List;
 import org.mavai.outcome.Outcome;
-import org.mavai.punit.examples.app.llm.ChatResponse;
 
 /**
  * Validates and parses LLM responses into {@link ShoppingAction} instances.
@@ -27,18 +26,6 @@ public class ShoppingActionValidator {
         static BasketTranslation of(List<ShoppingAction> actions) {
             return new BasketTranslation(List.copyOf(actions));
         }
-    }
-
-    /**
-     * Parses and validates a chat response as shopping actions.
-     *
-     * <p>Expects the wrapped format: {@code {"actions": [{"context": "SHOP", ...}, ...]}}
-     *
-     * @param response the chat response containing JSON content
-     * @return an outcome containing the validation result, or a failure with details
-     */
-    public static Outcome<BasketTranslation> validate(ChatResponse response) {
-        return parse(response.content());
     }
 
     /**

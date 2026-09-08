@@ -29,8 +29,8 @@ import org.mavai.punit.runtime.PUnit;
  *
  * <h2>Setup</h2>
  *
- * <p>This experiment makes real LLM calls. Configure the
- * {@code ChatLlm} provider via {@code OPENAI_API_KEY} and
+ * <p>This experiment makes real LLM calls in real mode. Set
+ * {@code PUNIT_LLM_MODE=real} and {@code OPENAI_API_KEY} and
  * {@code ANTHROPIC_API_KEY} for the models in the grid.
  *
  * <h2>Running</h2>

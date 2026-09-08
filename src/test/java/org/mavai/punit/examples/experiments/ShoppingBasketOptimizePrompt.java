@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.mavai.punit.api.Experiment;
 import org.mavai.punit.api.spec.Scorer;
-import org.mavai.punit.examples.app.llm.ChatLlmProvider;
+import org.mavai.punit.examples.lm.LanguageModelMode;
 import org.mavai.punit.examples.servicecontracts.ShoppingBasketServiceContract;
 import org.mavai.punit.examples.servicecontracts.ShoppingBasketServiceContract.LlmTuning;
 import org.mavai.punit.runtime.PUnit;
@@ -24,8 +24,8 @@ import org.mavai.punit.runtime.PUnit;
  *
  * <h2>Setup</h2>
  *
- * <p>This experiment makes real LLM calls. Configure the
- * {@code ChatLlm} provider via {@code OPENAI_API_KEY} (or the
+ * <p>This experiment makes real LLM calls in real mode. Set
+ * {@code PUNIT_LLM_MODE=real} and {@code OPENAI_API_KEY} (or the
  * equivalent for your provider). The example is sized small to
  * keep the run cheap — {@code maxIterations=5} at
  * {@link org.mavai.punit.examples.servicecontracts.ShoppingBasketSampleSizes#OPTIMIZE_PER_ITERATION_SAMPLE_SIZE}
@@ -84,7 +84,7 @@ public class ShoppingBasketOptimizePrompt {
 
     @Experiment
     void optimizeSystemPrompt() {
-        if (ChatLlmProvider.isMockMode()) {
+        if (LanguageModelMode.isMock()) {
             // The mock LLM ignores prompt content and emits canned
             // shopping-basket JSON, which makes meta-prompt
             // engineering impossible. Set PUNIT_LLM_MODE=real (with
